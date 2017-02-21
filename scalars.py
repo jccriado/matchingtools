@@ -310,7 +310,7 @@ SM_eoms = [
      OpSum(
          Op(mu2phi(), phic(-1)),
          -Op(lambdaphi(), phic(0), phi(0), phic(-1)),
-         -Op(ye(0, 1), lLc(2, -1, 0), eR(2, 1)),
+     p    -Op(ye(0, 1), lLc(2, -1, 0), eR(2, 1)),
          -Op(yd(0, 1), qLc(2, 3, -1, 0), dR(2, 3, 1)),
          -Op(V(0, 1), yuc(0, 2), uRc(3, 4, 2), qL(3, 4, 5, 1), epsSU2(5, -1)))),
      

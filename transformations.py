@@ -65,7 +65,7 @@ def apply_rules_until_aux(op_sum, rules, final_tensor_names, done):
             new_op_sum += OperatorSum([operator])
     remaining = []
     for operator in new_op_sum.operators:
-        if operator.contains(final_tensor_names):
+        if any(operator.contains(name) for name in final_tensor_names):
             done.append(operator)
         else:
             remaining.append(operator)

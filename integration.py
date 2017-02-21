@@ -18,7 +18,7 @@ class Scalar(object):
         return final_op_sum
 
     def apply_propagator(self, operator_sum, max_order=2):
-        final_op_sum = operator_sumn
+        final_op_sum = operator_sum
         for order in range(0, max_order + 1, 2):
             operator_sum = self.apply_diff_op(operator_sum)
             final_op_sum += operator_sum
@@ -164,10 +164,10 @@ class VLF(object):
         return factor * f.derivative(n + 1)
 
     def equations_of_motion(self, interaction_lagrangian):
-        L_variation = -interaction_lagrangian.variation(self.L_name, fermion)
-        R_variation = -interaction_lagrangian.variation(self.R_name, fermion)
-        Lc_variation = interaction_lagrangian.variation(self.Lc_name, fermion)
-        Rc_variation = interaction_lagrangian.variation(self.Rc_name, fermion)
+        L_variation = interaction_lagrangian.variation(self.L_name, fermion)
+        R_variation = interaction_lagrangian.variation(self.R_name, fermion)
+        Lc_variation = -interaction_lagrangian.variation(self.Lc_name, fermion)
+        Rc_variation = -interaction_lagrangian.variation(self.Rc_name, fermion)
         op_sum_inv_mass = OpSum(self.inv_mass) 
         return [(self.L_name, op_sum_inv_mass * (self.R_der() + Rc_variation)),
                 (self.R_name, op_sum_inv_mass * (self.L_der() + Lc_variation)),

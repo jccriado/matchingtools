@@ -78,8 +78,8 @@ class Operator(object):
     def remaining_tensors(self, position):
         return self.tensors[:position] + self.tensors[position+1:]
 
-    def contains(self, names):
-        return any(tensor.name in names for tensor in self.tensors)
+    def contains(self, name):
+        return any(tensor.name == name for tensor in self.tensors)
     
     def derivative(self, index):
         return OperatorSum(list(leibniz_rule(index, self)))
@@ -219,7 +219,7 @@ class OperatorSum(object):
         result = OperatorSum()
         for operator in self.operators:
             if (operator.dimension <= max_dim and
-                not operator.contains(field_names)):
+                not any(operator.contains(name) for name in field_names)):
                 result = result.append(operator)
             elif operator.dimension < max_dim:
                 changed = True
