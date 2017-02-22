@@ -10,12 +10,15 @@ from transformations import (
     apply_rules_until)
 
 from integration import (
-    integrate, RealScalar, ComplexScalar, RealVector, ComplexVector,
-    VLF)
+    integrate, RealScalar, ComplexScalar, RealVector, ComplexVector, VLF)
 
 # -- Flavor tensors --
 
+deltaFlavor = TensorBuilder("deltaFlavor")
+
 # Standard Model
+gb = TensorBuilder("gb")
+gw = TensorBuilder("gw")
 mu2phi = TensorBuilder("mu2phi")
 lambdaphi = TensorBuilder("lambdaphi")
 ye = TensorBuilder("ye")
@@ -592,7 +595,7 @@ L_1vectors = -OpSum(
                           sigmaSU2(2, 3, 4), phi(4)),
     
     Op(gduB1(0, 1, 2), B1c(3, 0), dRc(4, 5, 1), sigma4(3, 4, 6), uR(6, 5, 2)),
-    Op(gduB1c(0, 1, 2), B1(3, 0), uRc(4, 5, 2), sigma4(3, 4, 6), dRc(6, 5, 1)),
+    Op(gduB1c(0, 1, 2), B1(3, 0), uRc(4, 5, 2), sigma4(3, 4, 6), dR(6, 5, 1)),
     number_op(1j) * Op(gphiB1(0), B1c(1, 0), D(1, phi(2)), epsSU2(2, 3), phi(3)),
     number_op(-1j) * Op(gphiB1c(0), B1(1, 0), D(1, phic(2)), epsSU2(2, 3), phic(3)),
 
@@ -813,7 +816,7 @@ heavy_Phi = ComplexScalar("Phi", "Phic", 3)
 
 heavy_scalars = [
     heavy_S, heavy_S1, heavy_S2, heavy_varphi, heavy_Xi0, heavy_Xi1,
-    Theta1, heavy_Theta3, heavy_omega1, heavy_omega2, heavy_omega4,
+    heavy_Theta1, heavy_Theta3, heavy_omega1, heavy_omega2, heavy_omega4,
     heavy_Pi1, heavy_Pi7, heavy_zeta, heavy_Omega1, heavy_Omega2,
     heavy_Omega4, heavy_Upsilon, heavy_Phi
 ]
@@ -866,8 +869,370 @@ heavy_leptons = [heavy_N, heavy_E, heavy_Delta1, heavy_Delta3,
 
 heavy_fields = heavy_scalars + heavy_vectors + heavy_quarks + heavy_leptons
 
+# *** L1 vector ***
+
 # -- Integration --
 
 print "Integrating...",
-eff_lag = integrate(heavy_fields, interaction_lagrangian, max_dim=6)
+vectors_eff_lag = integrate(heavy_vectors, L_1vectors + L_2vectors, max_dim=6)
 print "done."
+
+# -- Remove operators without ML1 --
+
+L1_eff_lag = OpSum(*[op for op in vectors_eff_lag.operators
+                     if op.contains_symbol("ML1")])
+
+# -- Transformations --
+
+Ophi = tensor_op("Ophi")
+Ophi4 = tensor_op("Ophi4")
+OphiD = tensor_op("OphiD")
+Ophisq = tensor_op("Ophisq")
+Okinphi = tensor_op("Okinphi")
+OD2 = tensor_op("OD2")
+OD2c = tensor_op("OD2c")
+Q1 = tensor_op("Q1")
+
+OphiB = tensor_op("OphiB")
+OWB = tensor_op("OWB")
+OphiW = tensor_op("OphiW")
+
+Oephi = flavor_tensor_op("Oephi")
+Odphi = flavor_tensor_op("Odphi")
+Ouphi = flavor_tensor_op("Ouphi")
+Oephic = flavor_tensor_op("Oephic")
+Odphic = flavor_tensor_op("Odphic")
+Ouphic = flavor_tensor_op("Ouphic")
+O5 = flavor_tensor_op("O5")
+O5c = flavor_tensor_op("O5c")
+O5aux = flavor_tensor_op("O5aux")
+O5auxc = flavor_tensor_op("O5auxc")
+
+O1phil = flavor_tensor_op("O1phil")
+O1philc = flavor_tensor_op("O1philc")
+O1phiq = flavor_tensor_op("O1phiq")
+O1phiqc = flavor_tensor_op("O1phiqc")
+O3phil = flavor_tensor_op("O3phil")
+O3philc = flavor_tensor_op("O3philc")
+O3phiq = flavor_tensor_op("O3phiq")
+O3phiqc = flavor_tensor_op("O3phiqc")
+O1phie = flavor_tensor_op("O1phie")
+O1phiec = flavor_tensor_op("O1phiec")
+O1phid = flavor_tensor_op("O1phid")
+O1phidc = flavor_tensor_op("O1phidc")
+O1phiu = flavor_tensor_op("O1phiu")
+O1phiuc = flavor_tensor_op("O1phiuc")
+Ophiud = flavor_tensor_op("Ophiud")
+Ophiudc = flavor_tensor_op("Ophiudc")
+
+rules = [
+    # -- Higgs and derivatives --
+    
+    # (Dphic phi) (Dphic phi) -> - (OphiD + Q1 + (DDphic phi) (phic phi))
+    (Op(D(0, phic(1)), phi(1), D(0, phic(2)), phi(2)),
+     -OpSum(OphiD, Q1, OD2c)),
+
+    # (phic Dphi) (phic Dphi) -> - (OphiD + Q1 + (phic DDphi) (phic phi))
+    (Op(phic(1), D(0, phi(1)), phic(2), D(0, phi(2))),
+     -OpSum(OphiD, Q1, OD2)),
+    
+    # Q1 -> 1/2 Ophisq - 1/2 OD2 - 1/2 OD2c
+    (Q1, OpSum(half * Ophisq, -half * OD2, -half * OD2c)),
+
+    # OD2 -> (phic DDphi) (phic phi)
+    (OD2, OpSum(Op(phic(0), D(1, D(1, phi(0))), phic(2), phi(2)))),
+
+    # OD2c -> (DDphic phi) (phic phi)
+    (OD2c, OpSum(Op(D(0, D(0, phic(1))), phi(1), phic(2), phi(2)))),
+
+    # -- SU(2) --
+
+    # sigmaSU2(0, -1, -2) sigmaSU2(0, -3, -4) ->
+    # 2 kdelta(-1, -4) kdelta(-3, -2) - kdelta(-1, -2) kdelta(-3, -4)
+    (Op(sigmaSU2(0, -1, -2), sigmaSU2(0, -3, -4)),
+     OpSum(number_op(2) * Op(kdelta(-1, -4), kdelta(-3, -2)),
+           -Op(kdelta(-1, -2), kdelta(-3, -4)))),
+    
+    # epsSU2(-1, -2) epsSU2(-3, -4) ->
+    # kdelta(-1, -3) kdelta(-2, -4) - kdelta(-1, -4) kdelta(-2, -3)
+    (Op(epsSU2(-1, -2), epsSU2(-3, -4)),
+     OpSum(Op(kdelta(-1, -3), kdelta(-2, -4)),
+           -Op(kdelta(-1, -4), kdelta(-2, -3)))),
+    
+    # epsSU2(-1, 0) epsSU2(0, -2) -> -kdelta(-1, -2)
+    (Op(epsSU2(-1, 0), epsSU2(0, -2)),
+     -OpSum(Op(kdelta(-1, -2)))),
+
+    # epsSU2(0, -1) epsSU2(0, -2) -> kdelta(-1, -2)
+    (Op(epsSU2(0, -1), epsSU2(0, -2)),
+     OpSum(Op(kdelta(-1, -2)))),
+    
+    # epsSU2(-1, 0) epsSU2(-2, 0) -> kdelta(-1, -2)
+    (Op(epsSU2(-1, 0), epsSU2(-2, 0)),
+     OpSum(Op(kdelta(-1, -2)))),
+
+    # epsSU2(0, 0) -> 0
+    (Op(epsSU2(0, 0)), OpSum()),
+    
+    # -- Lorentz --
+    
+    # epsUp(-1, -2) epsUpDot(-3, -4) ->
+    # -1/2 sigma4bar(0, -3, -1) sigma4bar(0, -4, -2)
+    (Op(epsUp(-1, -2), epsUpDot(-3, -4)),
+     OpSum(-half * Op(sigma4bar(0, -3, -1), sigma4bar(0, -4, -2)))),
+
+    # epsDown(-1, -2) epsDownDot(-3, -4) ->
+    # -1/2 sigma4(0, -1, -3) sigma4(0, -2, -4)
+    (Op(epsDown(-1, -2), epsDownDot(-3, -4)),
+     OpSum(-half * Op(sigma4(0, -1, -3), sigma4(0, -2, -4)))),
+
+    # -- Higgs and fermion doublets --
+
+    # (lLc Dphi) gamma (phic lL) -> -i/2 (O3phil + O1phil)
+    (Op(lLc(0, 1, -1), sigma4bar(2, 0, 3), lL(3, 4, -2), phic(4), D(2, phi(1))),
+     OpSum(number_op(-0.5j) * O3phil(-1, -2),
+           number_op(-0.5j) * O1phil(-1, -2))),
+
+    # (lLc phi) gamma (Dphic lL) -> i/2 (O3philc + O1philc)
+    (Op(lLc(0, 1, -2), sigma4bar(2, 0, 3), lL(3, 4, -1), D(2, phic(4)), phi(1)),
+     OpSum(number_op(0.5j) * O3philc(-1, -2),
+           number_op(0.5j) * O1philc(-1, -2))),
+
+    # (qLc Dphi) gamma (phic qL) -> -i/2 (O3phiq + O1phiq)
+    (Op(qLc(0, 5, 1, -1), sigma4bar(2, 0, 3), qL(3, 5, 4, -2), phic(4), D(2, phi(1))),
+     OpSum(number_op(-0.5j) * O3phil(-1, -2),
+           number_op(-0.5j) * O1phil(-1, -2))),
+
+    # (qLc phi) gamma (Dphic qL) -> i/2 (O3phiqc + O1phiqc)
+    (Op(qLc(0, 5, 1, -2), sigma4bar(2, 0, 3), qL(3, 5, 4, -1), D(2, phic(4)), phi(1)),
+     OpSum(number_op(0.5j) * O3philc(-1, -2),
+           number_op(0.5j) * O1philc(-1, -2))),
+
+    # -- Involving field strengths and Higgs --
+    
+    (Op(D(0, phic(1)), D(2, phi(1)), bFS(0, 2)),
+     OpSum(number_op(-0.5) * Op(phic(1), D(0, D(2, phi(1))), bFS(0, 2)),
+           number_op(0.5) * Op(D(0, D(2, phic(1))), phi(1), bFS(0, 2)),
+           number_op(-0.5) * Op(phic(1), D(2, phi(1)), D(0, bFS(0, 2))),
+           number_op(0.5) * Op(D(2, phic(1)), phi(1), D(0, bFS(0, 2))))),
+
+    (Op(phic(2), D(0, D(1, phi(2))), bFS(0, 1)),
+     OpSum(number_op(-0.5j) * Op(gb()) * OphiB,
+           number_op(-0.5j) * Op(gw()) * OWB)),
+    (Op(D(0, D(1, phic(2))), phi(2), bFS(0, 1)),
+     OpSum(number_op(0.5j) * Op(gb()) * OphiB,
+           number_op(0.5j) * Op(gw()) * OWB))
+]
+
+SM_eoms = [
+    (Op(D(0, D(0, phic(-1)))),
+     OpSum(
+         Op(mu2phi(), phic(-1)),
+         -Op(lambdaphi(), phic(0), phi(0), phic(-1)),
+         -Op(ye(0, 1), lLc(2, -1, 0), eR(2, 1)),
+         -Op(yd(0, 1), qLc(2, 3, -1, 0), dR(2, 3, 1)),
+         -Op(V(0, 1), yuc(0, 2), uRc(3, 4, 2), qL(3, 4, 5, 1), epsSU2(5, -1)))),
+     
+    (Op(D(0, D(0, phi(-1)))),
+     OpSum(
+         Op(mu2phi(), phi(-1)),
+         -Op(lambdaphi(), phic(0), phi(0), phi(-1)),
+         -Op(yec(0, 1), eRc(2, 1), lL(2, -1, 0)),
+         -Op(ydc(0, 1), dRc(2, 3, 1), qL(2, 3, -1, 0)),
+         -Op(Vc(0, 1), yu(0, 2), qLc(3, 4, 5, 1), uR(3, 4, 2), epsSU2(5, -1)))),
+
+    (Op(D(0, bFS(0, -1))),
+     -OpSum(
+         number_op(-1./2) * Op(gb(), deltaFlavor(2, 4),
+                               lLc(0, 1, 2), sigma4bar(-1, 0, 3), lL(3, 1, 4)),
+         number_op(1./6) * Op(gb(), deltaFlavor(3, 5),
+                              qLc(0, 1, 2, 3), sigma4bar(-1, 0, 4), qL(4, 1, 2, 5)),
+         number_op(-1.) * Op(gb(), deltaFlavor(1, 3),
+                             eRc(0, 1), sigma4(-1, 0, 2), eR(2, 3)),
+         number_op(-1./3) * Op(gb(), deltaFlavor(2, 4),
+                               dRc(0, 1, 2), sigma4(-1, 0, 3), dR(3, 1, 4)),
+         number_op(2./3) * Op(gb(), deltaFlavor(2, 4),
+                               uRc(0, 1, 2), sigma4(-1, 0, 3), uR(3, 1, 4)),
+         number_op(1j/2.) * Op(gb(), phic(0), D(-1, phi(0))),
+         number_op(-1j/2.) * Op(gb(), D(-1, phic(0)), phi(0))))
+]
+
+definitions = [
+    # (Dphic Dphi) (phic phi) -> Q1
+    (Op(D(0, phic(1)), D(0, phi(1)), phic(2), phi(2)),
+     OpSum(Q1)),
+    
+    # (phi Dphic) (Dphic phi) -> OphiD
+    (Op(phic(0), D(1, phi(0)), D(1, phic(2)), phi(2)),
+     OpSum(OphiD)),
+    
+    # (phic phi)^3 -> 3 * Ophi
+    (Op(phic(0), phi(0), phic(1), phi(1), phic(2), phi(2)),
+     OpSum(number_op(3) * Ophi)),
+    
+    # (phic phi)^2 -> Ophi4
+    (Op(phic(0), phi(0), phic(1), phi(1)),
+     OpSum(Ophi4)),
+
+    # Dphic Dphi -> Okinphi
+    (Op(D(0, phic(1)), D(0, phi(1))),
+     OpSum(Okinphi)),
+
+    # (phic phi) B B -> OphiB
+    (Op(phic(0), phi(0), B(1, 2), B(1, 2)),
+     OpSum(OphiB)),
+
+    # (phic phi) W B -> OWB
+    (Op(phic(0), sigmaSU2(1, 0, 2), phi(2), W(3, 4, 2), B(3, 4)),
+     OpSum(OWB)),
+
+    # (phic phi) W W -> OphiW
+    (Op(phic(0), phi(0), W(1, 2, 3), W(1, 2, 3)),
+     OpSum(OphiW)),
+    
+    # (phic phi) (lLc phi eR) -> Oephi
+    (Op(phic(0), phi(0), lLc(1, 2, -1), phi(2), eR(1, -2)),
+     OpSum(Oephi(-1, -2))),
+
+    # (phic phi) (eRc phic lL) -> Oephic
+    (Op(phic(0), phi(0), eRc(1, -2), phic(2), lL(1, 2, -1)),
+     OpSum(Oephic(-1, -2))),
+
+    # (phic phi) (qLc phi dR) -> Odphi
+    (Op(phic(0), phi(0), qLc(1, 2, 3, -1), phi(3), dR(1, 2, -2)),
+     OpSum(Odphi(-1, -2))),
+
+    # (phic phi) (dRc phic qL) -> Odphic
+    (Op(phic(0), phi(0), dRc(1, 2, -2), phic(3), qL(1, 2, 3, -1)),
+     OpSum(Odphic(-1, -2))),
+
+    # (phic phi) (qLc epsSU2 phic uR) -> Ouphi
+    (Op(phic(0), phi(0), qLc(1, 2, 3, -1), epsSU2(3, 4), phic(4), uR(1, 2, -2)),
+     OpSum(Ouphi(-1, -2))),
+
+    # (phic phi) (uRc qL epsSU2 phi) -> Ouphic
+    (Op(phic(0), phi(0), uRc(1, 2, -2), qL(1, 2, 3, -1), epsSU2(3, 4), phi(4)),
+     OpSum(Ouphic(-1, -2))),
+
+    # lL(0, 1, -1) epsSU2(1, 2) phi(2) epsUp(0, 3)
+    # phi(4) epsSU2(5, 4) lL(3, 5, -2) -> O5
+    (Op(lL(0, 1, -1), epsSU2(1, 2), phi(2), epsUp(0, 3),
+        phi(4), epsSU2(5, 4), lL(3, 5, -2)),
+     OpSum(O5(-1, -2))),
+
+    # lLc(0, 1, -2) epsSU2(1, 2) phic(2) epsUp(3, 0)
+    # phic(4) epsSU2(5, 4) lLc(3, 5, -1) -> O5c
+    (Op(lLc(0, 1, -1), epsSU2(1, 2), phic(2), epsUpDot(0, 3),
+        phic(4), epsSU2(5, 4), lLc(3, 5, -2)),
+     -OpSum(O5c(-1, -2))),
+
+    # lL(0, 1, -1) epsUp(0, 2) lL(2, 1, -2) phi(3) phi(3) -> O5aux
+     (Op(lL(0, 1, -1), epsUp(0, 2), lL(2, 1, -2), phi(3), phi(3)),
+      OpSum(O5aux(-1, -2))),
+
+    # lLc(0, 1, -2) epsUpDot(0, 2) lLc(2, 1, -1) phic(3) phic(3) -> O5auxc
+     (Op(lLc(0, 1, -2), epsUpDot(0, 2), lLc(2, 1, -1), phic(3), phic(3)),
+      OpSum(O5auxc(-1, -2))),
+
+    # (phic Dphi) (lLc gamma lL) -> -i O1phil
+    (Op(phic(0), D(1, phi(0)), lLc(2, 3, -1), sigma4bar(1, 2, 4), lL(4, 3, -2)),
+     OpSum(number_op(-1j) * O1phil(-1, -2))),
+
+    # (Dphic phi) (lLc gamma lL) -> i O1philc
+    (Op(D(1, phic(0)), phi(0), lLc(2, 3, -2), sigma4bar(1, 2, 4), lL(4, 3, -1)),
+     OpSum(number_op(1j) * O1philc(-1, -2))),
+
+    # (phic sigma Dphi) (lLc sigma gamma lL) -> -i O3phil
+    (Op(phic(0), sigmaSU2(1, 0, 2), D(3, phi(2)),
+        lLc(4, 5, -1), sigma4bar(3, 4, 6), sigmaSU2(1, 5, 7), lL(6, 7, -2)),
+     OpSum(number_op(-1j) * O3phil(-1, -2))),
+
+    # (Dphic sigma phi) (lLc sigma gamma lL) -> i O3philc
+    (Op(D(3, phic(0)), sigmaSU2(1, 0, 2), phi(2),
+        lLc(4, 5, -2), sigma4bar(3, 4, 6), sigmaSU2(1, 5, 7), lL(6, 7, -1)),
+     OpSum(number_op(1j) * O3philc(-1, -2))),
+    
+    # (phic Dphi) (qLc gamma qL) -> -i O1phiq
+    (Op(phic(0), D(1, phi(0)), qLc(2, 3, 4, -1), sigma4bar(1, 2, 5), qL(5, 3, 4, -2)),
+     OpSum(number_op(-1j) * O1phiq(-1, -2))),
+
+    # (Dphic phi) (qpLc gamma qL) -> i O1phiqc
+    (Op(D(1, phic(0)), phi(0), qLc(2, 3, 4, -2), sigma4bar(1, 2, 5), qL(5, 3, 4, -1)),
+     OpSum(number_op(1j) * O1phiqc(-1, -2))),
+
+    # (phic sigma Dphi) (qLc sigma gamma qL) -> -i O3phiq
+    (Op(phic(0), sigmaSU2(1, 0, 2), D(3, phi(2)), qLc(4, 5, 6, -1),
+        sigma4bar(3, 4, 7), sigmaSU2(1, 6, 8), qL(7, 5, 8, -2)),
+     OpSum(number_op(-1j) * O3phiq(-1, -2))),
+
+    # (phic sigma Dphi) (qLc sigma gamma qL) -> i O3phiqc
+    (Op(D(3, phic(0)), sigmaSU2(1, 0, 2), phi(2), qLc(4, 5, 6, -2),
+        sigma4bar(3, 4, 7), sigmaSU2(1, 6, 8), qL(7, 5, 8, -1)),
+     OpSum(number_op(1j) * O3phiqc(-1, -2))),
+
+    # (phic Dphi) (eRc gamma eR) -> -i O1phie
+    (Op(phic(0), D(1, phi(0)), eRc(2, -1), sigma4(1, 2, 3), eR(3, -2)),
+     OpSum(number_op(-1j) * O1phie(-1, -2))),
+
+    # (Dphic phi) (eRc gamma eR) -> i O1phiec
+    (Op(D(1, phic(0)), phi(0), eRc(2, -2), sigma4(1, 2, 3), eR(3, -1)),
+     OpSum(number_op(1j) * O1phiec(-1, -2))),
+
+    # (phic Dphi) (dRc gamma dR) -> -i O1phid
+    (Op(phic(0), D(1, phi(0)), dRc(2, 3, -1), sigma4(1, 2, 4), dR(4, 3, -2)),
+     OpSum(number_op(-1j) * O1phid(-1, -2))),
+
+    # (Dphic phi) (dRc gamma dR) -> i O1phidc
+    (Op(D(1, phic(0)), phi(0), dRc(2, 3, -2), sigma4(1, 2, 4), dR(4, 3, -1)),
+     OpSum(number_op(1j) * O1phidc(-1, -2))),
+
+    # (phic Dphi) (uRc gamma uR) -> -i O1phiu
+    (Op(phic(0), D(1, phi(0)), uRc(2, 3, -1), sigma4(1, 2, 4), uR(4, 3, -2)),
+     OpSum(number_op(-1j) * O1phiu(-1, -2))),
+
+    # (Dphic phi) (uRc gamma uR) -> i O1phiuc
+    (Op(D(1, phic(0)), phi(0), uRc(2, 3, -2), sigma4(1, 2, 4), uR(4, 3, -1)),
+     OpSum(number_op(1j) * O1phiuc(-1, -2))),
+    
+    # (phi epsSU2 Dphi) (uRc gamma dR) -> -i Ophiud
+    (Op(phi(0), epsSU2(0, 1), D(2, phi(1)),
+        uRc(3, 4, -1), sigma4(2, 3, 5), dR(5, 4, -2)),
+     OpSum(number_op(-1j) * Ophiud(-1, -2))),
+
+    # (phic epsSU2 Dphic) (dRc gamma uR) -> i Ophiud
+    (Op(phic(0), epsSU2(0, 1), D(2, phic(1)),
+        dRc(3, 4, -2), sigma4(2, 3, 5), uR(5, 4, -1)),
+     OpSum(number_op(1j) * Ophiudc(-1, -2)))
+]
+
+transpose_epsSU2 = [(Op(epsSU2(-1, -2)), OpSum(Op(epsSU2(-2, -1))))]
+
+all_rules = rules + SM_eoms + definitions #+ transpose_epsSU2
+
+op_names = [
+    "Ophi4", "Ophi", "OphiD", "Ophisq", "Okinphi",
+    "OphiB", "OWB", "OphiW",
+    "Oephi", "Oephic", "Odphi", "Odphic", "Ouphi", "Ouphic",
+    "O5", "O5c", "O5aux", "O5auxc",
+    "O1phil", "O1philc", "O1phiq", "O1phiqc", "O3phil", "O3philc", "O3phiq", "O3phiqc",
+    "O1phie", "O1phiec", "O1phid", "O1phidc", "O1phiu", "O1phiuc", "Ophiud", "Ophiudc"
+]
+
+print "Appling rules...",
+L1_final_lag = apply_rules_until(L1_eff_lag, all_rules, op_names, 11)
+print "done."
+
+print "Collecting...",
+L1_final_lag = collect_numbers_and_symbols(L1_final_lag)
+L1_final_lag, L1_rest = collect_by_tensors(L1_final_lag, op_names)
+print "done."
+
+print "-- L1_final_lag --"
+for op_name, coef_lst in L1_final_lag:
+    print str(op_name) + ":"
+    for op_coef, num in coef_lst:
+        print "  " + str(num) + " " + str(op_coef)
+
+print "-- rest --"
+for op in L1_rest:
+    print op

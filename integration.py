@@ -5,8 +5,6 @@ from operators import (
     generic, boson, fermion,
     sigma4, sigma4bar, epsUp, epsUpDot, epsDown, epsDownDot)
 
-from transformations import collect_numbers_and_symbols
-
 class Scalar(object):
     def apply_diff_op(self, operator_sum):
         final_op_sum = OperatorSum()

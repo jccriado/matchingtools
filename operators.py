@@ -80,6 +80,13 @@ class Operator(object):
 
     def contains(self, name):
         return any(tensor.name == name for tensor in self.tensors)
+
+    def contains_symbol(self, name):
+        for tensor in self.tensors:
+            if tensor.name[0] == "{" and tensor.name[-1] == "}":
+                if tensor.name[1:tensor.name.index("^")] == name:
+                    return True
+        return False
     
     def derivative(self, index):
         return OperatorSum(list(leibniz_rule(index, self)))
