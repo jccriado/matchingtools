@@ -331,8 +331,10 @@ def OpSum(*operators):
 def number_op(number):
     return Operator([Tensor("[" + str(number) + "]", [])])
 
-def symbol_op(symbol, exponent):
-    return Operator([Tensor("{" + symbol + "^" + str(exponent) + "}", [])])
+def symbol_op(symbol, exponent, indices=None):
+    if indices is None:
+        indices = []
+    return Operator([Tensor("{" + symbol + "^" + str(exponent) + "}", indices)])
 
 def tensor_op(name):
     return Operator([Tensor(name, [])])

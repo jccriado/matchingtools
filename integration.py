@@ -12,7 +12,7 @@ class Scalar(object):
             new_ind = operator.max_index + 1
             final_op_sum += apply_derivatives(
                 [new_ind, new_ind],
-                -self.inv_mass_sq * operator)
+                -self.free_inv_mass_sq * operator)
         return final_op_sum
 
     def apply_propagator(self, operator_sum, max_order=2):
@@ -20,7 +20,7 @@ class Scalar(object):
         for order in range(0, max_order + 1, 2):
             operator_sum = self.apply_diff_op(operator_sum)
             final_op_sum += operator_sum
-        coef_op = -self.inv_mass_sq
+        coef_op = -self.free_inv_mass_sq
         return OperatorSum([op * coef_op for op in final_op_sum.operators])
 
     
@@ -31,8 +31,9 @@ class Vector(object):
         generic_2 = Operator([generic(list(range(-1, -n - 1, -1)))])
         generic_der_1 = apply_derivatives([0,-1], generic_1)
         generic_der_2 = apply_derivatives([0, 0], generic_2)
-        structure = (OperatorSum([self.inv_mass_sq]) * generic_der_1 +
-                     OperatorSum([number_op(-1) * self.inv_mass_sq]) * generic_der_2)
+        structure = (OperatorSum([self.free_inv_mass_sq]) * generic_der_1 +
+                     OperatorSum([number_op(-1) * self.free_inv_mass_sq]) *
+                     generic_der_2)
         return structure.replace_all({"generic": operator_sum}, 6)
 
     def apply_propagator(self, operator_sum, max_order=2):
@@ -40,28 +41,34 @@ class Vector(object):
         for order in range(0, max_order + 1, 2):
             operator_sum = self.apply_diff_op(operator_sum)
             final_op_sum += operator_sum
-        coef_op = self.inv_mass_sq
+        coef_op = self.free_inv_mass_sq
         return OperatorSum([op * coef_op for op in final_op_sum.operators])
 
                 
 class RealBoson(object):
-    def __init__(self, name, num_of_inds):
+    def __init__(self, name, num_of_inds, has_flavor=True):
         self.name = name
-        self.mass = "M" + self.name
         self.num_of_inds = num_of_inds
-        self.inv_mass_sq = symbol_op(self.mass, -2)
+        mass = "M" + self.name
+        free_mass_inds = [-num_of_inds] if has_flavor else None
+        self.free_inv_mass_sq = symbol_op(mass, -2, indices=free_mass_inds)
+        mass_inds = [num_of_inds-1] if has_flavor else None
+        self.mass_sq = symbol_op(mass, 2, indices=mass_inds)
     
     def equations_of_motion(self, interaction_lagrangian):
         variation = interaction_lagrangian.variation(self.name, True)
         return [(self.name, self.apply_propagator(-variation))]
 
 class ComplexBoson(object):
-    def __init__(self, name, c_name, num_of_inds):
+    def __init__(self, name, c_name, num_of_inds, has_flavor=True):
         self.name = name
         self.c_name = c_name
-        self.mass = "M" + name
         self.num_of_inds = num_of_inds
-        self.inv_mass_sq = symbol_op(self.mass, -2)
+        mass = "M" + self.name
+        free_mass_inds = [-num_of_inds] if has_flavor else None
+        self.free_inv_mass_sq = symbol_op(mass, -2, indices=free_mass_inds)
+        mass_inds = [num_of_inds-1] if has_flavor else None
+        self.mass_sq = symbol_op(mass, 2, indices=mass_inds)
 
     def equations_of_motion(self, interaction_lagrangian):
         variation = interaction_lagrangian.variation(self.name, True)
@@ -76,7 +83,7 @@ class RealScalar(RealBoson, Scalar):
                    dimension=1, statistics=boson)
         f_op = Operator([f])
         kinetic_term = OperatorSum([number_op(0.5)]) * D_op(n + 1, f) * D_op(n + 1, f)
-        mass_term = number_op(-0.5) * symbol_op(self.mass, 2) * f_op * f_op
+        mass_term = number_op(-0.5) * self.mass_sq * f_op * f_op
         return kinetic_term + OperatorSum([mass_term])
 
 class ComplexScalar(ComplexBoson, Scalar):
@@ -89,7 +96,7 @@ class ComplexScalar(ComplexBoson, Scalar):
         f_op = Operator([f])
         c_f_op = Operator([c_f])
         kinetic_term = D_op(n + 1, c_f) * D_op(n + 1, f)
-        mass_term = number_op(-1) * symbol_op(self.mass, 2) * c_f_op * f_op
+        mass_term = number_op(-1) * self.mass_sq * c_f_op * f_op
         return kinetic_term + OperatorSum([mass_term])
 
 class RealVector(RealBoson, Vector):
@@ -99,7 +106,7 @@ class RealVector(RealBoson, Vector):
                              dimension=1, statistics=boson)])
         repl_f = Operator([Tensor(self.name, [-1] + list(range(1, n)), is_field=True,
                              dimension=1, statistics=boson)])
-        half_mass_sq = number_op(0.5) * symbol_op(self.mass, 2)
+        half_mass_sq = number_op(0.5) * self.mass_sq
         mass_term = half_mass_sq * f * f
         pre_kin_term = OperatorSum([number_op(-1) * half_mass_sq * f])
         replacement = self.apply_diff_op(OperatorSum([repl_f]))
@@ -115,24 +122,27 @@ class ComplexVector(ComplexBoson, Vector):
                                dimension=1, statistics=boson)])
         repl_f = Operator([Tensor(self.name, [-1] + list(range(1, n)), is_field=True,
                                   dimension=1, statistics=boson)])
-        mass_sq = symbol_op(self.mass, 2)
-        mass_term = mass_sq * c_f * f
-        pre_kin_term = OperatorSum([number_op(-1) * mass_sq * c_f])
+        mass_term = self.mass_sq * c_f * f
+        pre_kin_term = OperatorSum([number_op(-1) * self.mass_sq * c_f])
         replacement = self.apply_diff_op(OperatorSum([repl_f]))
         kinetic_term = pre_kin_term * f.replace_first(self.name, replacement)
         return kinetic_term + OperatorSum([mass_term])
 
 class VLF(object):
-    def __init__(self, name, L_name, R_name, Lc_name, Rc_name, num_of_inds):
+    def __init__(self, name, L_name, R_name, Lc_name, Rc_name, num_of_inds,
+                 has_flavor=True):
         self.name = name
         self.L_name = L_name
         self.R_name = R_name
         self.Lc_name = Lc_name
         self.Rc_name = Rc_name
         self.num_of_inds = num_of_inds
-        self.mass = "M" + self.name
-        self.inv_mass = symbol_op(self.mass, -1)
-
+        mass = "M" + self.name
+        free_mass_inds = [-num_of_inds] if has_flavor else None
+        self.free_inv_mass = symbol_op(mass, -1, indices=free_mass_inds)
+        mass_inds = [num_of_inds - 1] if has_flavor else None
+        self.mass = symbol_op(mass, 1, indices=mass_inds)
+        
     def L_der(self):
         n = self.num_of_inds
         factor = OpSum(number_op(1j) * Op(sigma4bar(n + 1, -1, 0)))
@@ -166,7 +176,7 @@ class VLF(object):
         R_variation = interaction_lagrangian.variation(self.R_name, fermion)
         Lc_variation = -interaction_lagrangian.variation(self.Lc_name, fermion)
         Rc_variation = -interaction_lagrangian.variation(self.Rc_name, fermion)
-        op_sum_inv_mass = OpSum(self.inv_mass) 
+        op_sum_inv_mass = OpSum(self.free_inv_mass) 
         return [(self.L_name, op_sum_inv_mass * (self.R_der() + Rc_variation)),
                 (self.R_name, op_sum_inv_mass * (self.L_der() + Lc_variation)),
                 (self.Lc_name, op_sum_inv_mass * (self.Rc_der() + R_variation)),
@@ -185,8 +195,8 @@ class VLF(object):
         kinR = (fRc * fR).replace_first(self.R_name, self.R_der())
         kinLc = (fLc * fL).replace_first(self.Lc_name, self.Lc_der())
         kinRc = (fRc * fR).replace_first(self.Rc_name, self.Rc_der())
-        mass1 = symbol_op(self.mass, 1) * fLc * fR
-        mass2 = symbol_op(self.mass, 1) * fRc * fL
+        mass1 = self.mass * fLc * fR
+        mass2 = self.mass * fRc * fL
         return half * (kinL + kinR + kinLc + kinRc) + OpSum(-mass1, -mass2)
         
 def integrate(heavy_fields, interaction_lagrangian, max_dim=6):

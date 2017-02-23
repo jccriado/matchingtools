@@ -23,14 +23,14 @@ def collect_symbols(operator):
         if tensor.name[0] == "{" and tensor.name[-1] == "}":
             name = tensor.name[1:tensor.name.index("^")]
             exponent = float(tensor.name[tensor.name.index("^")+1:-1])
-            prev_exponent = symbols.get(name, 0)
-            symbols[name] = exponent + prev_exponent
+            prev_exponent = symbols.get((name, tuple(tensor.indices)), 0)
+            symbols[(name, tuple(tensor.indices))] = exponent + prev_exponent
         else:
             new_tensors.append(tensor)
-            new_op = Operator([])
-    for symbol, exponent in symbols.items():
+    new_op = Operator([])
+    for (symbol, inds), exponent in symbols.items():
         if exponent != 0:
-            new_op *= symbol_op(symbol, exponent)
+            new_op *= symbol_op(symbol, exponent, indices=inds)
     return new_op * Operator(new_tensors)
 
 def collect_numbers_and_symbols(op_sum):
