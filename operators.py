@@ -133,6 +133,18 @@ class Operator(object):
                                          OperatorSum([subs_op]))
         tensors_left = self.tensors[:position]
         tensors_right = self.tensors[position+1:]
+        if all([operator.contains("gammac"),
+                operator.contains("phic"),
+                self.contains("phi"),
+                self.dimension == 3,
+                operator.dimension == 4]):
+            print "-"*50
+            print "Substituting " + str(operator)
+            print "in ", self
+            print "result: ", OperatorSum([Operator(tensors_left +
+                                                     op.tensors +
+                                                     tensors_right)
+                                            for op in der_subs_ops.operators])
         return OperatorSum([Operator(tensors_left + op.tensors + tensors_right)
                             for op in der_subs_ops.operators])
 
@@ -344,9 +356,6 @@ def flavor_tensor_op(name):
         return Op(Tensor(name, list(indices)))
     return f
 
-kdelta = TensorBuilder("kdelta")
-generic = TensorBuilder("generic")
-
 boson = True
 fermion = False
 
@@ -356,3 +365,6 @@ epsDown = TensorBuilder("epsDown")
 epsDownDot = TensorBuilder("epsDownDot")
 sigma4bar = TensorBuilder("sigma4bar")
 sigma4 = TensorBuilder("sigma4")
+
+kdelta = TensorBuilder("kdelta")
+generic = FieldBuilder("generic", 0, boson)
