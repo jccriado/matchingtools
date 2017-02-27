@@ -45,11 +45,6 @@ class Vector(object):
             operator_sum = self.apply_diff_op(operator_sum)
             final_op_sum += operator_sum
         coef_op = self.free_inv_mass_sq
-        if self.name == "L1":
-            for op in final_op_sum.operators:
-                if op.dimension <= max_dim:
-                    print op * coef_op 
-                      
         return OperatorSum([op * coef_op for op in final_op_sum.operators
                             if op.dimension <= max_dim])
 
@@ -270,11 +265,4 @@ def integrate(heavy_fields, interaction_lagrangian, max_dim=6):
     quadratic_lagrangian = sum([field.quadratic_terms() for field in heavy_fields],
                                OperatorSum())
     total_lagrangian = quadratic_lagrangian + interaction_lagrangian
-    print "-"*80
-    for op in total_lagrangian.replace_all({"L1": eoms["L1"],
-                                            "L1c": eoms["L1c"]},
-                                           max_dim).operators:
-        if op.contains("gamma") and op.contains("gammac"):
-            print op
-    print "-"*80
     return total_lagrangian.replace_all(eoms, max_dim)

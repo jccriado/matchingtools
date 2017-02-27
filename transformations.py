@@ -116,4 +116,4 @@ def collect_by_tensors(op_sum, tensor_names):
         s = sum_numbers(collection[key])
         if s:
             pair_collection.append((key, s))
-    return pair_collection, rest
+    return sorted(pair_collection, key=(lambda x: x[0])), rest
