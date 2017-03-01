@@ -10,7 +10,7 @@ from transformations import (
     apply_rules_until)
 
 from integration import (
-    integrate, VLF)
+    integrate, VectorLikeFermion)
 
 # -- Flavor tensors --
 
@@ -60,7 +60,7 @@ interaction_lagrangian = -OpSum(
     Op(lambdaP2c(0, 1), qLc(2, 3, 4, 1), phi(4), DR(2, 3, 0))
 )
 
-heavy_D = VLF("D", "DL", "DR", "DLc", "DRc", 3)
+heavy_D = VectorLikeFermion("D", "DL", "DR", "DLc", "DRc", 3)
 heavy_fields = [heavy_D]
 
 # -- Integration --
@@ -132,8 +132,7 @@ definitions = [
      OpSum(Oephi(-1, -2))),
 
     # (phic phi) (eRc phic lL) -> Oephic
-    (Op(phic(0), phi(0), eRc(1, -2), phic(2), lL(1, 2, -1)),
-     OpSum(Oephic(-1, -2))),
+    (Op(phic(0), phi(0), eRc(1, -2), phic(2), lL(1, 2, -1)),     OpSum(Oephic(-1, -2))),
 
     # (phic phi) (qLc phi dR) -> Odphi
     (Op(phic(0), phi(0), qLc(1, 2, 3, -1), phi(3), dR(1, 2, -2)),

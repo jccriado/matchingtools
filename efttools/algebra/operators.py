@@ -1,8 +1,5 @@
-import itertools
 import permutations
-
-def concat(lst):
-    return list(itertools.chain(*lst))
+from lsttools import concat, enum_product
 
 class Tensor(object):
     def __init__(self, name, indices, is_field=False,
@@ -239,9 +236,6 @@ class OperatorSum(object):
 def rest(lst, index):
     return lst[:index] + lst[index+1:]
 
-def enum_product(*iters):
-    return itertools.product(*map(enumerate, iters))
-
 def remove_indices(indices, inds_to_be_rm):
     return [ind if ind not in inds_to_be_rm
             else -inds_to_be_rm.index(ind)-1
@@ -353,6 +347,8 @@ epsDown = TensorBuilder("epsDown")
 epsDownDot = TensorBuilder("epsDownDot")
 sigma4bar = TensorBuilder("sigma4bar")
 sigma4 = TensorBuilder("sigma4")
+deltaUpDown = TensorBuilder("deltaUpDown")
+deltaUpDownDot = TensorBuilder("deltaUpDownDot")
 
 kdelta = TensorBuilder("kdelta")
 generic = FieldBuilder("generic", 0, boson)
