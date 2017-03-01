@@ -1,3 +1,5 @@
+import context
+
 from efttools.algebra import (
     Tensor, Op, OpSum,
     TensorBuilder, FieldBuilder, D,

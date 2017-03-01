@@ -1,16 +1,17 @@
-from operators import (
+import context
+
+from efttools.algebra import (
     Tensor, Op, OpSum,
     TensorBuilder, FieldBuilder, D,
     number_op, symbol_op, tensor_op, flavor_tensor_op,
     boson, fermion, kdelta,
-    sigma4, sigma4bar, epsUp, epsUpDot, epsDown, epsDownDot)
-
-from transformations import (
+    sigma4, sigma4bar, epsUp, epsUpDot, epsDown, epsDownDot,
     collect_numbers_and_symbols, collect_by_tensors,
-    apply_rules_until, sum_numbers, group_op_sum)
+    apply_rules_until, group_op_sum)
 
-from integration import (
-    integrate, RealScalar, ComplexScalar, RealVector, ComplexVector, VectorLikeFermion)
+from efttools.integration import (
+    integrate, RealScalar, ComplexScalar, RealVector,
+    ComplexVector, VectorLikeFermion)
 
 import time
 
