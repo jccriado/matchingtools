@@ -117,3 +117,8 @@ def collect_by_tensors(op_sum, tensor_names):
         if s:
             pair_collection.append((key, s))
     return sorted(pair_collection, key=(lambda x: x[0])), rest
+
+def group_op_sum(op_sum):
+    op_sum = collect_numbers_and_symbols(op_sum)
+    return OperatorSum([number_op(n) * op
+                        for op, n in sum_numbers(op_sum)])

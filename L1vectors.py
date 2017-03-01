@@ -7,10 +7,14 @@ from operators import (
 
 from transformations import (
     collect_numbers_and_symbols, collect_by_tensors,
-    apply_rules_until)
+    apply_rules_until, sum_numbers, group_op_sum)
 
 from integration import (
     integrate, RealScalar, ComplexScalar, RealVector, ComplexVector, VectorLikeFermion)
+
+import time
+
+tstart = time.time()
 
 # -- Flavor tensors --
 
@@ -95,21 +99,6 @@ h2 = TensorBuilder("h2")
 h3 = TensorBuilder("h3")
 h3c = TensorBuilder("h3c")
 
-# VDS
-deltaB = TensorBuilder("deltaB")
-deltaW = TensorBuilder("deltaW")
-deltaL1 = TensorBuilder("deltaL1")
-deltaL1c = TensorBuilder("deltaL1c")
-deltaW1 = TensorBuilder("deltaW1")
-deltaW1c = TensorBuilder("deltaW1c")
-
-# VVS
-epsilonS = TensorBuilder("epsilonS")
-epsilonXi0 = TensorBuilder("epsilonXi0")
-epsilonXi1 = TensorBuilder("epsilonXi1")
-epsilonXi1c = TensorBuilder("epsilonXi1c")
-
-
 # -- Group tensors --
 
 epsSU2 = TensorBuilder("epsSU2")
@@ -164,6 +153,8 @@ Q5 = FieldBuilder("Q5", 1, boson)
 Q5c = FieldBuilder("Q5c", 1, boson)
 
 # -- Lagrangian --
+
+half = number_op(0.5)
 
 L_1vectors = -OpSum(
     Op(glB(0, 1, 2), B(3, 0), lLc(4, 5, 1), sigma4bar(3, 4, 6), lL(6, 5, 2)),
@@ -224,22 +215,6 @@ L_2vectors = -OpSum(
     Op(h3(0, 1), L1c(2, 3, 0), phi(3), L1c(2, 4, 1), phi(4)),
     Op(h3c(0, 1), phic(2), L1(3, 2, 0), phic(4), L1(3, 4, 1)))
 
-L_VDS = -OpSum(
-    Op(deltaB(0, 1), B(2, 0), D(2, S(1))),
-    Op(deltaW(0, 1), W(2, 3, 0), D(2, Xi0(3, 1))),
-    Op(deltaL1(0, 1), L1c(2, 3, 0), D(2, varphi(3, 1))),
-    Op(deltaL1c(0, 1), L1(2, 3, 0), D(2, varphic(3, 1))),
-    Op(deltaW1(0, 1), W1c(2, 3, 0), D(2, Xi1(3, 1))),
-    Op(deltaW1c(0, 1), W1(2, 3, 0), D(2, Xi1c(3, 1))))
-
-L_VVS = -OpSum(
-    Op(epsilonS(0, 1, 2), S(0), L1c(3, 4, 1), L1(3, 4, 2)),
-    Op(epsilonXi0(0, 1, 2), Xi0(3, 0), L1c(4, 5, 1), sigmaSU2(3, 5, 6), L1(4, 6, 2)),
-    Op(epsilonXi1(0, 1, 2), Xi1(3, 0), L1c(4, 5, 1), sigmaSU2(3, 5, 6),
-       epsSU2(6, 7), L1c(4, 7, 2)),
-    Op(epsilonXi1c(0, 1, 2), Xi1c(3, 0), epsSU2(4, 5), L1(6, 5, 2),
-       sigmaSU2(3, 4, 7), L1(6, 7, 1)))
-
 heavy_B = RealVector("B", 2)
 heavy_W = RealVector("W", 3)
 heavy_G = RealVector("G", 3)
@@ -270,8 +245,8 @@ print "done."
 
 # -- Remove operators without ML1 --
 
-L1_eff_lag = OpSum(*[op for op in vectors_eff_lag.operators
-                     if op.contains_symbol("ML1")])
+L1_eff_lag = group_op_sum(OpSum(*[op for op in vectors_eff_lag.operators
+                                  if op.contains_symbol("ML1")]))
 
 # -- Transformations --
 
@@ -287,7 +262,7 @@ Oyuc = flavor_tensor_op("Oyuc")
 
 O5 = flavor_tensor_op("O5")
 O5c = flavor_tensor_op("O5c")
-O5aux = flavor_tensor_op("O5aux")
+O5aux = flavor_tensor_op("O5apux")
 O5auxc = flavor_tensor_op("O5auxc")
 
 Ophi = tensor_op("Ophi")
@@ -882,3 +857,5 @@ for op_name, coef_lst in L1_final_lag:
 print "-- rest --"
 for op in L1_rest:
     print op
+
+print "Elapsed time: " + str(time.time() - tstart)
