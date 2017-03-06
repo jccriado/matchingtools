@@ -12,6 +12,8 @@ from efttools.algebra import (
 from efttools.integration import (
     integrate, VectorLikeFermion, MajoranaFermion)
 
+from efttools.output import write_latex
+
 # -- Flavor tensors --
 
 mu2phi = TensorBuilder("mu2phi")
@@ -188,6 +190,8 @@ print "Appling rules...",
 final_lag = apply_rules_until(eff_lag, all_rules, op_names, 11)
 print "done."
 
+final_lag_1 = final_lag
+
 print "Collecting...",
 final_lag = collect_numbers_and_symbols(final_lag)
 final_lag, rest = collect_by_tensors(final_lag, op_names)
@@ -206,3 +210,24 @@ for op in rest:
     print op
 
 
+print "-- latex --"
+structures = {
+    "lambdaNmajl": "(\\lambda_N^{{l(\\text{{maj}})}})_{{{}{}}}",
+    "lambdaNmajlc": "(\\lambda_N^{{l(\\text{{maj}})}})^*_{{{}{}}}",
+    "MNmaj": "M_{{N^{{\\text{{maj}}}}_{{{}}}}}"
+}
+
+op_reps = {
+    "O1phil": "\\frac{\\left(\\alpha^{\\left(1\\right)}_{\\phi l}\\right)_{ij}}{\Lambda^2}",
+    "O1philc": "\\frac{\\left(\\alpha^{\\left(1\\right)}_{\\phi l}\\right)^*_{ij}}{\Lambda^2}", 
+    "O3phil": "\\frac{\\left(\\alpha^{\\left(3\\right)}_{\\phi l}\\right)_{ij}}{\Lambda^2}",
+    "O3philc": "\\frac{\\left(\\alpha^{\\left(3\\right)}_{\\phi l}\\right)^*_{ij}}{\Lambda^2}",
+    "O1phie": "\\frac{\\left(\\alpha^{\\left(1\\right)}_{\\phi e}\\right)_{ij}}{\Lambda^2}",
+    "O1phiec": "\\frac{\\left(\\alpha^{\\left(1\\right)}_{\\phi e}\\right)^*_{ij}}{\Lambda^2}",
+    "Oephi": "\\frac{\\left(\\alpha_{e\\phi}\\right)_{ij}}{\Lambda^2}",
+    "Oephic": "\\frac{\\left(\\alpha_{e\\phi}\\right)^*_{ij}}{\Lambda^2}",
+    "O5": "\\frac{\\left(\\alpha_5\\right)_{ij}}{\Lambda^2}", 
+    "O5c": "\\frac{\\left(\\alpha_5\\right)^*_{ij}}{\Lambda^2}"}
+print type(final_lag_1.operators)
+write_latex("leptons.tex", final_lag_1, structures, op_reps,
+            ["i", "j", "k", "l", "m", "n"])
