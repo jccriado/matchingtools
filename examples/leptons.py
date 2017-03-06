@@ -12,7 +12,7 @@ from efttools.algebra import (
 from efttools.integration import (
     integrate, VectorLikeFermion, MajoranaFermion)
 
-from efttools.output import write_latex
+from efttools.output import Writer
 
 # -- Flavor tensors --
 
@@ -190,27 +190,6 @@ print "Appling rules...",
 final_lag = apply_rules_until(eff_lag, all_rules, op_names, 11)
 print "done."
 
-final_lag_1 = final_lag
-
-print "Collecting...",
-final_lag = collect_numbers_and_symbols(final_lag)
-final_lag, rest = collect_by_tensors(final_lag, op_names)
-print "done."
-
-# -- Printing --
-
-print "-- final_lag --"
-for op_name, coef_lst in final_lag:
-    print str(op_name) + ":"
-    for op_coef, num in coef_lst:
-        print "  " + str(num) + " " + str(op_coef)
-
-print "-- rest --"
-for op in rest:
-    print op
-
-
-print "-- latex --"
 structures = {
     "lambdaNmajl": "(\\lambda_N^{{l(\\text{{maj}})}})_{{{}{}}}",
     "lambdaNmajlc": "(\\lambda_N^{{l(\\text{{maj}})}})^*_{{{}{}}}",
@@ -218,16 +197,31 @@ structures = {
 }
 
 op_reps = {
-    "O1phil": "\\frac{\\left(\\alpha^{\\left(1\\right)}_{\\phi l}\\right)_{ij}}{\Lambda^2}",
-    "O1philc": "\\frac{\\left(\\alpha^{\\left(1\\right)}_{\\phi l}\\right)^*_{ij}}{\Lambda^2}", 
-    "O3phil": "\\frac{\\left(\\alpha^{\\left(3\\right)}_{\\phi l}\\right)_{ij}}{\Lambda^2}",
-    "O3philc": "\\frac{\\left(\\alpha^{\\left(3\\right)}_{\\phi l}\\right)^*_{ij}}{\Lambda^2}",
-    "O1phie": "\\frac{\\left(\\alpha^{\\left(1\\right)}_{\\phi e}\\right)_{ij}}{\Lambda^2}",
-    "O1phiec": "\\frac{\\left(\\alpha^{\\left(1\\right)}_{\\phi e}\\right)^*_{ij}}{\Lambda^2}",
-    "Oephi": "\\frac{\\left(\\alpha_{e\\phi}\\right)_{ij}}{\Lambda^2}",
-    "Oephic": "\\frac{\\left(\\alpha_{e\\phi}\\right)^*_{ij}}{\Lambda^2}",
-    "O5": "\\frac{\\left(\\alpha_5\\right)_{ij}}{\Lambda^2}", 
-    "O5c": "\\frac{\\left(\\alpha_5\\right)^*_{ij}}{\Lambda^2}"}
-print type(final_lag_1.operators)
-write_latex("leptons.tex", final_lag_1, structures, op_reps,
-            ["i", "j", "k", "l", "m", "n"])
+    "O1phil":
+    "\\frac{\\left(\\alpha^{\\left(1\\right)}_{\\phi l}\\right)_{ij}}{\Lambda^2}",
+    "O1philc":
+    "\\frac{\\left(\\alpha^{\\left(1\\right)}_{\\phi l}\\right)^*_{ij}}{\Lambda^2}", 
+    "O3phil":
+    "\\frac{\\left(\\alpha^{\\left(3\\right)}_{\\phi l}\\right)_{ij}}{\Lambda^2}",
+    "O3philc":
+    "\\frac{\\left(\\alpha^{\\left(3\\right)}_{\\phi l}\\right)^*_{ij}}{\Lambda^2}",
+    "O1phie":
+    "\\frac{\\left(\\alpha^{\\left(1\\right)}_{\\phi e}\\right)_{ij}}{\Lambda^2}",
+    "O1phiec":
+    "\\frac{\\left(\\alpha^{\\left(1\\right)}_{\\phi e}\\right)^*_{ij}}{\Lambda^2}",
+    "Oephi":
+    "\\frac{\\left(\\alpha_{e\\phi}\\right)_{ij}}{\Lambda^2}",
+    "Oephic":
+    "\\frac{\\left(\\alpha_{e\\phi}\\right)^*_{ij}}{\Lambda^2}",
+    "O5":
+    "\\frac{\\left(\\alpha_5\\right)_{ij}}{\Lambda^2}", 
+    "O5c":
+    "\\frac{\\left(\\alpha_5\\right)^*_{ij}}{\Lambda^2}"}
+
+final_lag_writer = Writer(final_lag, op_reps.keys())
+
+print final_lag_writer
+
+final_lag_writer.show_pdf("leptons", "open", structures, op_reps,
+                          ["i", "j", "k", "l", "m", "n"])
+

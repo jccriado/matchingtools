@@ -1,1 +1,1 @@
-from output import write_latex
+from output import Writer

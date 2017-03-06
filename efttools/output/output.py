@@ -1,8 +1,10 @@
-from efttools.algebra import (
-    collect_numbers_and_symbols, collect_by_tensors)
+from efttools.algebra import collect
+
+import sys
+
+from subprocess import call
 
 def display_tensor(structure, indices):
-    print structure, indices, structure.format(*map(str, indices))
     return structure.format(*map(str, indices))
 
 def power(name):
@@ -12,7 +14,6 @@ def power(name):
 
 def name(name):
     if name[0] == "{" and name[-1] == "}":
-        print name, name[1:name.index("^")]
         return name[1:name.index("^")]
     return name
 
@@ -42,12 +43,14 @@ def display_operator(operator, structures, inds):
                     left_inds = left_inds[1:]
     numerator = " ".join([display_tensor(structures.get(name(tensor.name), "T"),
                                          map(assigned_inds.get, tensor.indices)) +
-                          ("^{" + display_number(power(tensor.name)) + "}" if power(tensor.name) > 1 else "")
+                          ("^{" + display_number(power(tensor.name)) + "}"
+                           if power(tensor.name) > 1 else "")
                           for tensor in operator.tensors
                           if power(tensor.name) > -1])
     denominator = " ".join([display_tensor(structures.get(name(tensor.name), "T"),
                                            map(assigned_inds.get, tensor.indices)) +
-                            ("^{" + display_number(-power(tensor.name)) + "}" if power(tensor.name) < -1 else "")
+                            ("^{" + display_number(-power(tensor.name)) + "}"
+                             if power(tensor.name) < -1 else "")
                             for tensor in operator.tensors
                             if power(tensor.name) < 0])
     return "\\frac{{{}}}{{{}}}".format(numerator, denominator)
@@ -71,27 +74,63 @@ def display_number(number):
     else:
         return str(number).replace("j", "i")
 
+class Writer(object):
+    def __init__(self, op_sum, op_names, verbose=True):
+        self.collection, self.rest = collect(op_sum, op_names, verbose)
+        self.verbose = verbose
 
-def display(op_sum, structures, op_reps, inds):
-    op_sum = collect_numbers_and_symbols(op_sum)
-    collection, rest = collect_by_tensors(op_sum, op_reps.keys())
-    out_str = ""
-    for op_name, coef_lst in collection:
-        out_str += "\\begin{align*}\n"
-        out_str += op_reps.get(op_name, str(op_name)) + "= \n"
-        for i, (op_coef, num) in enumerate(coef_lst):
-            out_str += "& " + display_number(num) + " "
-            out_str += display_operator(op_coef, structures, inds)
-            if i < len(coef_lst) - 1:
-                out_str += " +"
-                if i%4 == 0:
-                    out_str += "\\\\"
-            out_str += "\n"
-        out_str += "\\end{align*}\n"
-    return out_str
+    def __str__(self):
+        total = "Collected:\n{coll}\nRest:\n  {rest}"
+        op_form = "  {name}:\n{coef}\n"
+        coef_term_form = "    {} {}"
+        return total.format(
+            coll = "\n".join(op_form.format(
+                name = str(op_name),
+                coef = "\n".join(coef_term_form.format(num, op_coef)
+                                  for num, op_coef in coef_lst))
+                              for op_name, coef_lst in self.collection),
+            rest = "\n".join(str(op) for op in self.rest))
 
-def write_latex(filename, op_sum, structures, op_reps, inds):
-    out_str = display(op_sum, structures, op_reps, inds)
-    f = open(filename, "w")
-    f.write(("\\documentclass{{article}}\n\\usepackage{{amsmath}}\n" +
-             "\\begin{{document}}\n{}\n\\end{{document}}").format(out_str))
+    def latex_code(self, structures, op_reps, inds):
+        out_str = "Collected operators:\n"
+        for op_name, coef_lst in self.collection:
+            out_str += "\\begin{align*}\n"
+            out_str += op_reps.get(op_name, str(op_name)) + "= \n  "
+            for i, (op_coef, num) in enumerate(coef_lst):
+                out_str += "& " + display_number(num) + " "
+                out_str += display_operator(op_coef, structures, inds)
+                if i < len(coef_lst) - 1:
+                    out_str += " +"
+                    if i%4 == 0:
+                        out_str += "\\\\"
+                        out_str += "\n  "
+            out_str += "\\end{align*}\n"
+        if self.rest:
+            out_str += "\nRest:\n"
+            out_str += "\\begin{align*}\n"
+            for i, op in enumerate(self.rest):
+                out_str += display_operator(op) + " + "
+                if i%5 == 0:
+                    out_str += "\n"
+            out_str += "\\end{align*}\n"
+        return out_str
+
+    def write_text_file(self, filename):
+        with open(filename, "w") as f:
+            f.write(str(self))
+
+    def write_latex(self, filename, structures, op_reps, inds):
+        out_str = self.latex_code(structures, op_reps, inds)
+        with open(filename + ".tex", "w") as f:
+            f.write(("\\documentclass{{article}}\n" +
+                     "\\usepackage{{amsmath}}\n" +
+                     "\\begin{{document}}\n{}" +
+                     "\\end{{document}}").format(self.latex_code(structures,
+                                                                 op_reps, inds)))
+
+    def show_pdf(self, filename, pdf_viewer, structures, op_reps, inds):
+        self.write_latex(filename, structures, op_reps, inds)
+        call(["pdflatex", filename + ".tex"])
+        call([pdf_viewer, filename + ".pdf"])
+
+
