@@ -4,6 +4,8 @@ from operators import (
     apply_derivatives, concat,
     number_op, symbol_op, kdelta, generic)
 
+import sys
+
 def collect_numbers(operator):
     new_tensors = []
     number = 1
@@ -122,3 +124,13 @@ def group_op_sum(op_sum):
     op_sum = collect_numbers_and_symbols(op_sum)
     return OperatorSum([number_op(n) * op
                         for op, n in sum_numbers(op_sum)])
+
+def collect(op_sum, op_names, verbose=True):
+    if verbose:
+        sys.stdout.write("Collecting...")
+        sys.stdout.flush()
+    op_sum = collect_numbers_and_symbols(op_sum)
+    collection, rest = collect_by_tensors(op_sum, op_names)
+    if verbose:
+        sys.stdout.write("done.\n")
+    return collection, rest

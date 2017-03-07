@@ -11,4 +11,4 @@ from lsttools import concat
 
 from transformations import (
     collect_numbers_and_symbols, collect_by_tensors,
-    apply_rules_until, group_op_sum)
+    apply_rules_until, group_op_sum, collect)
