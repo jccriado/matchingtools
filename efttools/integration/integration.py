@@ -6,7 +6,10 @@ from efttools.algebra import (
     sigma4, sigma4bar, epsUp, epsUpDot, epsDown, epsDownDot)
 
 class Scalar(object):
+    """Provide a propagator for scalars."""
+    
     def apply_diff_op(self, operator_sum):
+        """Apply the differential operator -D^2/M^2."""
         final_op_sum = OpSum()
         for operator in operator_sum.operators:
             new_ind = operator.max_index + 1
@@ -16,6 +19,18 @@ class Scalar(object):
         return final_op_sum
 
     def apply_propagator(self, operator_sum, max_order=2, max_dim=4):
+        """
+        Apply the scalar propagator -(D^2 + M^2)^(-1).
+
+        Args:
+            operator_sum (OperatorSum): the propagator is to be applied to it
+            max_order=2 (int): maximum order in the derivatives to which
+                               the propagator is to be expanded 
+            max_dim=4 (int): maximum dimension of the resulting operators
+
+        Return:
+            OperatorSum of the operators with the propagator applied.
+        """
         final_op_sum = operator_sum
         for order in range(0, max_order + 1, 2):
             operator_sum = self.apply_diff_op(operator_sum)
@@ -26,7 +41,15 @@ class Scalar(object):
 
     
 class Vector(object):
+    """Provide a propagator for vectors."""
+    
     def apply_diff_op(self, operator_sum):
+        """
+        Apply the diff. op. (D_mu D_nu - D^2 eta_{munu})/M^2.
+
+        The index mu is to be contracted with the first free index of the
+        operator sum J_mu provided as an argument.
+        """
         n = self.num_of_inds
         inds_1 = [0] + list(range(-2, -n - 1, -1))
         inds_2 = list(range(-1, -n - 1, -1))
@@ -40,6 +63,18 @@ class Vector(object):
         return structure.replace_all({"generic": operator_sum}, 6)
 
     def apply_propagator(self, operator_sum, max_order=2, max_dim=4):
+        """
+        Apply the vector propagator [(M^2 + D^2) eta_{munu} - D_mu D_nu]^(-1).
+
+        Args:
+            operator_sum (OperatorSum): the propagator is to be applied to it
+            max_order=2 (int): maximum order in the derivatives to which
+                               the propagator is to be expanded 
+            max_dim=4 (int): maximum dimension of the resulting operators
+
+        Return:
+            OperatorSum of the operators with the propagator applied.
+        """
         final_op_sum = operator_sum
         for order in range(0, max_order + 1, 2):
             operator_sum = self.apply_diff_op(operator_sum)
@@ -50,7 +85,18 @@ class Vector(object):
 
                 
 class RealBoson(object):
-    def __init__(self, name, num_of_inds, has_flavor=True):
+    """
+    Provide the EOMs and attributes for real bosons.
+
+    Attributes:
+        name (string): name identifier of the corresponding tensor
+        num_of_inds (int): number of indices of the corr. tensor
+        free_inv_mass_sq (Operator): operator containing the inverse mass
+                                     squared tensor with a free index
+        mass_sq (Operator): operator containing the mass squared tensor
+                            non-negative index (ready to appear directly)
+    """
+    def __init__(self, name, num_of_inds, has_flavor=True, ):
         self.name = name
         self.num_of_inds = num_of_inds
         mass = "M" + self.name
@@ -58,12 +104,39 @@ class RealBoson(object):
         self.free_inv_mass_sq = symbol_op(mass, -2, indices=free_mass_inds)
         mass_inds = [num_of_inds-1] if has_flavor else None
         self.mass_sq = symbol_op(mass, 2, indices=mass_inds)
+        self.order
     
-    def equations_of_motion(self, interaction_lagrangian):
+    def equations_of_motion(self, interaction_lagrangian,
+                            max_order=2, max_dim=4):
+        """
+        Solve the EOMs to given order in 1/M.
+
+        Args:
+            interaction_lagrangian (OperatorSum)
+            max_order=2 (int): maximum order in 1/M to which the propagator
+                               is to be expanded
+            max_dim=4 (int): maximum dimension of the resulting operators
+        Return:
+            A single-element list with a pair whose second
+            element is the solution to the EOMs
+        """
         variation = interaction_lagrangian.variation(self.name, True)
-        return [(self.name, self.apply_propagator(-variation))]
+        return [(self.name,
+                 self.apply_propagator(-variation, max_order, max_dim))]
 
 class ComplexBoson(object):
+    """
+    Provide the EOMs and attributes for complex bosons.
+
+    Attributes:
+        name (string): name identifier of the corresponding tensor
+        c_name (string): name identifier of the conjugate tensor
+        num_of_inds (int): number of indices of the corr. tensor
+        free_inv_mass_sq (Operator): operator containing the inverse mass
+                                     squared tensor with a free index
+        mass_sq (Operator): operator containing the mass squared tensor
+                            non-negative index (ready to appear directly)
+    """
     def __init__(self, name, c_name, num_of_inds, has_flavor=True):
         self.name = name
         self.c_name = c_name
@@ -75,13 +148,33 @@ class ComplexBoson(object):
         self.mass_sq = symbol_op(mass, 2, indices=mass_inds)
 
     def equations_of_motion(self, interaction_lagrangian):
+        """
+        Solve the EOMs to given order in 1/M.
+
+        Args:
+            interaction_lagrangian (OperatorSum)
+            max_order=2 (int): maximum order in 1/M to which the propagator
+                               is to be expanded
+            max_dim=4 (int): maximum dimension of the resulting operators
+        Return:
+            A two-element list with a pairs whose second
+            element are the solution to the EOMs for the field itself
+            and the complex conjugate, respectively
+        """
         variation = interaction_lagrangian.variation(self.name, True)
         c_variation = interaction_lagrangian.variation(self.c_name, True)
+        
         return [(self.name, self.apply_propagator(-c_variation)),
                 (self.c_name, self.apply_propagator(-variation))]
 
 class RealScalar(RealBoson, Scalar):
+    """
+    Complete class for heavy real scalar bosons.
+    
+    Provides the quadratic terms for them.
+    """
     def quadratic_terms(self):
+        """Construct the quadratic terms (1/2)[(DS)^2 + M^2 S^2]."""
         n = self.num_of_inds
         f = Tensor(self.name, list(range(n)), is_field=True,
                    dimension=1, statistics=boson)
@@ -92,7 +185,13 @@ class RealScalar(RealBoson, Scalar):
         return kinetic_term + OpSum(mass_term)
 
 class ComplexScalar(ComplexBoson, Scalar):
+    """
+    Complete class for heavy complex scalar bosons.
+    
+    Provides the quadratic terms for them.
+    """
     def quadratic_terms(self):
+        """Construct the quadratic terms DSc DS + M^2 Sc S."""
         n = self.num_of_inds
         f = Tensor(self.name, list(range(n)), is_field=True,
                    dimension=1, statistics=boson)
@@ -148,31 +247,31 @@ class VectorLikeFermion(object):
         
     def L_der(self):
         n = self.num_of_inds
-        factor = OpSum(number_op(1j) * Op(sigma4bar(n + 1, -1, 0)))
+        factor = OpSum(number_op(1j) * Op(sigma4bar(n, -1, 0)))
         f = Op(Tensor(self.L_name, [0] + list(range(-2, -n - 1, -1)), is_field=True,
                       dimension=1.5, statistics=fermion))
         return factor * f.derivative(n + 1)
 
     def R_der(self):
         n = self.num_of_inds
-        factor = OpSum(number_op(1j) * Op(sigma4(n + 1, -1, 0)))
+        factor = OpSum(number_op(1j) * Op(sigma4(n, -1, 0)))
         f = Op(Tensor(self.R_name, [0] + list(range(-2, -n - 1, -1)), is_field=True,
                       dimension=1.5, statistics=fermion))
-        return factor * f.derivative(n + 1)
+        return factor * f.derivative(n)
 
     def Lc_der(self):
         n = self.num_of_inds
-        factor = OpSum(number_op(-1j) * Op(sigma4bar(n + 1, 0, -1)))
+        factor = OpSum(number_op(-1j) * Op(sigma4bar(n, 0, -1)))
         f = Op(Tensor(self.Lc_name, [0] + list(range(-2, -n - 1, -1)), is_field=True,
                       dimension=1.5, statistics=fermion))
-        return factor * f.derivative(n + 1)
+        return factor * f.derivative(n)
 
     def Rc_der(self):
         n = self.num_of_inds
-        factor = OpSum(number_op(-1j) * Op(sigma4(n + 1, 0, -1)))
+        factor = OpSum(number_op(-1j) * Op(sigma4(n, 0, -1)))
         f = Op(Tensor(self.Rc_name, [0] + list(range(-2, -n - 1, -1)), is_field=True,
                       dimension=1.5, statistics=fermion))
-        return factor * f.derivative(n + 1)
+        return factor * f.derivative(n)
 
     def equations_of_motion(self, interaction_lagrangian):
         L_variation = -interaction_lagrangian.variation(self.L_name, fermion)
@@ -242,8 +341,6 @@ class MajoranaFermion(object):
         variation = interaction_lagrangian.variation(self.name, fermion)
         c_variation = interaction_lagrangian.variation(self.c_name, fermion)
         inv_mass = OpSum(self.free_inv_mass)
-        print [(self.c_name, inv_mass * self.pre_eps(self.der() + c_variation)),
-               (self.name, inv_mass * self.app_eps(self.c_der() + variation))]
         return [(self.c_name, inv_mass * self.pre_eps(self.der() + c_variation)),
                 (self.name, inv_mass * self.app_eps(self.c_der() + variation))]
 
@@ -264,11 +361,23 @@ class MajoranaFermion(object):
         mass2 = self.mass * c_f * c_f1 * Op(epsUpDot(0, n))
         return half * (kin + kinc + OpSum(-mass1, -mass2))
 
-    
 def integrate(heavy_fields, interaction_lagrangian, max_dim=6):
     eoms = dict(concat([field.equations_of_motion(interaction_lagrangian)
                         for field in heavy_fields]))
-    quadratic_lagrangian = sum([field.quadratic_terms() for field in heavy_fields],
+    replaced_eoms = {field_name:
+                     replacement.replace_all(eoms, max_dim - 2)
+                     for field_name, replacement in eoms.items()}
+    quadratic_lagrangian = sum([field.quadratic_terms()
+                                for field in heavy_fields],
                                OpSum())
     total_lagrangian = quadratic_lagrangian + interaction_lagrangian
-    return total_lagrangian.replace_all(eoms, max_dim)
+    return total_lagrangian.replace_all(replaced_eoms, max_dim)
+
+# def integrate(heavy_fields, interaction_lagrangian, max_dim=6):
+#     eoms = dict(concat([field.equations_of_motion(interaction_lagrangian)
+#                         for field in heavy_fields]))
+#     quadratic_lagrangian = sum([field.quadratic_terms()
+#                                 for field in heavy_fields],
+#                                OpSum())
+#     total_lagrangian = quadratic_lagrangian + interaction_lagrangian
+#     return total_lagrangian.replace_all(eoms, max_dim)

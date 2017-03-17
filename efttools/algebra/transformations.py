@@ -87,19 +87,21 @@ def sum_numbers(op_sum):
         collected = False
         num = 1
         n_removed = 0
-        for pos, tensor in enumerate(op.tensors):
-            if tensor.name[0] == "[" and tensor.name[-1] == "]":
-                op = op.remove_tensor(pos - n_removed)
-                n_removed += 1
-                num *= complex(tensor.name[1:-1])
+        op = collect_numbers(op)
+        if op.tensors[0].name[0] == "[" and op.tensors[0].name[-1] == "]":
+            num = complex(op.tensors[0].name[1:-1])
+            new_op = Operator(op.tensors[1:])
+        else:
+            num = 1
+            new_op = op
         for i, (collected_op, collected_num) in enumerate(collection):
-            if collected_op == op:
+            if collected_op == new_op:
                 collected = True
-                collection[i] = (op, num + collected_num)
+                collection[i] = (new_op, num + collected_num)
                 break
         if not collected:
-            collection.append((op, num))
-    return [(op, num) for op, num in collection if num != 0]
+            collection.append((new_op, num))
+    return [(o, num) for o, num in collection if num != 0]
 
 def collect_by_tensors(op_sum, tensor_names):
     collection = {}
@@ -118,6 +120,7 @@ def collect_by_tensors(op_sum, tensor_names):
         s = sum_numbers(collection[key])
         if s:
             pair_collection.append((key, s))
+    rest = sum_numbers(OperatorSum(rest))
     return sorted(pair_collection, key=(lambda x: x[0])), rest
 
 def group_op_sum(op_sum):

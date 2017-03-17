@@ -1,3 +1,5 @@
+import sys
+
 import context
 
 from efttools.algebra import (
@@ -11,11 +13,9 @@ from efttools.algebra import (
 
 from efttools.integration import (
     integrate, RealScalar, ComplexScalar, RealVector,
-    ComplexVector, VectorLikeFermion)
+    ComplexVector, VectorLikeFermion, MajoranaFermion)
 
 from efttools.output import Writer
-
-import sys
 
 # -- Flavor tensors --
 
@@ -70,6 +70,10 @@ lambdaSigma0Ll = TensorBuilder("lambdaSigma0Ll")
 lambdaSigma0Llc = TensorBuilder("lambdaSigma0Llc")
 lambdaSigma1l = TensorBuilder("lambdaSigma1l")
 lambdaSigma1lc = TensorBuilder("lambdaSigma1lc")
+lambdaNmajl = TensorBuilder("lambdaNmajl")
+lambdaNmajlc = TensorBuilder("lambdaNmajlc")
+lambdaSigma0majl = TensorBuilder("lambdaSigma0majl")
+lambdaSigma0majlc = TensorBuilder("lambdaSigma0majlc")
 
 # Scalars
 kappaS = TensorBuilder("kappaS")
@@ -257,6 +261,8 @@ zSigma0L = TensorBuilder("zSigma0L")
 zSigma0Lc = TensorBuilder("zSigma0Lc")
 zSigma0R = TensorBuilder("zSigma0R")
 zSigma0Rc = TensorBuilder("zSigma0Rc")
+zSigma0maj = TensorBuilder("zSigma0maj")
+zSigma0majc = TensorBuilder("zSigma0majc")
 zSigma1 = TensorBuilder("zSigma1")
 zSigma1c = TensorBuilder("zSigma1c")
 zDelta1 = TensorBuilder("zDelta1")
@@ -267,13 +273,15 @@ zNL = TensorBuilder("zNL")
 zNLc = TensorBuilder("zNLc")
 zNR = TensorBuilder("zNR")
 zNRc = TensorBuilder("zNRc")
+zNmaj = TensorBuilder("zNmaj")
+zNmajc = TensorBuilder("zNmajc")
 zE = TensorBuilder("zE")
 zEc = TensorBuilder("zEc")
 zXUD = TensorBuilder("zXUD")
 zXUDc = TensorBuilder("zXUDc")
 zUDY = TensorBuilder("zUDY")
 zUDYc = TensorBuilder("zUDYc")
-zUDu = TensorBuilder("UDu")
+zUDu = TensorBuilder("zUDu")
 zUDuc = TensorBuilder("zUDuc")
 zUDd = TensorBuilder("zUDd")
 zUDdc = TensorBuilder("zUDdc")
@@ -315,6 +323,8 @@ weSigma0LXi1 = TensorBuilder("weSigma0LXi1")
 weSigma0LXi1c = TensorBuilder("weSigma0LXi1c")
 weSigma0RXi1 = TensorBuilder("weSigma0RXi1")
 weSigma0RXi1c = TensorBuilder("weSigma0RXi1c")
+weSigma0majXi1 = TensorBuilder("weSigma0majXi1")
+weSigma0majXi1c = TensorBuilder("weSigma0majXi1c")
 wl3Xi1 = TensorBuilder("wl3Xi1")
 wl3Xi1c = TensorBuilder("wl3Xi1c")
 wq7Xi1 = TensorBuilder("wq7Xi1")
@@ -397,6 +407,8 @@ NL = FieldBuilder("NL", 1.5, fermion)
 NR = FieldBuilder("NR", 1.5, fermion)
 NLc = FieldBuilder("NLc", 1.5, fermion)
 NRc = FieldBuilder("NRc", 1.5, fermion)
+Nmaj = FieldBuilder("Nmaj", 1.5, fermion)
+Nmajc = FieldBuilder("Nmajc", 1.5, fermion)
 EL = FieldBuilder("EL", 1.5, fermion)
 ER = FieldBuilder("ER", 1.5, fermion)
 ELc = FieldBuilder("ELc", 1.5, fermion)
@@ -405,6 +417,8 @@ Sigma0L = FieldBuilder("Sigma0L", 1.5, fermion)
 Sigma0R = FieldBuilder("Sigma0R", 1.5, fermion)
 Sigma0Lc = FieldBuilder("Sigma0Lc", 1.5, fermion)
 Sigma0Rc = FieldBuilder("Sigma0Rc", 1.5, fermion)
+Sigma0maj = FieldBuilder("Sigma0maj", 1.5, fermion)
+Sigma0majc = FieldBuilder("Sigma0majc", 1.5, fermion)
 Sigma1L = FieldBuilder("Sigma1L", 1.5, fermion)
 Sigma1R = FieldBuilder("Sigma1R", 1.5, fermion)
 Sigma1Lc = FieldBuilder("Sigma1Lc", 1.5, fermion)
@@ -495,14 +509,14 @@ L_quarks = -OpSum(
     Op(lambdaP5(0, 1), DYLc(2, 3, 4, 0), epsSU2(4, 5), phic(5), dR(2, 3, 1)),
     Op(lambdaP5c(0, 1), dRc(2, 3, 1), epsSU2(4, 5), phi(5), DYL(2, 3, 4, 0)),
 
-    half * Op(lambdaP6(0, 1), V(1, 2), XUDLc(3, 4, 5, 0),
+    half * Op(lambdaP6(0, 1), V(1, 2), XUDRc(3, 4, 5, 0),
               epsSU2(6, 7), phi(7), sigmaSU2(5, 6, 8), qL(3, 4, 8, 2)),
     half * Op(lambdaP6c(0, 1), Vc(1, 2), qLc(3, 4, 5, 2),
-              sigmaSU2(6, 5, 7), epsSU2(7, 8), phic(8), XUDL(3, 4, 6, 0)),
+              sigmaSU2(6, 5, 7), epsSU2(7, 8), phic(8), XUDR(3, 4, 6, 0)),
 
     half * Op(lambdaP7(0, 1), V(1, 2), UDYRc(3, 4, 5, 0),
               phic(6), sigmaSU2(5, 6, 7), qL(3, 4, 7, 2)),
-    half * Op(lambdaP7c(0, 1), Vc(1, 2), qL(3, 4, 5, 2),
+    half * Op(lambdaP7c(0, 1), Vc(1, 2), qLc(3, 4, 5, 2),
               sigmaSU2(6, 5, 7), phi(7), UDYR(3, 4, 6, 0)))
 
 L_leptons = -OpSum(
@@ -519,6 +533,10 @@ L_leptons = -OpSum(
     Op(lambdaNLlc(0, 1), lLc(2, 3, 1), epsUpDot(2, 4),
        epsSU2(3, 5), phic(5), NLc(4, 0)),
 
+    Op(lambdaNmajl(0, 1), Nmaj(2, 0), epsUp(2, 3), epsSU2(4, 5), phi(5), lL(3, 4, 1)),
+    Op(lambdaNmajlc(0, 1), lLc(2, 3, 1), epsUpDot(2, 4),
+       epsSU2(3, 5), phic(5), Nmajc(4, 0)),
+
     Op(lambdaEl(0, 1), ERc(2, 0), phic(3), lL(2, 3, 1)),
     Op(lambdaElc(0, 1), lLc(2, 3, 1), phi(3), ER(2, 0)),
 
@@ -531,6 +549,11 @@ L_leptons = -OpSum(
               epsSU2(5, 6), phi(6), sigmaSU2(3, 5, 7), lL(4, 7, 1)),
     half * Op(lambdaSigma0Llc(0, 1), lLc(2, 3, 1), epsUpDot(2, 4),
               sigmaSU2(5, 3, 6), epsSU2(6, 7), phic(7), Sigma0Lc(4, 5, 0)),
+
+    half * Op(lambdaSigma0majl(0, 1), Sigma0maj(2, 3, 0), epsUp(2, 4),
+              epsSU2(5, 6), phi(6), sigmaSU2(3, 5, 7), lL(4, 7, 1)),
+    half * Op(lambdaSigma0majlc(0, 1), lLc(2, 3, 1), epsUpDot(2, 4),
+              sigmaSU2(5, 3, 6), epsSU2(6, 7), phic(7), Sigma0majc(4, 5, 0)),
 
     half * Op(lambdaSigma1l(0, 1), Sigma1Rc(2, 3, 0),
               phic(4), sigmaSU2(3, 4, 5), lL(2, 5, 1)),
@@ -564,6 +587,28 @@ L_scalars = -OpSum(
     half * Op(lambdaTildeXi1(0, 1), fSU2(2, 3, 4), Xi1c(2, 0), Xi1(3, 1),
               phic(5), sigmaSU2(4, 5, 6), phi(6)),
 
+    Op(kappaSXi0(0, 1, 2), S(0), Xi0(3, 1), Xi0(3, 2)),
+    Op(kappaSXi1(0, 1, 2), S(0), Xi1c(3, 1), Xi1(3, 2)),
+    Op(kappaXi0Xi1(0, 1, 2), fSU2(3, 4, 5), Xi0(3, 0), Xi1c(4, 1), Xi1(5, 2)),
+    Op(lambdaSXi0(0, 1), S(0), Xi0(2, 1), phic(3), sigmaSU2(2, 3, 4), phi(4)),
+
+    Op(kappaSvarphi(0, 1), S(0), varphic(2, 1), phi(2)),
+    Op(kappaSvarphic(0, 1), S(0), phic(2), varphi(2, 1)),
+    Op(kappaXi0varphi(0, 1), Xi0(2, 0), varphic(3, 1), sigmaSU2(2, 3, 4), phi(4)),
+    Op(kappaXi0varphic(0, 1), Xi0(2, 0), phic(3), sigmaSU2(2, 3, 4), varphi(4, 1)),
+    Op(kappaXi1varphi(0, 1), Xi1c(2, 0), epsSU2(5, 3), varphi(3, 1),
+       sigmaSU2(2, 5, 4), phi(4)),
+    Op(kappaXi1varphic(0, 1), Xi1(2, 0), phic(3), sigmaSU2(2, 3, 5),
+       epsSU2(5, 4), varphic(4, 1)),
+    Op(lambdaSXi1(0, 1), S(0), Xi1c(2, 1), epsSU2(3, 4), phi(4),
+       sigmaSU2(2, 3, 5), phi(5)),
+    Op(lambdaSXi1c(0, 1), S(0), Xi1(2, 1), phic(3),
+       sigmaSU2(2, 3, 4), epsSU2(4, 5), phic(5)),
+    Op(lambdaXi1Xi0(0, 1), fSU2(2, 3, 4), Xi1c(2, 0), Xi0(3, 1),
+       epsSU2(5, 6), phi(6), sigmaSU2(4, 5, 7), phi(7)),
+    Op(lambdaXi1Xi0c(0, 1), fSU2(2, 3, 4), Xi1(2, 0), Xi0(3, 1),
+       phic(5), sigmaSU2(4, 5, 6), epsSU2(6, 7), phic(7)),
+    
     # -----------------------------------------------------------------------
     # These don't contribute:
     # Op(ylS1(0, 1, 2), S1c(0), lLc(3, 4, 1), epsUpDot(3, 5),
@@ -685,13 +730,18 @@ L_VFSM = -OpSum(
     Op(zSigma0Rc(0, 1, 2), lLc(3, 4, 2), sigmaSU2(5, 4, 6), epsSU2(6, 7),
        L1c(8, 7, 1), sigma4bar(8, 3, 9), epsDown(9, 10), Sigma0Rc(10, 5, 0)),
     
+    Op(zSigma0maj(0, 1, 2), Sigma0majc(3, 4, 0), sigma4bar(5, 3, 6),
+       epsSU2(7, 8), L1(5, 8, 1), sigmaSU2(4, 7, 9), lL(6, 9, 2)),
+    Op(zSigma0majc(0, 1, 2), lLc(3, 4, 2), sigmaSU2(5, 4, 6),
+       epsSU2(6, 7), L1c(8, 7, 1), sigma4bar(8, 3, 9), Sigma0maj(9, 5, 0)),
+    
     Op(zSigma1(0, 1, 2), Sigma1Lc(3, 4, 0), sigma4bar(5, 3, 6),
        L1c(5, 7, 1), sigmaSU2(4, 7, 8), lL(6, 8, 2)),
     Op(zSigma1c(0, 1, 2), lLc(3, 4, 2), sigmaSU2(5, 4, 6), L1(7, 6, 1),
        sigma4bar(7, 3, 8), Sigma1L(8, 5, 0)),
 
     Op(zDelta1(0, 1, 2), Delta1Rc(3, 4, 0), sigma4(5, 3, 6), L1(5, 4, 1), eR(6, 2)),
-    Op(zDelta1c(0, 1, 2), eRc(3, 2), sigma4(4, 3, 5), L1(4, 6, 1), Delta1R(5, 6, 0)),
+    Op(zDelta1c(0, 1, 2), eRc(3, 2), sigma4(4, 3, 5), L1c(4, 6, 1), Delta1R(5, 6, 0)),
 
     Op(zDelta3(0, 1, 2), Delta3Rc(3, 4, 0), sigma4(5, 3, 6),
        epsSU2(4, 7), L1c(5, 7, 1), eR(6, 2)),
@@ -706,6 +756,14 @@ L_VFSM = -OpSum(
        epsSU2(7, 8), L1(5, 8, 1), lL(6, 7, 2)),
     Op(zNRc(0, 1, 2), lLc(3, 4, 2), sigma4bar(5, 3, 6),
        epsSU2(4, 7), L1c(5, 7, 1), epsDown(6, 8), NRc(8, 0)),
+
+    Op(zNmaj(0, 1, 2), Nmajc(3, 0), sigma4bar(4, 3, 5),
+       epsSU2(6, 7), L1(4, 7, 1), lL(5, 6, 2)),
+    Op(zNmajc(0, 1, 2), lLc(3, 4, 2), sigma4bar(5, 3, 6),
+       epsSU2(4, 7), L1c(5, 7, 1), Nmaj(6, 0)),
+
+    Op(zE(0, 1, 2), ELc(3, 0), sigma4bar(4, 3, 5), L1c(4, 6, 1), lL(5, 6, 2)),
+    Op(zEc(0, 1, 2), lLc(3, 4, 2), L1(5, 4, 1), sigma4bar(5, 3, 6), EL(6, 0)),
 
     Op(zXUD(0, 1, 2), XUDLc(3, 4, 5, 0), sigma4bar(6, 3, 7),
        epsSU2(8, 9), L1(6, 9, 1), sigmaSU2(5, 8, 10), qL(7, 4, 10, 2)),
@@ -745,11 +803,11 @@ L_VFSM = -OpSum(
 
 L_SFSM = -OpSum(
     Op(wuS(0, 1, 2), S(0), ULc(3, 4, 1), uR(3, 4, 2)),
-    Op(wuSc(0, 1, 2), S(0), uRc(3, 4, 2), ULc(3, 4, 1)),
+    Op(wuSc(0, 1, 2), S(0), uRc(3, 4, 2), UL(3, 4, 1)),
     Op(wdS(0, 1, 2), S(0), DLc(3, 4, 1), dR(3, 4, 2)),
-    Op(wdSc(0, 1, 2), S(0), dRc(3, 4, 2), DLc(3, 4, 1)),
+    Op(wdSc(0, 1, 2), S(0), dRc(3, 4, 2), DL(3, 4, 1)),
     Op(weS(0, 1, 2), S(0), ELc(3, 1), eR(3, 2)),
-    Op(weSc(0, 1, 2), S(0), eRc(3, 2), ELc(3, 1)),
+    Op(weSc(0, 1, 2), S(0), eRc(3, 2), EL(3, 1)),
     Op(wqS(0, 1, 2), S(0), UDRc(3, 4, 5, 1), qL(3, 4, 5, 2)),
     Op(wqSc(0, 1, 2), S(0), qLc(3, 4, 5, 2), UDR(3, 4, 5, 1)),
     Op(wlS(0, 1, 2), S(0), Delta1Rc(3, 4, 1), lL(3, 4, 2)),
@@ -772,15 +830,17 @@ L_SFSM = -OpSum(
     Op(wuXi1c(0, 1, 2), Xi1(3, 0), uRc(4, 5, 2), UDYL(4, 5, 3, 1)),
     Op(wdXi1(0, 1, 2), Xi1c(3, 0), XUDLc(4, 5, 3, 1), dR(4, 5, 2)),
     Op(wdXi1c(0, 1, 2), Xi1(3, 0), dRc(4, 5, 2), XUDL(4, 5, 3, 1)),
-    Op(weSigma0RXi1(0, 1, 2), Xi1c(3, 0), Sigma0Rc(4, 5, 1),
+    Op(weSigma0RXi1(0, 1, 2), Xi1c(3, 0), Sigma0Rc(4, 3, 1),
        epsDown(4, 6), eRc(6, 2)),
     Op(weSigma0RXi1c(0, 1, 2), Xi1(3, 0), eR(4, 2),
        epsDownDot(4, 5), Sigma0R(5, 3, 1)),
     Op(weSigma0LXi1c(0, 1, 2), Xi1(3, 0), Sigma0Lc(4, 3, 1), eR(4, 2)),
     Op(weSigma0LXi1(0, 1, 2), Xi1c(3, 0), eRc(4, 2), Sigma0L(4, 3, 1)),
+    Op(weSigma0majXi1c(0, 1, 2), Xi1(3, 0), Sigma0majc(4, 3, 1), eR(4, 2)),
+    Op(weSigma0majXi1(0, 1, 2), Xi1c(3, 0), eRc(4, 2), Sigma0maj(4, 3, 1)),
     Op(wl3Xi1(0, 1, 2), Xi1c(3, 0), Delta3Rc(4, 5, 1),
        sigmaSU2(3, 5, 6), lL(4, 6, 2)),
-    Op(wl3Xi1c(0, 1, 2), Xi1(3, 0), lL(4, 5, 2),
+    Op(wl3Xi1c(0, 1, 2), Xi1(3, 0), lLc(4, 5, 2),
        sigmaSU2(3, 5, 6), Delta3R(4, 6, 1)),
     Op(wq7Xi1(0, 1, 2), Xi1(3, 0), XURc(4, 5, 6, 1),
        sigmaSU2(3, 6, 7), qL(4, 5, 7, 2)),
@@ -863,13 +923,21 @@ heavy_quarks = [heavy_U, heavy_D, heavy_XU, heavy_UD, heavy_DY, heavy_XUD, heavy
 
 heavy_N = VectorLikeFermion("N", "NL", "NR", "NLc", "NRc", 2)
 heavy_E = VectorLikeFermion("E", "EL", "ER", "ELc", "ERc", 2)
-heavy_Delta1 = VectorLikeFermion("Delta1", "Delta1L", "Delta1R", "Delta1Lc", "Delta1Rc", 3)
-heavy_Delta3 = VectorLikeFermion("Delta3", "Delta3L", "Delta3R", "Delta3Lc", "Delta3Rc", 3)
-heavy_Sigma0 = VectorLikeFermion("Sigma0", "Sigma0L", "Sigma0R", "Sigma0Lc", "Sigma0Rc", 3)
-heavy_Sigma1 = VectorLikeFermion("Sigma1", "Sigma1L", "Sigma1R", "Sigma1Lc", "Sigma1Rc", 3)
+heavy_Delta1 = VectorLikeFermion("Delta1", "Delta1L", "Delta1R",
+                                 "Delta1Lc", "Delta1Rc", 3)
+heavy_Delta3 = VectorLikeFermion("Delta3", "Delta3L", "Delta3R",
+                                 "Delta3Lc", "Delta3Rc", 3)
+heavy_Sigma0 = VectorLikeFermion("Sigma0", "Sigma0L", "Sigma0R",
+                                 "Sigma0Lc", "Sigma0Rc", 3)
+heavy_Sigma1 = VectorLikeFermion("Sigma1", "Sigma1L", "Sigma1R",
+                                 "Sigma1Lc", "Sigma1Rc", 3)
+
+heavy_Nmaj = MajoranaFermion("Nmaj", "Nmajc", 2)
+heavy_Sigma0maj = MajoranaFermion("Sigma0maj", "Sigma0majc", 3)
 
 heavy_leptons = [heavy_N, heavy_E, heavy_Delta1, heavy_Delta3,
-                 heavy_Sigma0, heavy_Sigma1]
+                 heavy_Sigma0, heavy_Sigma1,
+                 heavy_Nmaj, heavy_Sigma0maj]
 
 
 heavy_fields = heavy_scalars + heavy_vectors + heavy_quarks + heavy_leptons
@@ -880,7 +948,7 @@ heavy_fields = heavy_scalars + heavy_vectors + heavy_quarks + heavy_leptons
 
 print "Integrating...",
 sys.stdout.flush()
-vectors_eff_lag = integrate(heavy_fields, interaction_lagrangian, max_dim=6)
+eff_lag = integrate(heavy_fields, interaction_lagrangian, max_dim=6)
 print "done."
 
 # -- Remove operators without ML1 --
@@ -894,13 +962,27 @@ scalar_masses = [
     "MS", "MS1", "MS2", "Mvarphi", "MXi0", "MXi1",
     "MTheta1", "MTheta3", "Momega1", "Momega2", "Momega4",
     "MPi1", "MPi7", "Mzeta", "MOmega1", "MOmega2",
-    "MOmega4", "MUpsilon", "MPhi"
+    "MOmega4", "MUpsilon", "MPhi",
 ]
 
-L1_eff_lag = group_op_sum(OpSum(*[
-    op for op in vectors_eff_lag.operators
-    if (any(op.contains_symbol(vmass) for vmass in vector_masses) and
-        any(op.contains_symbol(smass) for smass in scalar_masses))]))
+lepton_masses = [
+    "MN", "ME", "MDelta1", "MDelta3", "MSigma0", "MSigma1", 
+    "MNmaj", "MSigma0maj"]
+
+quark_masses = ["MU", "MD", "MXU", "MUD", "MDY", "MXUD", "MUDY"]
+
+eff_lag = group_op_sum(OpSum(*[
+    op for op in eff_lag.operators
+    if ((any(op.contains_symbol(vmass) for vmass in vector_masses) and
+         any(op.contains_symbol(smass) for smass in scalar_masses)) or
+        (any(op.contains_symbol(vmass) for vmass in vector_masses) and
+         any(op.contains_symbol(qmass) for qmass in quark_masses)) or
+        (any(op.contains_symbol(vmass) for vmass in vector_masses) and
+         any(op.contains_symbol(lmass) for lmass in lepton_masses)) or
+        (any(op.contains_symbol(smass) for smass in scalar_masses) and
+         any(op.contains_symbol(qmass) for qmass in quark_masses)) or
+        (any(op.contains_symbol(smass) for smass in scalar_masses) and
+         any(op.contains_symbol(lmass) for lmass in lepton_masses)))]))
 
 # -- Transformations --
 
@@ -984,13 +1066,13 @@ rules = [
     (Op(D(0, phic(1)), phi(1), D(0, phic(2)), phi(2)),
      -OpSum(OphiD,
             Op(D(0, phic(1)), D(0, phi(1)), phic(2), phi(2)),
-            Op(phic(0), D(1, D(1, phi(0))), phic(2), phi(2)))),
+            Op(D(1, D(1, phic(0))), phi(0), phic(2), phi(2)))),
 
     # (phic Dphi) (phic Dphi) -> - (OphiD + Q1 + (phic DDphi) (phic phi))
     (Op(phic(1), D(0, phi(1)), phic(2), D(0, phi(2))),
      -OpSum(OphiD,
             Op(D(0, phic(1)), D(0, phi(1)), phic(2), phi(2)),
-            Op(D(0, D(0, phic(1))), phi(1), phic(2), phi(2)))),
+            Op(phic(1), D(0, D(0, phi(1))), phic(2), phi(2)))),
     
     # Q1 -> 1/2 Ophisq - 1/2 OD2 - 1/2 OD2c
     (Op(D(0, phic(1)), D(0, phi(1)), phic(2), phi(2)),
@@ -1026,6 +1108,12 @@ rules = [
 
     # epsSU2(0, 0) -> 0
     (Op(epsSU2(0, 0)), OpSum()),
+
+    # phi epsSU2 phi -> 0
+    (Op(phi(0), epsSU2(0, 1), phi(1)), OpSum()),
+
+    # phic epsSU2 phic -> 0
+    (Op(phic(0), epsSU2(0, 1), phic(1)), OpSum()),
     
     # -- Lorentz --
     
@@ -1038,6 +1126,30 @@ rules = [
     # -1/2 sigma4(0, -1, -3) sigma4(0, -2, -4)
     (Op(epsDown(-1, -2), epsDownDot(-3, -4)),
      OpSum(-half * Op(sigma4(0, -1, -3), sigma4(0, -2, -4)))),
+
+    # epsUp(0, -1) epsDown(0, -2) -> -kdelta(-1, -2)
+    (Op(epsUp(0, -1), epsDown(0, -2)),
+     OpSum(Op(kdelta(-1, -2)))),
+
+    # epsDown(-1, 0) epsUp(0, -2) -> kdelta(-1, -2)
+    (Op(epsDown(-1, 0), epsUp(0, -2)),
+     OpSum(-Op(kdelta(-1, -2)))),
+
+    # epsUp(0, -1) epsDown(0, -2) -> -kdelta(-1, -2)
+    (Op(epsUp(-1, 0), epsDown(-2, 0)),
+     OpSum(Op(kdelta(-1, -2)))),
+
+    # epsUpDot(-1, 0) epsDownDot(0, -2) -> kdelta(-1, -2)
+    (Op(epsUpDot(-1, 0), epsDownDot(0, -2)),
+     OpSum(-Op(kdelta(-1, -2)))),
+
+    # epsUpDot(-1, 0) epsDownDot(-2, 0) -> kdelta(-1, -2)
+    (Op(epsUpDot(-1, 0), epsDownDot(-2, 0)),
+     OpSum(Op(kdelta(-1, -2)))),
+
+    # epsDownDot(-1, 0) epsUpDot(0, -2) -> kdelta(-1, -2)
+    (Op(epsDownDot(-1, 0), epsUpDot(0, -2)),
+     OpSum(-Op(kdelta(-1, -2)))),
 
     # -- Higgs and fermion doublets --
 
@@ -1068,10 +1180,11 @@ rules = [
 
     (Op(qLc(0, 1, 2, -1), dR(0, 1, -2), dRc(3, 4, -3), qL(3, 4, 2, -4)),
      OpSum(-number_op(1./6) * O1qd(-1, -4, -3, -2),
-            -O8qd(-1, -4, -3, -2))),
+           -O8qd(-1, -4, -3, -2))),
 
     (Op(qLc(0, 1, 2, -1), uR(0, 1, -2), uRc(3, 4, -3), qL(3, 4, 2, -4)),
-     OpSum(-number_op(1./6) * O1qu(-1, -4, -3, -2), -O8qu(-1, -4, -3, -2))),
+     OpSum(-number_op(1./6) * O1qu(-1, -4, -3, -2),
+           -O8qu(-1, -4, -3, -2))),
 
     # -- Involving field strengths and Higgs --
 
@@ -1224,16 +1337,102 @@ rules = [
     # Dphic qLc DuR -> -OuphiDaux - DDphic qLc DuR
     (Op(epsSU2(4, 1), D(0, phic(1)), qLc(2, 3, 4, -2), D(0, uR(2, 3, -1))),
      OpSum(-OuphiDauxc(-1, -2),
-           -Op(epsSU2(4, 1), D(0, D(0, phic(1))), qLc(2, 3, 4, -2), uR(2, 3, -1)))),
+           -Op(epsSU2(4, 1), D(0, D(0, phic(1))), qLc(2, 3, 4, -2), uR(2, 3, -1))))
+]
 
-    
+Ofphi2Ophif = [
+    # deltaB qLc sigma4bar qL phic D phi ->
+    # deltaB(-O1phiq - DqLc sigma4bar qL phic phi - qLc sigma4bar DqL phic phi)
+    (Op(deltaB(-1, -2), phic(0), D(1, phi(0)),
+        qLc(2, 3, 4, -3), sigma4bar(1, 2, 5), qL(5, 3, 4, -4)),
+     OpSum(-Op(deltaB(-1, -2), D(1, phic(0)), phi(0),
+               qLc(2, 3, 4, -3), sigma4bar(1, 2, 5), qL(5, 3, 4, -4)),
+           -Op(deltaB(-1, -2), phic(0), phi(0),
+               D(1, qLc(2, 3, 4, -3)), sigma4bar(1, 2, 5), qL(5, 3, 4, -4)),
+           -Op(deltaB(-1, -2), phic(0), phi(0),
+               qLc(2, 3, 4, -3), sigma4bar(1, 2, 5), D(1, qL(5, 3, 4, -4))))),
+
+    # deltaB lLc sigma4bar lL phic D phi ->
+    # deltaB(-O1phil - DlLc sigma4bar lL phic phi - lLc sigma4bar DlL phic phi)
+    (Op(deltaB(-1, -2), phic(0), D(1, phi(0)),
+        lLc(2, 3, -3), sigma4bar(1, 2, 5), lL(5, 3, -4)),
+     OpSum(-Op(deltaB(-1, -2), D(1, phic(0)), phi(0),
+               lLc(2, 3, -3), sigma4bar(1, 2, 5), lL(5, 3, -4)),
+           -Op(deltaB(-1, -2), phic(0), phi(0),
+               D(1, lLc(2, 3, -3)), sigma4bar(1, 2, 5), lL(5, 3, -4)),
+           -Op(deltaB(-1, -2), phic(0), phi(0),
+               lLc(2, 3, -3), sigma4bar(1, 2, 5), D(1, lL(5, 3, -4))))),
+
+    # deltaW qLc sigma4bar sigmaSU2 qL phic sigmaSU2 D phi ->
+    # deltaW(-iO3phiq - DqLc sigma4bar sigmaSU2 qL phic sigmaSU2 phi
+    # - qLc sigma4bar sigmaSU2 DqL phic sigmaSU2 phi)
+    (Op(deltaW(-1, -2), phic(0), sigmaSU2(6, 0, 7), D(1, phi(7)),
+        qLc(2, 3, 4, -3), sigma4bar(1, 2, 5),
+        sigmaSU2(6, 4, 8), qL(5, 3, 8, -4)),
+     OpSum(-Op(deltaW(-1, -2), D(1, phic(0)), sigmaSU2(6, 0, 7), phi(7),
+               qLc(2, 3, 4, -3), sigma4bar(1, 2, 5),
+               sigmaSU2(6, 4, 8), qL(5, 3, 8, -4)),
+           -Op(deltaW(-1, -2), phic(0), sigmaSU2(6, 0, 7), phi(7),
+               D(1, qLc(2, 3, 4, -3)), sigma4bar(1, 2, 5),
+               sigmaSU2(6, 4, 8), qL(5, 3, 8, -4)),
+           -Op(deltaW(-1, -2), phic(0), sigmaSU2(6, 0, 7), phi(7),
+               qLc(2, 3, 4, -3), sigma4bar(1, 2, 5),
+               sigmaSU2(6, 4, 8), D(1, qL(5, 3, 8, -4))))),
+
+    # deltaW lLc sigma4bar sigmaSU2 lL phic sigmaSU2 D phi ->
+    # deltaW(-iO3phil - DlLc sigmaSU2 sigma4bar lL phic sigmaSU2 phi -
+    # lLc sigma4bar sigmaSU2 DlL phic sigmaSU2 phi)
+    (Op(deltaW(-1, -2), phic(0), sigmaSU2(6, 0, 7), D(1, phi(7)),
+        lLc(2, 3, -3), sigma4bar(1, 2, 5), sigmaSU2(6, 3, 8), lL(5, 8, -4)),
+     OpSum(-Op(deltaW(-1, -2), D(1, phic(0)), sigmaSU2(6, 0, 7), phi(7),
+               lLc(2, 3, -3), sigma4bar(1, 2, 5),
+               sigmaSU2(6, 3, 8), lL(5, 8, -4)),
+           -Op(deltaW(-1, -2), phic(0), sigmaSU2(6, 0, 7), phi(7),
+               D(1, lLc(2, 3, -3)), sigma4bar(1, 2, 5),
+               sigmaSU2(6, 3, 8), lL(5, 8, -4)),
+           -Op(deltaW(-1, -2), phic(0), sigmaSU2(6, 0, 7), phi(7),
+               lLc(2, 3, -3), sigma4bar(1, 2, 5),
+               sigmaSU2(6, 3, 8), D(1, lL(5, 8, -4))))),
+
+    # deltaB dRc sigma4bar dR phic D phi ->
+    # deltaB(-O1phid - DdRc sigma4bar dR phic phi - dRc sigma4bar DdR phic phi)
+    (Op(deltaB(-1, -2), phic(0), D(1, phi(0)),
+        dRc(2, 3, -3), sigma4(1, 2, 5), dR(5, 3, -4)),
+     OpSum(-Op(deltaB(-1, -2), D(1, phic(0)), phi(0),
+               dRc(2, 3, -3), sigma4(1, 2, 5), dR(5, 3, -4)),
+           -Op(deltaB(-1, -2), phic(0), phi(0),
+               D(1, dRc(2, 3, -3)), sigma4(1, 2, 5), dR(5, 3, -4)),
+           -Op(deltaB(-1, -2), phic(0), phi(0),
+               dRc(2, 3, -3), sigma4(1, 2, 5), D(1, dR(5, 3, -4))))),
+
+    # deltaB uRc sigma4bar uR phic D phi ->
+    # deltaB(-O1phiu - DuRc sigma4bar uR phic phi - uRc sigma4bar DuR phic phi)
+    (Op(deltaB(-1, -2), phic(0), D(1, phi(0)),
+        uRc(2, 3, -3), sigma4(1, 2, 5), uR(5, 3, -4)),
+     OpSum(-Op(deltaB(-1, -2), D(1, phic(0)), phi(0),
+               uRc(2, 3, -3), sigma4(1, 2, 5), uR(5, 3, -4)),
+           -Op(deltaB(-1, -2), phic(0), phi(0),
+               D(1, uRc(2, 3, -3)), sigma4(1, 2, 5), uR(5, 3, -4)),
+           -Op(deltaB(-1, -2), phic(0), phi(0),
+               uRc(2, 3, -3), sigma4(1, 2, 5), D(1, uR(5, 3, -4))))),
+
+    # deltaB eRc sigma4bar eR phic D phi ->
+    # deltaB(-O1phie - DuRc sigma4bar eR phic phi - eRc sigma4bar DeR phic phi)
+    (Op(deltaB(-1, -2), phic(0), D(1, phi(0)),
+        eRc(2, -3), sigma4(1, 2, 5), eR(5, -4)),
+     OpSum(-Op(deltaB(-1, -2), D(1, phic(0)), phi(0),
+               eRc(2, -3), sigma4(1, 2, 5), eR(5, -4)),
+           -Op(deltaB(-1, -2), phic(0), phi(0),
+               D(1, eRc(2, -3)), sigma4(1, 2, 5), eR(5, -4)),
+           -Op(deltaB(-1, -2), phic(0), phi(0),
+               eRc(2, -3), sigma4(1, 2, 5), D(1, eR(5, -4))))),
 ]
 
 SM_eoms = [
     (Op(D(0, D(0, phic(-1)))),
      OpSum(
          Op(mu2phi(), phic(-1)),
-         -Op(lambdaphi(), phic(0), phi(0), phic(-1)),
+         -number_op(2) * Op(lambdaphi(), phic(0), phi(0), phic(-1)),
          -Op(ye(0, 1), lLc(2, -1, 0), eR(2, 1)),
          -Op(yd(0, 1), qLc(2, 3, -1, 0), dR(2, 3, 1)),
          -Op(V(0, 1), yuc(0, 2), uRc(3, 4, 2), qL(3, 4, 5, 1), epsSU2(5, -1)))),
@@ -1241,7 +1440,7 @@ SM_eoms = [
     (Op(D(0, D(0, phi(-1)))),
      OpSum(
          Op(mu2phi(), phi(-1)),
-         -Op(lambdaphi(), phic(0), phi(0), phi(-1)),
+         -number_op(2) * Op(lambdaphi(), phic(0), phi(0), phi(-1)),
          -Op(yec(0, 1), eRc(2, 1), lL(2, -1, 0)),
          -Op(ydc(0, 1), dRc(2, 3, 1), qL(2, 3, -1, 0)),
          -Op(Vc(0, 1), yu(0, 2), qLc(3, 4, 5, 1), uR(3, 4, 2), epsSU2(5, -1)))),
@@ -1272,32 +1471,32 @@ SM_eoms = [
          number_op(-0.5j) * Op(gw(), phic(0), sigmaSU2(-2, 0, 1), D(-1, phi(1))),
          number_op(0.5j) * Op(gw(), D(-1, phic(0)), sigmaSU2(-2, 0, 1), phi(1)))),
 
-    # (Op(sigma4bar(0, -1, 1), D(0, lL(1, -2, -3))),
-    #  OpSum(-Op(ye(-3, 0), phi(-2), eR(-1, 0)))),
-    # (Op(sigma4bar(0, 1, -1), D(0, lLc(1, -2, -3))),
-    #  OpSum(-Op(yec(-3, 0), phic(-2), eRc(-1, 0)))),
+    (Op(sigma4bar(0, -1, 1), D(0, lL(1, -2, -3))),
+     OpSum(number_op(-1j) * Op(ye(-3, 0), phi(-2), eR(-1, 0)))),
+    (Op(sigma4bar(0, 1, -1), D(0, lLc(1, -2, -3))),
+     OpSum(number_op(1j) * Op(yec(-3, 0), phic(-2), eRc(-1, 0)))),
 
-    # (Op(sigma4bar(0, -1, 1), D(0, qL(1, -2, -3, -4))),
-    #  OpSum(-Op(yd(-4, 0), phi(-3), dR(-1, -2, 0)),
-    #        -Op(Vc(0, -4), yu(0, 1), epsSU2(-3, 2), phic(2), uR(-1, -2, 1)))),
-    # (Op(sigma4bar(0, 1, -1), D(0, qLc(1, -2, -3, -4))),
-    #  OpSum(-Op(ydc(-4, 0), phic(-3), dRc(-1, -2, 0)),
-    #        -Op(V(0, -4), yuc(0, 1), epsSU2(-3, 2), phi(2), uRc(-1, -2, 1)))),
+    (Op(sigma4bar(0, -1, 1), D(0, qL(1, -2, -3, -4))),
+     OpSum(number_op(-1j) * Op(yd(-4, 0), phi(-3), dR(-1, -2, 0)),
+           number_op(-1j) * Op(Vc(0, -4), yu(0, 1), epsSU2(-3, 2), phic(2), uR(-1, -2, 1)))),
+    (Op(sigma4bar(0, 1, -1), D(0, qLc(1, -2, -3, -4))),
+     OpSum(number_op(1j) * Op(ydc(-4, 0), phic(-3), dRc(-1, -2, 0)),
+           number_op(1j) * Op(V(0, -4), yuc(0, 1), epsSU2(-3, 2), phi(2), uRc(-1, -2, 1)))),
 
-    # (Op(sigma4(0, 1, -1), D(0, eR(1, -2))),
-    #  OpSum(-Op(ye(0, -2), phi(1), lL(-1, 1, 0)))),
-    # (Op(sigma4(0, -1, 1), D(0, eRc(1, -2))),
-    #  OpSum(-Op(ye(0, -2), phic(1), lLc(-1, 1, 0)))),
+    (Op(sigma4(0, -1, 1), D(0, eR(1, -2))),
+     OpSum(number_op(-1j) * Op(yec(0, -2), phic(1), lL(-1, 1, 0)))),
+    (Op(sigma4(0, 1, -1), D(0, eRc(1, -2))),
+     OpSum(number_op(1j) * Op(ye(0, -2), phi(1), lLc(-1, 1, 0)))),
 
-    # (Op(sigma4(0, 1, -1), D(0, dR(1, -2, -3))),
-    #  OpSum(-Op(yd(0, -3), phi(1), qL(-1, -2, 1, 0)))),
-    # (Op(sigma4(0, -1, 1), D(0, dRc(1, -2, -3))),
-    #  OpSum(-Op(ydc(0, -3), phic(1), qLc(-1, -2, 1, 0)))),
+    (Op(sigma4(0, -1, 1), D(0, dR(1, -2, -3))),
+     OpSum(number_op(-1j) * Op(ydc(0, -3), phic(1), qL(-1, -2, 1, 0)))),
+    (Op(sigma4(0, 1, -1), D(0, dRc(1, -2, -3))),
+     OpSum(number_op(1j) * Op(yd(0, -3), phi(1), qLc(-1, -2, 1, 0)))),
 
-    # (Op(sigma4(0, 1, -1), D(0, uR(1, -2, -3))),
-    #  OpSum(-Op(Vc(0, 1), yu(0, -3), epsSU2(2, 3), phic(3), qL(-1, -2, 2, 1)))),
-    # (Op(sigma4(0, -1, 1), D(0, uRc(1, -2, -3))),
-    #  OpSum(-Op(V(0, 1), yuc(0, -3), epsSU2(2, 3), phi(3), qLc(-1, -2, 2, 1))))
+    (Op(sigma4(0, -1, 1), D(0, uR(1, -2, -3))),
+     OpSum(number_op(-1j) * Op(V(0, 1), yuc(0, -3), epsSU2(2, 3), phi(3), qL(-1, -2, 2, 1)))),
+    (Op(sigma4(0, 1, -1), D(0, uRc(1, -2, -3))),
+     OpSum(number_op(1j) * Op(Vc(0, 1), yu(0, -3), epsSU2(2, 3), phic(3), qLc(-1, -2, 2, 1))))
 ]
 
 definitions = [
@@ -1411,7 +1610,7 @@ definitions = [
     (Op(phic(0), D(1, phi(0)), qLc(2, 3, 4, -1), sigma4bar(1, 2, 5), qL(5, 3, 4, -2)),
      OpSum(number_op(-1j) * O1phiq(-1, -2))),
 
-    # (Dphic phi) (qpLc gamma qL) -> i O1phiqc
+    # (Dphic phi) (qLc gamma qL) -> i O1phiqc
     (Op(D(1, phic(0)), phi(0), qLc(2, 3, 4, -2), sigma4bar(1, 2, 5), qL(5, 3, 4, -1)),
      OpSum(number_op(1j) * O1phiqc(-1, -2))),
 
@@ -1509,11 +1708,11 @@ definitions = [
      OpSum(Oledqc(-1, -2, -3, -4))),
 
     # (lLc eR) epsSU2 (qLc uR) -> Olequ
-    (Op(lLc(0, 1, -1), eR(0, -2), epsSU2(1, 2), qLc(3, 4, 2, -4), uR(3, 4, -3)),
+    (Op(lLc(0, 1, -1), eR(0, -2), epsSU2(1, 2), qLc(3, 4, 2, -3), uR(3, 4, -4)),
      OpSum(Olequ(-1, -2, -3, -4))),
 
     # (eRc lL) epsSU2 (uRc qL) -> Olequc
-    (Op(eRc(0, -2), lL(0, 1, -1), epsSU2(1, 2), uRc(3, 4, -3), qL(3, 4, 2, -4)),
+    (Op(eRc(0, -2), lL(0, 1, -1), epsSU2(1, 2), uRc(3, 4, -4), qL(3, 4, 2, -3)),
      OpSum(Olequc(-1, -2, -3, -4))),
 
     # (qLc uR) epsSU2 (qLc dR) -> O1qud
@@ -1550,7 +1749,7 @@ definitions = [
 
     # qLc phi dR -> Oyd
     (Op(qLc(0, 2, 1, -1), phi(1), dR(0, 2, -2)),
-     OpSum(Oye(-1, -2))),
+     OpSum(Oyd(-1, -2))),
 
     # dR phic qLc -> Oydc
     (Op(dRc(0, 2, -2), phic(1), qL(0, 2, 1, -1)),
@@ -1565,10 +1764,9 @@ definitions = [
      OpSum(Oyuc(-1, -2)))
 ]
 
-transpose_epsSU2 = [(Op(epsSU2(-1, -2)), OpSum(Op(epsSU2(-2, -1))))]
+transpose_epsSU2 = [(Op(epsSU2(-1, -2)), OpSum(-Op(epsSU2(-2, -1))))]
 
-
-all_rules = rules + SM_eoms + definitions + transpose_epsSU2
+all_rules = rules + Ofphi2Ophif + SM_eoms + definitions + transpose_epsSU2
 
 op_names = [
     "Okinphi", "Ophi4", "Ophi2", "Oye", "Oyec", "Oyd", "Oydc", "Oyu", "Oyuc",
@@ -1593,339 +1791,408 @@ op_names = [
 
 print "Applying rules...",
 sys.stdout.flush()
-L1_final_lag = apply_rules_until(L1_eff_lag, all_rules, op_names, 12)
+final_lag = apply_rules_until(eff_lag, all_rules, op_names, 12)
 print "done."
-
-print "Collecting...",
-sys.stdout.flush()
-L1_final_lag = collect_numbers_and_symbols(L1_final_lag)
-L1_final_lag, L1_rest = collect_by_tensors(L1_final_lag, op_names)
-print "done."
-
-print "-- L1_final_lag --"
-for op_name, coef_lst in L1_final_lag:
-    print str(op_name) + ":"
-    for op_coef, num in coef_lst:
-        print "  " + str(num) + " " + str(op_coef)
-
-print "-- rest --"
-for op in L1_rest:
-    print op
 
 structures = {
     "deltaFlavor": "\\delta_{{{}{}}}",
 
-    # "Standard Model": ,
+    # Standard Model
     "gb": "g'",
     "gw": "g",
     "mu2phi": "\\mu^2_\\phi",
     "lambdaphi": "\\lambda_\\phi",
-    "ye": "y^e_{{{}{}}}",
-    "yec": "y^{e\\dagger}_{{{1}{0}}}",
-    "yd": "y^d_{{{}{}}}",
-    "ydc": "y^{d\\dagger}_{{{1}{0}}}",
+    "ye": "\\delta_{{{0}{1}}}y^e_{{{0}{0}}}",
+    "yec": "\\delta_{{{0}{1}}}y^{{e*}}_{{{0}{0}}}",
+    "yd": "\\delta_{{{0}{1}}}y^d_{{{0}{0}}}",
+    "ydc": "\\delta_{{{0}{1}}}y^{{d*}}_{{{0}{0}}}",
     "yu": "y^u_{{{}{}}}",
-    "yuc": "y^{u\\dagger}_{{{1}{0}}}",
+    "yuc": "y^{{u*}}_{{{}{}}}",
     "V": "V_{{{}{}}}",
     "Vc": "V^\\dagger_{{{1}{0}}}",
 
-    # "Quark": ,
+    # Quarks
     "lambdaP1": "\\lambda'^{{(1)}}_{{{}{}}}",
     "lambdaP1c": "\\lambda'^{{(1)*}}_{{{}{}}}",
-    "lambdaP2": "\\lambda'^{{(2)}}_{{{}{}}}"
+    "lambdaP2": "\\lambda'^{{(2)}}_{{{}{}}}",
     "lambdaP2c": "\\lambda'^{{(2)*}}_{{{}{}}}",
     "lambdaP3u": "\\lambda'^{{(3u)}}_{{{}{}}}",
     "lambdaP3uc": "\\lambda'^{{(3u)*}}_{{{}{}}}",
     "lambdaP3d": "\\lambda'^{{(3d)}}_{{{}{}}}",
     "lambdaP3dc": "\\lambda'^{{(3d)*}}_{{{}{}}}",
-    "lambdaP4": "\\lambda'^{{(4)}}_{{{}{}}}"
+    "lambdaP4": "\\lambda'^{{(4)}}_{{{}{}}}",
     "lambdaP4c": "\\lambda'^{{(4)*}}_{{{}{}}}",
-    "lambdaP5": "\\lambda'^{{(5)}}_{{{}{}}}"
+    "lambdaP5": "\\lambda'^{{(5)}}_{{{}{}}}",
     "lambdaP5c": "\\lambda'^{{(5)*}}_{{{}{}}}",
-    "lambdaP6": "\\lambda'^{{(6)}}_{{{}{}}}"
+    "lambdaP6": "\\lambda'^{{(6)}}_{{{}{}}}",
     "lambdaP6c": "\\lambda'^{{(6)*}}_{{{}{}}}",
-    "lambdaP7": "\\lambda'^{{(7)}}_{{{}{}}}"
+    "lambdaP7": "\\lambda'^{{(7)}}_{{{}{}}}",
     "lambdaP7c": "\\lambda'^{{(7)*}}_{{{}{}}}",
 
-    # "Lepton": ,
-    "lambdaDelta1e": "\left(\\lambda^{{\\Delta_1}}_{{e}}\right)_{{{}{}}}",
-    "lambdaDelta1ec": ,
-    "lambdaDelta3e": ,
-    "lambdaDelta3ec": ,
-    "lambdaNRl": ,
-    "lambdaNRlc": ,
-    "lambdaNLl": ,
-    "lambdaNLlc": ,
-    "lambdaEl": ,
-    "lambdaElc": ,
-    "lambdaSigma0Rl": ,
-    "lambdaSigma0Rlc": ,
-    "lambdaSigma0Ll": ,
-    "lambdaSigma0Llc": ,
-    "lambdaSigma1l": ,
-    "lambdaSigma1lc": ,
+    # Leptons
+    "lambdaDelta1e": "\\left(\\lambda^{{\\Delta_1}}_{{e}}\\right)_{{{}{}}}",
+    "lambdaDelta1ec": "\\left(\\lambda^{{\\Delta_1}}_{{e}}\\right)^*_{{{}{}}}",
+    "lambdaDelta3e": "\\left(\\lambda^{{\\Delta_3}}_{{e}}\\right)_{{{}{}}}",
+    "lambdaDelta3ec": "\\left(\\lambda^{{\\Delta_3}}_{{e}}\\right)^*_{{{}{}}}",
+    "lambdaNRl": "\\left(\\lambda^{{N_R}}_{{l}}\\right)_{{{}{}}}",
+    "lambdaNRlc": "\\left(\\lambda^{{N_R}}_{{l}}\\right)^*_{{{}{}}}",
+    "lambdaNLl": "\\left(\\lambda^{{N_L}}_{{l}}\\right)_{{{}{}}}",
+    "lambdaNLlc": "\\left(\\lambda^{{N_L}}_{{l}}\\right)^*_{{{}{}}}",
+    "lambdaNmajl": "\\left(\\lambda^{{N^{{(maj)}}}}_{{l}}\\right)_{{{}{}}}",
+    "lambdaNmajlc": "\\left(\\lambda^{{N^{{(maj)}}}}_{{l}}\\right)^*_{{{}{}}}",
+    "lambdaEl": "\\left(\\lambda^{{E}}_{{l}}\\right)_{{{}{}}}",
+    "lambdaElc": "\\left(\\lambda^{{E}}_{{l}}\\right)^*_{{{}{}}}",
+    "lambdaSigma0Rl": "\\left(\\lambda^{{\\Sigma_{{0R}}}}_{{l}}\\right)_{{{}{}}}",
+    "lambdaSigma0Rlc": "\\left(\\lambda^{{\\Sigma_{{0R}}}}_{{l}}\\right)^*_{{{}{}}}",
+    "lambdaSigma0Ll": "\\left(\\lambda^{{\\Sigma_{{0L}}}}_{{l}}\\right)_{{{}{}}}",
+    "lambdaSigma0Llc": "\\left(\\lambda^{{\\Sigma_{{0L}}}}_{{l}}\\right)^*_{{{}{}}}",
+    "lambdaSigma0majl":
+    "\\left(\\lambda^{{\\Sigma^{{(maj)}}_{{0}}}}_{{l}}\\right)_{{{}{}}}",
+    "lambdaSigma0majlc":
+    "\\left(\\lambda^{{\\Sigma^{{(maj)}}_{{0}}}}_{{l}}\\right)^*_{{{}{}}}",
+    "lambdaSigma1l": "\\left(\\lambda^{{\\Sigma_1}}_{{l}}\\right)_{{{}{}}}",
+    "lambdaSigma1lc": "\\left(\\lambda^{{\\Sigma_1}}_{{l}}\\right)^*_{{{}{}}}",
 
-# "Scalar": ,
-"kappaS": ,
-    "lambdaS": ,
-    "kappaS3": ,
-    "kappaXi0": ,
-    "lambdaXi0": ,
-    "ylS1": ,
-    "ylS1c": ,
-    "yeS2": ,
-    "yeS2c": ,
-    "yevarphi": ,
-    "yevarphic": ,
-    "ydvarphi": ,
-    "ydvarphic": ,
-    "yuvarphi": ,
-    "yuvarphic": ,
-    "lambdavarphi": ,
-    "lambdavarphic": ,
-    "ylXi1": ,
-    "ylXi1c": ,
-    "kappaXi1": ,
-    "kappaXi1c": ,
-    "lambdaXi1": ,
-    "lambdaXi1c": ,
-    "lambdaTildeXi1": ,
-    "lambdaTildeXi1c": ,
-    "lambdaTheta1": ,
-    "lambdaTheta1c": ,
-    "lambdaTheta3": ,
-    "lambdaTheta3c": ,
-    "yqlomega1": ,
-    "yqlomega1c": ,
-    "yqqomega1": ,
-    "yqqomega1c": ,
-    "yeuomega1": ,
-    "yeuomega1c": ,
-    "yduomega1": ,
-    "yduomega1c": ,
-    "ydomega2": ,
-    "ydomega2c": ,
-    "yedomega4": ,
-    "yedomega4c": ,
-    "yuuomega4": ,
-    "yuuomega4c": ,
-    "yldPi1": ,
-    "yldPi1c": ,
-    "yluPi7": ,
-    "yluPi7c": ,
-    "yeqPi7": ,
-    "yeqPi7c": ,
-    "yqlzeta": ,
-    "yqlzetac": ,
-    "yqqzeta": ,
-    "yqqzetac": ,
-    "yudOmega1": ,
-    "yudOmega1c": ,
-    "yqqOmega1": ,
-    "yqqOmega1c": ,
-    "ydOmega2": ,
-    "ydOmega2c": ,
-    "ydOmega4": ,
-    "ydOmega4c": ,
-    "yqUpsilon": ,
-    "yqUpsilonc": ,
-    "yquPhi": ,
-    "yquPhic": ,
-    "ydqPhi": ,
-    "ydqPhic": ,
-    "kappaSXi0": ,
-    "kappaSXi1": ,
-    "kappaXi0Xi1": ,
-    "lambdaSXi0": ,
-    "kappaSvarphi": ,
-    "kappaSvarphic": ,
-    "kappaXi0varphi": ,
-    "kappaXi0varphic": ,
-    "kappaXi1varphi": ,
-    "kappaXi1varphic": ,
-    "kappaXi0Theta1": ,
-    "kappaXi0Theta1c": ,
-    "kappaXi1Theta1": ,
-    "kappaXi1Theta1c": ,
-    "kappaXi1Theta3": ,
-    "kappaXi1Theta3c": ,
-    "lambdaSXi1": ,
-    "lambdaSXi1c": ,
-    "lambdaXi1Xi0": ,
-    "lambdaXi1Xi0c": ,
+    # Scalars
+    "kappaS": "\\kappa_{{\\mathcal{{S}}_{}}}",
+    "lambdaS": "\\lambda^{{{}{}}}_{{\\mathcal{{S}}}}",
+    "kappaS3": "\\kappa^{{{}{}{}}}_{{\\mathcal{{S}}^3}}",
+    "kappaXi0": "\\kappa_{{\\Xi_{{0{}}}}}",
+    "lambdaXi0": "\\lambda^{{{}{}}}_{{\\Xi_0}}",
+    "ylS1": "\\left(y^l_{{\\mathcal{{S}}_{{1{}}}}}\\right)_{{{}{}}}",
+    "ylS1c": "\\left(y^l_{{\mathcal{{S}}_{{1{}}}}}\\right)^*_{{{}{}}}",
+    "yeS2": "\\left(y^e_{{\\mathcal{{S}}_{{2{}}}}}\\right)_{{{}{}}}",
+    "yeS2c": "\\left(y^e_{{\mathcal{{S}}_{{2{}}}}}\\right)^*_{{{}{}}}",
+    "yevarphi": "\\left(y^e_{{\\varphi_{{{}}}}}\\right)_{{{}{}}}",
+    "yevarphic": "\\left(y^e_{{\\varphi_{{{}}}}}\\right)^*_{{{}{}}}",
+    "ydvarphi": "\\left(y^d_{{\\varphi_{{{}}}}}\\right)_{{{}{}}}",
+    "ydvarphic": "\\left(y^d_{{\\varphi_{{{}}}}}\\right)^*_{{{}{}}}",
+    "yuvarphi": "\\left(y^u_{{\\varphi_{{{}}}}}\\right)_{{{}{}}}",
+    "yuvarphic": "\\left(y^u_{{\\varphi_{{{}}}}}\\right)^*_{{{}{}}}",
+    "lambdavarphi": "\\lambda_{{\\varphi_{}}}",
+    "lambdavarphic": "\\lambda^*_{{\\varphi_{}}}",
+    "ylXi1": "\\left(y^l_{{\\Xi_{{1{}}}}}\\right)_{{{}{}}}",
+    "ylXi1c": "\\left(y^l_{{\\Xi_{{1{}}}}}\\right)^*_{{{}{}}}",
+    "kappaXi1": "\\kappa_{{\\Xi_{{1{}}}}}",
+    "kappaXi1c": "\\kappa^*_{{\\Xi_{{1{}}}}}",
+    "lambdaXi1": "\\lambda^{{{}{}}}_{{\\Xi_1}}",
+    "lambdaXi1c": "\\left(\\lambda^{{{}{}}}_{{\\Xi_1}}\right)^*",
+    "lambdaTildeXi1": "\\tilde{{\\lambda}}^{{{}{}}}_{{\\Xi_1}}",
+    "lambdaTildeXi1c": "\\left(\\tilde{{\\lambda}}^{{{}{}}}_{{\\Xi_1}}\\right)^*",
+    "kappaSXi0": "\\kappa^{{{}{}{}}}_{{\\mathcal{{S}}\\Xi_0}}",
+    "kappaSXi1": "\\kappa^{{{}{}{}}}_{{\\mathcal{{S}}\\Xi_1}}",
+    "kappaXi0Xi1": "\\kappa^{{{}{}{}}}_{{\\Xi_0\\Xi_1}}",
+    "lambdaSXi0": "\\lambda^{{{}{}}}_{{\\mathcal{{S}}\\Xi_0}}",
+    "kappaSvarphi": "\\kappa^{{{}{}}}_{{\\mathcal{{S}}\\varphi}}",
+    "kappaSvarphic": "\\left(\\kappa^{{{}{}}}_{{\mathcal{{S}}\\varphi}}\\right)^*",
+    "kappaXi0varphi": "\\kappa^{{{}{}}}_{{\\Xi_0\\varphi}}",
+    "kappaXi0varphic": "\\left(\\kappa^{{{}{}}}_{{\\Xi_0\\varphi}}\\right)^*",
+    "kappaXi1varphi": "\\kappa^{{{}{}}}_{{\\Xi_1\\varphi}}",
+    "kappaXi1varphic": "\\left(\\kappa^{{{}{}}}_{{\\Xi_1\\varphi}}\\right)^*",
+    "lambdaSXi1": "\\lambda^{{{}{}}}_{{\\mathcal{{S}}\\Xi_1}}",
+    "lambdaSXi1c": "\\left(\\lambda^{{{}{}}}_{{\\mathcal{{S}}\\Xi_1}}\\right)^*",
+    "lambdaXi1Xi0": "\\lambda^{{{}{}}}_{{\\Xi_1\\Xi_0}}",
+    "lambdaXi1Xi0c": "\\left(\\lambda^{{{}{}}}_{{\\Xi_1\\Xi_0}}\right)^*",
 
-# "Vectors": ,
-"glB": ,
-    "gqB": ,
-    "geB": ,
-    "gdB": ,
-    "guB": ,
-    "gphiB": ,
-    "gphiBc": ,
-    "glW": ,
-    "glWc": ,
-    "gqW": ,
-    "gphiW": ,
-    "gphiWc": ,
-    "gqG": ,
-    "guG": ,
-    "gdG": ,
-    "gqH": ,
-    "gduB1": ,
-    "gduB1c": ,
-    "gphiB1": ,
-    "gphiB1c": ,
-    "gphiW1": ,
-    "gphiW1c": ,
-    "gduG1": ,
-    "gduG1c": ,
-    "gelL3": ,
-    "gelL3c": ,
-    "gedU2": ,
-    "gedU2c": ,
-    "glqU2": ,
-    "glqU2c": ,
-    "geuU5": ,
-    "geuU5c": ,
-    "gulQ1": ,
-    "gulQ1c": ,
-    "gdqQ1": ,
-    "gdqQ1c": ,
-    "gdlQ5": ,
-    "gdlQ5c": ,
-    "geqQ5": ,
-    "geqQ5c": ,
-    "guqQ5": ,
-    "guqQ5c": ,
+    # Vectors 1
+    "glB": "\\left(g^l_{{\mathcal{{B}}_{{{}}}}}\\right)_{{{}{}}}",
+    "gqB": "\\left(g^{{q}}_{{\\mathcal{{B}}}}\\right)_{{{}{}}}",
+    "geB": "\\left(g^{{e}}_{{\\mathcal{{B}}}}\\right)_{{{}{}}}",
+    "gdB": "\\left(g^{{d}}_{{\\mathcal{{B}}}}\\right)_{{{}{}}}",
+    "guB": "\\left(g^{{u}}_{{\\mathcal{{B}}}}\\right)_{{{}{}}}",
+    "gphiB": "g^{{\\phi}}_{{\\mathcal{{B}}_{{{}}}}}",
+    "gphiBc": "g^{{\\phi *}}_{{\\mathcal{{B}}_{{{}}}}}",
+    "glW": "\\left(g^{{l}}_{{\\mathcal{{W}}}}\\right)_{{{}{}}}",
+    "gqW": "\\left(g^{{q}}_{{\\mathcal{{W}}}}\\right)_{{{}{}}}",
+    "gphiW": "g^{{\\phi}}_{{\\mathcal{{W}}_{{{}}}}}",
+    "gphiWc": "g^{{\\phi *}}_{{\\mathcal{{W}}_{{{}}}}}",
+    "gduB1": "\\left(g^{{du}}_{{\\mathcal{{B}}^1}}\\right)_{{{}{}}}",
+    "gduB1c": "\\left(g^{{du}}_{{\\mathcal{{B}}^1}}\\right)^*_{{{}{}}}",
+    "gphiB1": "g^{{\\phi}}_{{\\mathcal{{B}}^1_{{{}}}}}",
+    "gphiB1c": "g^{{\\phi *}}_{{\\mathcal{{B}}^1_{{{}}}}}",
+    "gphiW1": "g^{{\\phi}}_{{\\mathcal{{W}}^1_{{{}}}}}",
+    "gphiW1c": "g^{{\\phi *}}_{{\\mathcal{{W}}^1_{{{}}}}}",
 
-# "Vectors": ,
-"gamma": ,
-    "gammac": ,
-    "zetaB": ,
-    "zetaBc": ,
-    "zetaW": ,
-    "zetaWc": ,
-    "zetaB1": ,
-    "zetaB1c": ,
-    "zetaW1": ,
-    "zetaW1c": ,
-    "gB": ,
-    "gW": ,
-    "gTildeB": ,
-    "gTildeW": ,
-    "h1": ,
-    "h2": ,
-    "h3": ,
-    "h3c": ,
+    # Vectors 2
+    "gamma": "\\gamma_{{{}}}",
+    "gammac": "\\gamma^*_{{{}}}",
+    "zetaB": "\\zeta^{{{}{}}}_{{\\mathcal{{B}}}}",
+    "zetaBc": "\\zeta^{{{}{}*}}_{{\\mathcal{{B}}}}",
+    "zetaW": "\\zeta^{{{}{}}}_{{\mathcal{{W}}}}",
+    "zetaWc": "\\zeta^{{{}{}*}}_{{\mathcal{{W}}}}",
+    "zetaB1": "\\zeta^{{{}{}}}_{{\mathcal{{B}}_1}}",
+    "zetaB1c": "\\zeta^{{{}{}*}}_{{\mathcal{{B}}_1}}",
+    "zetaW1": "\\zeta^{{{}{}}}_{{\mathcal{{W}}_1}}",
+    "zetaW1c": "\\zeta^{{{}{}*}}_{{\mathcal{{W}}_1}}",
+    "gB": "g^{{{}{}}}_{{\\mathcal{{B}}}}",
+    "gW": "g^{{{}{}}}_{{\\mathcal{{W}}}}",
+    "gTildeB": "\\tilde{{g}}^{{{}{}}}_{{\\mathcal{{B}}}}",
+    "gTildeW": "\\tilde{{g}}^{{{}{}}}_{{\\mathcal{{W}}}}",
+    "h1": "h^{{(1)}}_{{{}{}}}",
+    "h2": "h^{{(2)}}_{{{}{}}}",
+    "h3": "h^{{(3)}}_{{{}{}}}",
+    "h3c": "h^{{(3)*}}_{{{}{}}}",
 
-# "VD": ,
-"deltaB": ,
-    "deltaW": ,
-    "deltaL1": ,
-    "deltaL1c": ,
-    "deltaW1": ,
-    "deltaW1c": ,
+    # VDS
+    "deltaB": "\\delta^{{{}{}}}_{{\\mathcal{{B}}}}",
+    "deltaW": "\\delta^{{{}{}}}_{{\\mathcal{{W}}}}",
+    "deltaL1": "\\delta^{{{}{}}}_{{\\mathcal{{L}}^1}}",
+    "deltaL1c": "\\delta^{{{}{}*}}_{{\\mathcal{{L}}^1}}",
+    "deltaW1": "\\delta^{{{}{}}}_{{\\mathcal{{W}}^1}}",
+    "deltaW1c": "\\delta^{{{}{}*}}_{{\\mathcal{{W}}^1}}",
 
-# "VV": ,
-"epsilonS": ,
-    "epsilonXi0": ,
-    "epsilonXi1": ,
-    "epsilonXi1c": ,
+    # VVS
+    "epsilonS": "\\varepsilon^{{{}{}{}}}_{{\\mathcal{{S}}}}",
+    "epsilonXi0": "\\varepsilon^{{{}{}{}}}_{{\\Xi_0}}",
+    "epsilonXi1": "\\varepsilon^{{{}{}{}}}_{{\\Xi_1}}",
+    "epsilonXi1c": "\\varepsilon^{{{}{}{}*}}_{{\\Xi_1}}",
 
-# "VS": ,
-"g1Xi1L1": ,
-    "g1Xi1L1c": ,
-    "g1Xi0L1": ,
-    "g1Xi0L1c": ,
-    "g1SL1": ,
-    "g1SL1c": ,
-    "g2Xi1L1": ,
-    "g2Xi1L1c": ,
-    "g2Xi0L1": ,
-    "g2Xi0L1c": ,
-    "g2SL1": ,
-    "g2SL1c": ,
+    # VS(SM)
+    "g1Xi1L1": "g^{{(1)}}_{{\\Xi_{{1{}}}\\mathcal{{L}}^1_{{{}}}}}",
+    "g1Xi1L1c": "g^{{(1)*}}_{{\\Xi_{{1{}}}\\mathcal{{L}}^1_{{{}}}}}",
+    "g1Xi0L1": "g^{{(1)}}_{{\\Xi_{{0{}}}\\mathcal{{L}}^1_{{{}}}}}",
+    "g1Xi0L1c": "g^{{(1)*}}_{{\\Xi_{{0{}}}\\mathcal{{L}}^1_{{{}}}}}",
+    "g1SL1": "g^{{(1)}}_{{\\mathcal{{S}}_{{{}}}\\mathcal{{L}}^1_{{{}}}}}",
+    "g1SL1c": "g^{{(1)*}}_{{\\mathcal{{S}}_{{{}}}\\mathcal{{L}}^1_{{{}}}}}",
+    "g2Xi1L1": "g^{{(2)}}_{{\\Xi_{{1{}}}\\mathcal{{L}}^1_{{{}}}}}",
+    "g2Xi1L1c": "g^{{(2)*}}_{{\\Xi_{{1{}}}\\mathcal{{L}}^1_{{{}}}}}",
+    "g2Xi0L1": "g^{{(2)}}_{{\\Xi_{{0{}}}\\mathcal{{L}}^1_{{{}}}}}",
+    "g2Xi0L1c": "g^{{(2)*}}_{{\\Xi_{{0{}}}\\mathcal{{L}}^1_{{{}}}}}",
+    "g2SL1": "g^{{(2)}}_{{\\mathcal{{S}}_{{{}}}\\mathcal{{L}}^1_{{{}}}}}",
+    "g2SL1c": "g^{{(2)*}}_{{\\mathcal{{S}}_{{{}}}\\mathcal{{L}}^1_{{{}}}}}",
 
-# "VF": ,
-"zSigma0L": ,
-    "zSigma0Lc": ,
-    "zSigma0R": ,
-    "zSigma0Rc": ,
-    "zSigma1": ,
-    "zSigma1c": ,
-    "zDelta1": ,
-    "zDelta1c": ,
-    "zDelta3": ,
-    "zDelta3c": ,
-    "zNL": ,
-    "zNLc": ,
-    "zNR": ,
-    "zNRc": ,
-    "zE": ,
-    "zEc": ,
-    "zXUD": ,
-    "zXUDc": ,
-    "zUDY": ,
-    "zUDYc": ,
-    "zUDu": ,
-    "zUDuc": ,
-    "zUDd": ,
-    "zUDdc": ,
-    "zXU": ,
-    "zXUc": ,
-    "zDY": ,
-    "zDYc": ,
-    "zU": ,
-    "zUc": ,
-    "zD": ,
-    "zDc": ,
+    # VF(SM)
+    "zSigma0L": "z^{{\\Sigma_{{0L}}}}_{{{}{}{}}}",
+    "zSigma0Lc": "z^{{\\Sigma_{{0L}}*}}_{{{}{}{}}}",
+    "zSigma0R": "z^{{\\Sigma_{{0R}}}}_{{{}{}{}}}",
+    "zSigma0Rc": "z^{{\\Sigma_{{0R}}*}}_{{{}{}{}}}",
+    "zSigma0maj": "z^{{\\Sigma^{{(maj)}}_{{0}}}}_{{{}{}{}}}",
+    "zSigma0majc": "z^{{\\Sigma^{{(maj)}}_{{0}}*}}_{{{}{}{}}}",
+    "zSigma1": "z^{{\\Sigma_1}}_{{{}{}{}}}",
+    "zSigma1c": "z^{{\\Sigma_1*}}_{{{}{}{}}}",
+    "zDelta1": "z^{{\\Delta_1}}_{{{}{}{}}}",
+    "zDelta1c": "z^{{\\Delta_1*}}_{{{}{}{}}}",
+    "zDelta3": "z^{{\\Delta_3}}_{{{}{}{}}}",
+    "zDelta3c": "z^{{\\Delta_3*}}_{{{}{}{}}}",
+    "zNL": "z^{{N_L}}_{{{}{}{}}}",
+    "zNLc": "z^{{N_L*}}_{{{}{}{}}}",
+    "zNR": "z^{{N_R}}_{{{}{}{}}}",
+    "zNRc": "z^{{N_L*}}_{{{}{}{}}}",
+    "zNmaj": "z^{{N^{{maj}}}}_{{{}{}{}}}",
+    "zNmajc": "z^{{N^{{(maj)}}*}}_{{{}{}{}}}",
+    "zE": "z^E_{{{}{}{}}}",
+    "zEc": "z^{{E*}}_{{{}{}{}}}",
+    "zXUD": "z^{{XUD}}_{{{}{}{}}}",
+    "zXUDc": "z^{{XUD*}}_{{{}{}{}}}",
+    "zUDY": "z^{{UDY}}_{{{}{}{}}}",
+    "zUDYc": "z^{{UDY*}}_{{{}{}{}}}",
+    "zUDu": "z^{{UD}}_{{u,{}{}{}}}",
+    "zUDuc": "z^{{UD*}}_{{u,{}{}{}}}",
+    "zUDd": "z^{{UD}}_{{d,{}{}{}}}",
+    "zUDdc": "z^{{UD}}_{{d,{}{}{}}}",
+    "zXU": "z^{{XU}}_{{{}{}{}}}",
+    "zXUc": "z^{{XU*}}_{{{}{}{}}}",
+    "zDY": "z^{{DY}}_{{{}{}{}}}",
+    "zDYc": "z^{{DY*}}_{{{}{}{}}}",
+    "zU": "z^{{U}}_{{{}{}{}}}",
+    "zUc": "z^{{U*}}_{{{}{}{}}}",
+    "zD": "z^{{D}}_{{{}{}{}}}",
+    "zDc": "z^{{D*}}_{{{}{}{}}}",
 
-# "SF": ,
-"wuS": ,
-    "wuSc": ,
-    "wdS": ,
-    "wdSc": ,
-    "weS": ,
-    "weSc": ,
-    "wqS": ,
-    "wqSc": ,
-    "wlS": ,
-    "wlSc": ,
-    "wuXi0": ,
-    "wuXi0c": ,
-    "wdXi0": ,
-    "wdXi0c": ,
-    "weXi0": ,
-    "weXi0c": ,
-    "wqXi0": ,
-    "wqXi0c": ,
-    "wlXi0": ,
-    "wlXi0c": ,
-    "wuXi1": ,
-    "wuXi1c": ,
-    "wdXi1": ,
-    "wdXi1c": ,
-    "weSigma0LXi1": ,
-    "weSigma0LXi1c": ,
-    "weSigma0RXi1": ,
-    "weSigma0RXi1c": ,
-    "wl3Xi1": ,
-    "wl3Xi1c": ,
-    "wq7Xi1": ,
-    "wq7Xi1c": ,
-    "wq5Xi1": ,
-    "wq5Xi1c": 
+    # SF(SM)
+    "wuS": "\\left(w^u_{{\\mathcal{{S}}_{{{}}}}}\\right)_{{{}{}}}",
+    "wuSc": "\\left(w^u_{{\\mathcal{{S}}_{{{}}}}}\\right)^*_{{{}{}}}",
+    "wdS": "\\left(w^d_{{\\mathcal{{S}}_{{{}}}}}\\right)_{{{}{}}}",
+    "wdSc": "\\left(w^d_{{\\mathcal{{S}}_{{{}}}}}\\right)^*_{{{}{}}}",
+    "weS": "\\left(w^e_{{\\mathcal{{S}}_{{{}}}}}\\right)_{{{}{}}}",
+    "weSc": "\\left(w^e_{{\\mathcal{{S}}_{{{}}}}}\\right)^*_{{{}{}}}",
+    "wqS": "\\left(w^q_{{\\mathcal{{S}}_{{{}}}}}\\right)_{{{}{}}}",
+    "wqSc": "\\left(w^q_{{\\mathcal{{S}}_{{{}}}}}\\right)^*_{{{}{}}}",
+    "wlS": "\\left(w^l_{{\\mathcal{{S}}_{{{}}}}}\\right)_{{{}{}}}",
+    "wlSc": "\\left(w^l_{{\\mathcal{{S}}_{{{}}}}}\\right)^*_{{{}{}}}",
+    "wuXi0": "\\left(w^u_{{\\Xi_{{0{}}}}}\\right)_{{{}{}}}",
+    "wuXi0c": "\\left(w^u_{{\\Xi_{{0{}}}}}\\right)^*_{{{}{}}}",
+    "wdXi0": "\\left(w^d_{{\\Xi_{{0{}}}}}\\right)_{{{}{}}}",
+    "wdXi0c": "\\left(w^d_{{\\Xi_{{0{}}}}}\\right)^*_{{{}{}}}",
+    "weXi0": "\\left(w^e_{{\\Xi_{{0{}}}}}\\right)_{{{}{}}}",
+    "weXi0c": "\\left(w^e_{{\\Xi_{{0{}}}}}\\right)^*_{{{}{}}}",
+    "wqXi0": "\\left(w^q_{{\\Xi_{{0{}}}}}\\right)_{{{}{}}}",
+    "wqXi0c": "\\left(w^q_{{\\Xi_{{0{}}}}}\\right)^*_{{{}{}}}",
+    "wlXi0": "\\left(w^l_{{\\Xi_{{0{}}}}}\\right)_{{{}{}}}",
+    "wlXi0c": "\\left(w^l_{{\\Xi_{{0{}}}}}\\right)^*_{{{}{}}}",
+    "wuXi1": "\\left(w^u_{{\\Xi_{{1{}}}}}\\right)_{{{}{}}}",
+    "wuXi1c": "\\left(w^u_{{\\Xi_{{1{}}}}}\\right)^*_{{{}{}}}",
+    "wdXi1": "\\left(w^d_{{\\Xi_{{1{}}}}}\\right)_{{{}{}}}",
+    "wdXi1c": "\\left(w^d_{{\\Xi_{{1{}}}}}\\right)^*_{{{}{}}}",
+    "weSigma0LXi1":
+    "\\left(w^{{e\\Sigma_{{0L}}}}_{{\\Xi_{{1{}}}}}\\right)_{{{}{}}}",
+    "weSigma0LXi1c":
+    "\\left(w^{{e\\Sigma_{{0L}}}}_{{\\Xi_{{1{}}}}}\\right)^*_{{{}{}}}",
+    "weSigma0RXi1": "\\left(w^{{e\\Sigma_{{0R}}}}_{{\\Xi_{{1{}}}}}\\right)_{{{}{}}}",
+    "weSigma0RXi1c":
+    "\\left(w^{{e\\Sigma_{{0R}}}}_{{\\Xi_{{1{}}}}}\\right)^*_{{{}{}}}",
+    "weSigma0majXi1":
+    "\\left(w^{{e\\Sigma^{{(maj)}}_{{0}}}}_{{\\Xi_{{1{}}}}}\\right)_{{{}{}}}",
+    "weSigma0majXi1c":
+    "\\left(w^{{e\\Sigma^{{(maj)}}_{{0}}}}_{{\\Xi_{{1{}}}}}\\right)^*_{{{}{}}}",
+    "wl3Xi1": "\\left(w^{{l(3)}}_{{\\Xi_{{1{}}}}}\\right)_{{{}{}}}",
+    "wl3Xi1c": "\\left(w^{{l(3)}}_{{\\Xi_{{1{}}}}}\\right)^*_{{{}{}}}",
+    "wq7Xi1": "\\left(w^{{l(7)}}_{{\\Xi_{{1{}}}}}\\right)_{{{}{}}}",
+    "wq7Xi1c": "\\left(w^{{l(7)}}_{{\\Xi_{{1{}}}}}\\right)^*_{{{}{}}}",
+    "wq5Xi1": "\\left(w^{{l(5)}}_{{\\Xi_{{1{}}}}}\\right)_{{{}{}}}",
+    "wq5Xi1c": "\\left(w^{{l(5)}}_{{\\Xi_{{1{}}}}}\\right)^*_{{{}{}}}",
+
+    "MS": "M_{{\\mathcal{{S}}_{}}}",
+    "MXi0": "M_{{\\Xi_{{0{}}}}}",
+    "MXi1": "M_{{\\Xi_{{1{}}}}}",
+    "Mvarphi": "M_{{\\varphi_{}}}",
+    
+    "MB": "M_{{\\mathcal{{B}}_{}}}",
+    "MW": "M_{{\\mathcal{{W}}_{}}}",
+    "MB1": "M_{{\\mathcal{{B}}^1_{}}}",
+    "MW1": "M_{{\\mathcal{{W}}^1_{}}}",
+    "ML1": "M_{{\\mathcal{{L}}^1_{}}}",
+
+    "MN": "M_{{N_{}}}",
+    "ME": "M_{{E_{}}}",
+    "MDelta1": "M_{{\\Delta_{{1{}}}}}",
+    "MDelta3": "M_{{\\Delta_{{3{}}}}}",
+    "MSigma0": "M_{{\\Sigma_{{0{}}}}}",
+    "MSigma1": "M_{{\\Sigma_{{1{}}}}}",
+    "MNmaj": "M_{{N^{{(maj)}}_{}}}",
+    "MSigma0maj": "M_{{\\Sigma^{{(maj)}}_{{0{}}}}}",
+
+    "MU": "M_{{U_{}}}",
+    "MD": "M_{{D_{}}}",
+    "MXU": "M_{{XU_{}}}",
+    "MUD": "M_{{UD_{}}}",
+    "MDY": "M_{{DY_{}}}",
+    "MXUD": "M_{{XUD_{}}}",
+    "MUDY": "M_{{UDY_{}}}",
+
+    "phi": "\\phi_{}",
+    "phic": "\\phi^*_{}",
+    "lL": "l_{{L{}{}{}}}",
+    "lLc": "l^c_{{L\\dot{{{}}}{}{}}}",
+    "qL": "q_{{L{}{}{}{}}}",
+    "qLc": "q^c_{{L\\dot{{{}}}{}{}{}}}",
+    "eR": "e^{{\\dot{{{}}}}}_{{R{}}}",
+    "eRc": "e^{{c{}}}_{{R{}}}",
+    "dR": "d^{{\\dot{{{}}}}}_{{R{}{}}}",
+    "dRc": "d^{{c{}}}_{{R{}{}}}",
+    "uR": "u^{{\\dot{{{}}}}}_{{R{}{}}}",
+    "uRc": "u^{{c{}}}_{{R{}{}}}",
+    "bFS": "B_{{{}{}}}",
+    "wFS": "W_{{{}{}}}",
+
+    "epsSU2": "i(\\sigma_2)_{{{}{}}}",
+    "sigmaSU2": "\\sigma^{}_{{{}{}}}",
+    "fSU2": "f_{{{}{}{}}}",
+
+    "lambdaColor": "\\lambda^{}_{{{}{}}}",
+
+    "eps4": "\\epsilon_{{{}{}{}{}}}",
+
+    "epsUp": "\\epsilon^{{{}{}}}",
+    "epsUpDot": "\\epsilon^{{\\dot{{{}}}\\dot{{{}}}}}",
+    "epsDown": "\\epsilon_{{{}{}}}",
+    "epsDownDot": "\\epsilon_{{\\dot{{{}}}\\dot{{{}}}}}",
+    "sigma4bar": "\\bar{{\\sigma}}_{{4{}}}^{{\\dot{{{}}}{}}}",
+    "sigma4": "\\sigma^{{4{}}}_{{{}\\dot{{{}}}}}",
+    "deltaUpDown": "\\delta^{}_{}",
+    "deltaUpDownDot": "\\delta_{{\\dot{{{}}}}}^{{\\dot{{{}}}}}",
 }
 
 
 
+op_reps = {
+    "Okinphi": "\\alpha_{kin,\\phi}", 
+    "Ophi4": "\\alpha_{\\phi 4}",
+    "Ophi2": "\\alpha_{\\phi 2}",
+    "Oye": "\\left(\\alpha_{{y^e}}\\right)_{ij}",
+    "Oyec": "\\left(\\alpha_{{y^e}}\\right)^*_{ij}",
+    "Oyd": "\\left(\\alpha_{{y^d}}\\right)_{ij}",
+    "Oydc": "\\left(\\alpha_{{y^d}}\\right)^*_{ij}",
+    "Oyu": "\\left(\\alpha_{{y^u}}\\right)_{ij}",
+    "Oyuc": "\\left(\\alpha_{{y^u}}\\right)^*_{ij}",
 
+    "O5": "\\frac{\\left(\\alpha_5\\right)_{}}{\\Lambda}",
+    "O5c": "\\frac{\\left(\\alpha_5\right)^*_{ij}}{\\Lambda}",
+    "O5aux": "\\frac{\\left(\\alpha^{{(aux)}}_5\right)_{ij}}{\\Lambda}",
+    "O5auxc": "\\frac{\\left(\\alpha^{{(aux)}}_5\right)^*_{ij}}{\\Lambda}",
+    
+    "Ophi": "\\frac{\\alpha_\\phi}{\\Lambda^2}",
+    "OphiD": "\\frac{\\alpha_{\\phi D}}{\\Lambda^2}",
+    "Ophisq": "\\frac{\\alpha_{\\phi\\square}}{\\Lambda^2}",
+    
+    "OphiB": "\\frac{\\alpha_{\\phi B}}{\\Lambda^2}",
+    "OWB": "\\frac{\\alpha_{WB}}{\\Lambda^2}",
+    "OphiW": "\\frac{\\alpha_{\\phi W}}{\\Lambda^2}",
+    "OphiBTilde": "\\frac{\\alpha_{\\phi\\tilde{B}}}{\\Lambda^2}",
+    "OWBTilde": "\\frac{\\alpha_{W\\tilde{B}}}{\\Lambda^2}",
+    "OphiWTilde": "\\frac{\\alpha_{\\phi\\tilde{W}}}{\\Lambda^2}",
+    
+    "Oephi": "\\frac{\\left(\\alpha_{e\\phi}\\right)_{ij}}{\\Lambda^2}",
+    "Oephic": "\\frac{\\left(\\alpha_{e\\phi}\\right)^*_{ij}}{\\Lambda^2}",
+    "Odphi": "\\frac{\\left(\\alpha_{d\\phi}\\right)_{ij}}{\\Lambda^2}",
+    "Odphic": "\\frac{\\left(\\alpha_{d\\phi}\\right)^*_{ij}}{\\Lambda^2}",
+    "Ouphi": "\\frac{\\left(\\alpha_{u\\phi}\\right)_{ij}}{\\Lambda^2}",
+    "Ouphic": "\\frac{\\left(\\alpha_{u\\phi}\\right)^*_{ij}}{\\Lambda^2}",
 
+    "O1phil":
+    "\\frac{\\left(\\alpha^{(1)}_{\\phi l}\\right)_{ij}}{\\Lambda^2}",
+    "O1philc":
+    "\\frac{\\left(\\alpha^{(1)}_{\\phi l}\\right)^*_{ij}}{\\Lambda^2}", 
+    "O3phil":
+    "\\frac{\\left(\\alpha^{(3)}_{\\phi l}\\right)_{ij}}{\\Lambda^2}",
+    "O3philc":
+    "\\frac{\\left(\\alpha^{(3)}_{\\phi l}\\right)^*_{ij}}{\\Lambda^2}",
+    "O1phiq":
+    "\\frac{\\left(\\alpha^{(1)}_{\\phi q}\\right)_{ij}}{\\Lambda^2}",
+    "O1phiqc":
+    "\\frac{\\left(\\alpha^{(1)}_{\\phi q}\\right)^*_{ij}}{\\Lambda^2}", 
+    "O3phiq":
+    "\\frac{\\left(\\alpha^{(3)}_{\\phi q}\\right)_{ij}}{\\Lambda^2}",
+    "O3phiqc":
+    "\\frac{\\left(\\alpha^{(3)}_{\\phi q}\\right)^*_{ij}}{\\Lambda^2}",
+    "O1phie":
+    "\\frac{\\left(\\alpha^{(1)}_{\\phi e}\\right)_{ij}}{\\Lambda^2}",
+    "O1phiec":
+    "\\frac{\\left(\\alpha^{(1)}_{\\phi e}\\right)^*_{ij}}{\\Lambda^2}", 
+    "O1phid":
+    "\\frac{\\left(\\alpha^{(1)}_{\\phi d}\\right)_{ij}}{\\Lambda^2}",
+    "O1phidc":
+    "\\frac{\\left(\\alpha^{(1)}_{\\phi d}\\right)^*_{ij}}{\\Lambda^2}",
+    "O1phiu":
+    "\\frac{\\left(\\alpha^{(1)}_{\\phi u}\\right)_{ij}}{\\Lambda^2}",
+    "O1phiuc":
+    "\\frac{\\left(\\alpha^{(1)}_{\\phi u}\\right)^*_{ij}}{\\Lambda^2}",
+    "Ophiud":
+    "\\frac{\\left(\\alpha_{\\phi ud}\\right)_{ij}}{\\Lambda^2}",
+    "Ophiudc":
+    "\\frac{\\left(\\alpha_{\\phi ud}\\right)^*_{ij}}{\\Lambda^2}", 
+    
+    "O1ll": "\\frac{\\left(\\alpha^{(1)}_{ll}\\right)_{ijkl}}{\\Lambda^2}",
+    "Oee": "\\frac{\\left(\\alpha_{ee}\\right)_{ijkl}}{\\Lambda^2}",
+    "Ole": "\\frac{\\left(\\alpha_{le}\\right)_{ijkl}}{\\Lambda^2}",
+    "O1qd": "\\frac{\\left(\\alpha^{(1)}_{qd}\\right)_{ijkl}}{\\Lambda^2}",
+    "O1qu": "\\frac{\\left(\\alpha^{(1)}_{qu}\\right)_{ijkl}}{\\Lambda^2}",
+    "O8qd": "\\frac{\\left(\\alpha^{(8)}_{qd}\\right)_{ijkl}}{\\Lambda^2}",
+    "O8qu": "\\frac{\\left(\\alpha^{(8)}_{qu}\\right)_{ijkl}}{\\Lambda^2}",
+    "Oledq": "\\frac{\\left(\\alpha_{ledq}\\right)_{ijkl}}{\\Lambda^2}",
+    "Olequ": "\\frac{\\left(\\alpha_{lequ}\\right)_{ijkl}}{\\Lambda^2}",
+    "O1qud": "\\frac{\\left(\\alpha^{(1)}_{qud}\\right)_{ijkl}}{\\Lambda^2}",
+    "Oledqc": "\\frac{\\left(\\alpha_{ledq}\\right)^*_{ijkl}}{\\Lambda^2}",
+    "Olequc": "\\frac{\\left(\\alpha_{lequ}\\right)^*_{ijkl}}{\\Lambda^2}",
+    "O1qudc": "\\frac{\\left(\\alpha^{(1)}_{qud}\\right)^*_{ijkl}}{\\Lambda^2}"
+}
 
+final_lag_writer = Writer(final_lag, op_reps.keys())
 
+print final_lag_writer
 
-
-
-
+final_lag_writer.show_pdf("mixed", "open", structures, op_reps,
+                          ["i", "j", "k", "l", "m", "n", "p", "q",
+                           "a", "b", "c", "d", "e", "f", "g", "h"])
 
 
