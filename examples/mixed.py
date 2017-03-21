@@ -2,12 +2,14 @@ import sys
 
 import context
 
-from efttools.algebra import (
+from efttools.operators import (
     Tensor, Op, OpSum,
     TensorBuilder, FieldBuilder, D,
     number_op, symbol_op, tensor_op, flavor_tensor_op,
     boson, fermion, kdelta,
-    sigma4, sigma4bar, epsUp, epsUpDot, epsDown, epsDownDot,
+    sigma4, sigma4bar, epsUp, epsUpDot, epsDown, epsDownDot)
+
+from efttools.transformations import (
     collect_numbers_and_symbols, collect_by_tensors,
     apply_rules_until, group_op_sum)
 

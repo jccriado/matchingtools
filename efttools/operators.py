@@ -1,16 +1,19 @@
 """
-Definitions of the basic building blocks: the classes Tensor, Operator,
-and OperatorSum. Implementation of the Leibniz rule for derivatives and
-the algorithms for matching and replacing as well as functional 
-derivatives.
+Core module with the definitions of the basic building blocks: the 
+classes :class:`Tensor`, :class:`Operator`, and :class:`OperatorSum`.
+Implements the Leibniz rule for derivatives and the algorithms for
+matching and replacing as well as functional derivatives.
 
-Interfaces for the creation of tensors, fields, operators and operator 
-sums: the functions TensorBuilder, FieldBuilder, Op and OpSum; 
-interface for creating derivatives of single tensors: the function D;
-interface for creating special single-tensor operators associated to
-(complex) numbers and powers of constants.
+Defines interfaces for the creation of tensors, fields, operators and 
+operator sums: :class:`TensorBuilder`, :class:`FieldBuilder`, 
+:func:`Op` and :func:`OpSum`; the interface for creating derivatives
+of single tensors: the function :func:`D`; and interfaces for creating
+special single-tensor associated to (complex) numbers and powers of 
+constants.
 
-Definition of the Lorentz tensors eps[Up/Down](Dot) and sigma4(bar).
+Defines the Lorentz tensors :data:`epsUp`, :data:`epsUpDot`, 
+:data:`epsDown`, :data:`epsDownDot`, :data:`sigma4` and
+:data:`sigma4bar`.
 """
 
 import permutations
@@ -19,22 +22,20 @@ from lsttools import concat, enum_product
 
 class Tensor(object):
     """
-    Building block for operators.
+    Basic building block for operators.
 
-    An object of the class Tensor represents a tensor, which may be
-    anything from structure constants to fields, flavor matrices or
-    just coupling constants. This tensor might have some derivatives
-    applied to it. The indices correponding to the derivatives
-    correspond to the first indices in the list of indices of the
-    Tensor.
+    A tensor might have some derivatives applied to it. The 
+    indices correponding to the derivatives are given by the first
+    indices in the list of indices of the Tensor.
 
     Attributes:
-        name (string): string identifier
-        indices ([int]): indices of the derivatives and the tensor
-        is_field (bool): false iff the tennsor is constant
-        num_of_der (int): number of derivatives acting on the tensor
-        dimension (int): energy dimensions of the tensor
-        statistics (bool): true for bosons, false for fermions
+        name (string): identifier
+        indices (list of ints): indices of the tensor and the
+                                derivaties applied to it
+        is_field (bool): specifies whether it is non-constant
+        num_of_der (int): number of derivatives acting
+        dimension (int): energy dimensions
+        statistics (bool): True for bosons and False for fermions
     """
     
     def __init__(self, name, indices, is_field=False,
@@ -154,7 +155,7 @@ class Operator(object):
     
     def variation(self, field_name, statistics):
         """
-        Take functional derivative of the spacetime integral of self.
+        Take functional derivative of the spacetime integral of self:
 
         Args:
             field_name (string): the name of the field with respect to
@@ -259,15 +260,13 @@ class Operator(object):
         Match the first ocurrence of a pattern
 
         Args:
-            pattern (Operator): contains the tensors and index structure
-                                to be matched
+            pattern (``Operator``): contains the tensors and index structure
+                to be matched
 
         Return:
-            if the matching succeeds: an Operator with the first occurrence
-                                      of the pattern substituted by a
-                                      "generic" tensor (with a sign change
-                                      if needed)
-            otherwise: None
+            if the matching succeeds, an Operator with the first occurrence
+                of the pattern substituted by a "generic" tensor (with a sign 
+                change if needed); None otherwise
         """
         fermions = tuple(pos for pos, tensor in enumerate(self.tensors)
                          if not tensor.statistics)
@@ -525,35 +524,28 @@ class TensorBuilder(object):
     """
     Interface for the creation of constant tensors.
 
-    To be used as follows. For the creation of a tensor, do:
-    > name = TensorBuilder("name")
-    To use it later inside an operator, do:
-    > Op(..., name(ind1, ind2, ...), ...)
-
     Attributes:
-        name (string): the identifier
+        name (string): the ``name`` attribute of the tensors to be created
     """
     def __init__(self, name):
         self.name = name
 
     def __call__(self, *indices):
+        """
+        Creates a Tensor object with the given indices and
+        the following attributes: ``is_field = False``,
+        ``num_of_der = 0``, ``dimension = 0``, ``statistics = boson``
+        """
         return Tensor(self.name, list(indices))
 
 class FieldBuilder(object):
     """
     Interface for the creation of fields.
 
-    To be used as follows. For the creation of a field, do:
-    > name = FieldBuilder("name", dimension, statistics)
-    To use it later inside an operator, do:
-    > Op(..., name(ind1, ind2, ...), ...)
-
     Attributes:
-        name (string): the identifier
-        dimension (int): the energy (mass, inverse length) dimensions
-        statistics (bool): True for bosons and False for fermion. 
-                           The usage the variables boson and fermion
-                           defined in this module is recommended
+        name (string): identifier of the fields to be created
+        dimension (int): energy dimensions of the fields to be created
+        statistics (bool): statistics of the fields to be created
     """
     def __init__(self, name, dimension, statistics):
         self.name = name
@@ -561,21 +553,25 @@ class FieldBuilder(object):
         self.statistics = statistics
 
     def __call__(self, *indices):
+        """
+        Creates a Tensor object with the given indices and
+        the following attributes: ``is_field = True``,
+        ``num_of_der = 0``
+        """
         return Tensor(self.name, list(indices), is_field=True,
                       num_of_der=0, dimension=self.dimension,
                       statistics=self.statistics)
 
 def D_op(index, *tensors):
+    """
+    Interface for the creation of operator sums of obtained from
+    de application of derivatives to producs of tensors.
+    """
     return Operator(list(tensors)).derivative(index)
 
 def D(index, tensor):
     """
     Interface for the creation of tensors with derivatives applied.
-
-    For ten an object of the classes TensorBuilder of FieldBuilder, the
-    recommended notation to define a tensor with derivatives inside
-    an operator is:
-    > Op(..., D(index, ten(ind1, ind2, ...)), ...)
     """
     return Operator([tensor]).derivative(index).operators[0].tensors[0]
 
@@ -623,6 +619,17 @@ def flavor_tensor_op(name):
 boson = True
 fermion = False
 
+kdelta = TensorBuilder("kdelta")
+"""
+Kronecker delta. To be replaced by the correponding
+index contraction appearing instead (module transformations).
+"""
+generic = FieldBuilder("generic", 0, boson)
+"""
+Generic tensor to be used for intermediate steps in calculations
+and in the output of matching.
+"""
+
 # Basic Lorentz group related tensors.
 #
 # * The eps- tensors represent the antisymmetric epsilon symbols with
@@ -633,19 +640,43 @@ fermion = False
 #   using the three Pauli matrices and the 2x2 identity. The Lorentz vector
 #   index is the first, the two two-component spinor indices are the second
 #   and third.
+
 epsUp = TensorBuilder("epsUp")
+"""
+Totally anti-symmetric tensor with two two-component spinor
+ undotted superindices
+"""
+
 epsUpDot = TensorBuilder("epsUpDot")
+"""
+Totally anti-symmetric tensor with two two-component spinor
+ dotted superindices
+"""
+
 epsDown = TensorBuilder("epsDown")
+"""
+Totally anti-symmetric tensor with two two-component spinor
+ undotted subindices
+"""
+
 epsDownDot = TensorBuilder("epsDownDot")
+"""
+Totally anti-symmetric tensor with two two-component spinor
+ dotted subindices
+"""
+
 sigma4bar = TensorBuilder("sigma4bar")
+"""
+Tensor with one lorentz index, one two-component spinor dotted
+superindex and one two-component spinor undotted superindex.
+Represents the four-vector of 2x2 matrices built out identity
+and minus the Pauli matrices.
+"""
+
 sigma4 = TensorBuilder("sigma4")
-
-# Kronecker delta. To be replaced by the correponding
-# index contraction appearing instead (module transformations)
-kdelta = TensorBuilder("kdelta")
-
-# Generic tensor to be used for intermediate steps in calculations
-# and in the output of matching
-generic = FieldBuilder("generic", 0, boson)
-
-
+"""
+Tensor with one lorentz index, one two-component spinor undotted
+subindex and one two-component spinor dotted subindex.
+Represents the four-vector of 2x2 matrices built out identity
+and the Pauli matrices.
+"""

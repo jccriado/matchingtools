@@ -1,6 +1,11 @@
-from efttools.algebra import (
+"""
+Module for the integration of heavy fields from a high-energy
+lagrangian. Contains the function :func:`integrate` and the classes 
+for representing the different types of heavy fields.
+"""
+
+from operators import (
     Tensor, Op, OpSum,
-    TensorBuilder, FieldBuilder,
     apply_derivatives, concat, number_op, symbol_op,
     generic, boson, fermion,
     sigma4, sigma4bar, epsUp, epsUpDot, epsDown, epsDownDot)
@@ -96,7 +101,14 @@ class RealBoson(object):
         mass_sq (Operator): operator containing the mass squared tensor
                             non-negative index (ready to appear directly)
     """
-    def __init__(self, name, num_of_inds, has_flavor=True, ):
+    def __init__(self, name, num_of_inds, has_flavor=True, order=2):
+        """
+        Args:
+            name (string): name identifier of the corresponding tensor
+            num_of_inds (int): number of indices of the corr. tensor
+            has_flavor (bool): specifies if there are several generations
+            order (int): maximum order in the derivatives for the propagator
+        """
         self.name = name
         self.num_of_inds = num_of_inds
         mass = "M" + self.name
@@ -104,7 +116,7 @@ class RealBoson(object):
         self.free_inv_mass_sq = symbol_op(mass, -2, indices=free_mass_inds)
         mass_inds = [num_of_inds-1] if has_flavor else None
         self.mass_sq = symbol_op(mass, 2, indices=mass_inds)
-        self.order
+        self.order = order
     
     def equations_of_motion(self, interaction_lagrangian,
                             max_order=2, max_dim=4):
@@ -137,7 +149,15 @@ class ComplexBoson(object):
         mass_sq (Operator): operator containing the mass squared tensor
                             non-negative index (ready to appear directly)
     """
-    def __init__(self, name, c_name, num_of_inds, has_flavor=True):
+    def __init__(self, name, c_name, num_of_inds, has_flavor=True, order=2):
+        """
+        Args:
+            name (string): name identifier of the corresponding tensor
+            c_name (string): name identifier of the conjugate tensor
+            num_of_inds (int): number of indices of the corr. tensor
+            has_flavor (bool): specifies if there are several generations
+            order (int): maximum order in the derivatives for the propagator
+        """
         self.name = name
         self.c_name = c_name
         self.num_of_inds = num_of_inds
@@ -146,6 +166,7 @@ class ComplexBoson(object):
         self.free_inv_mass_sq = symbol_op(mass, -2, indices=free_mass_inds)
         mass_inds = [num_of_inds-1] if has_flavor else None
         self.mass_sq = symbol_op(mass, 2, indices=mass_inds)
+        self.order = order
 
     def equations_of_motion(self, interaction_lagrangian):
         """
@@ -169,9 +190,16 @@ class ComplexBoson(object):
 
 class RealScalar(RealBoson, Scalar):
     """
-    Complete class for heavy real scalar bosons.
-    
-    Provides the quadratic terms for them.
+    Representation for heavy real scalar bosons.
+
+    The ``has_flavor`` argument to the constructor is a bool that
+    specifies whether there are several generations of the heavy field,
+    whereas the ``order`` argument gives a maximum order in the 
+    derivatives for the propagator.
+
+    Attributes:
+        name (string): name identifier of the corresponding tensor
+        num_of_inds (int): number of indices of the corresponding tensor
     """
     def quadratic_terms(self):
         """Construct the quadratic terms (1/2)[(DS)^2 + M^2 S^2]."""
@@ -186,9 +214,17 @@ class RealScalar(RealBoson, Scalar):
 
 class ComplexScalar(ComplexBoson, Scalar):
     """
-    Complete class for heavy complex scalar bosons.
-    
-    Provides the quadratic terms for them.
+    Representation for heavy complex scalar bosons.
+
+    The ``has_flavor`` argument to the constructor is a bool that
+    specifies whether there are several generations of the heavy field,
+    whereas the ``order`` argument gives a maximum order in the 
+    derivatives for the propagator.
+
+    Attributes:
+        name (string): name identifier of the corresponding tensor
+        c_name (string): name identifier of the conjugate tensor
+        num_of_inds (int): number of indices of the corresponding tensor
     """
     def quadratic_terms(self):
         """Construct the quadratic terms DSc DS + M^2 Sc S."""
@@ -204,6 +240,18 @@ class ComplexScalar(ComplexBoson, Scalar):
         return kinetic_term + OpSum(mass_term)
 
 class RealVector(RealBoson, Vector):
+    """
+    Representation for heavy real vector bosons.
+
+    The ``has_flavor`` argument to the constructor is a bool that
+    specifies whether there are several generations of the heavy field,
+    whereas the ``order`` argument gives a maximum order in the 
+    derivatives for the propagator.
+
+    Attributes:
+        name (string): name identifier of the corresponding tensor
+        num_of_inds (int): number of indices of the corresponding tensor
+    """
     def quadratic_terms(self):
         n = self.num_of_inds
         f1 = Op(Tensor(self.name, list(range(n)), is_field=True,
@@ -217,6 +265,19 @@ class RealVector(RealBoson, Vector):
         return kin1 + kin2 + mass_term
 
 class ComplexVector(ComplexBoson, Vector):
+    """
+    Representation for heavy complex vector bosons.
+
+    The ``has_flavor`` argument to the constructor is a bool that
+    specifies whether there are several generations of the heavy field,
+    whereas the ``order`` argument gives a maximum order in the 
+    derivatives for the propagator.
+
+    Attributes:
+        name (string): name identifier of the corresponding tensor
+        c_name (string): name identifier of the conjugate tensor
+        num_of_inds (int): number of indices of the corresponding tensor
+    """
     def quadratic_terms(self):
         n = self.num_of_inds
         f1 = Op(Tensor(self.name, list(range(n)), is_field=True,
@@ -231,8 +292,32 @@ class ComplexVector(ComplexBoson, Vector):
         return kin1 + kin2 + mass_term
     
 class VectorLikeFermion(object):
+    """
+    Representation for heavy vector-like fermions
+
+    The ``has_flavor`` argument to the constructor is a bool that
+    specifies whether there are several generations of the heavy field.
+
+    Attributes:
+        name (string): name of the field
+        L_name (string): name of the left-handed part
+        R_name (string): name of the right-handed part
+        Lc_name (string): name of the conjugate of the left-handed part
+        Rc_name (string): name of the conjugate of the right-handed part
+        num_of_inds (int): number of indices of the corresponding tensor
+    """
     def __init__(self, name, L_name, R_name, Lc_name, Rc_name, num_of_inds,
                  has_flavor=True):
+        """
+        Args:
+            name (string): name of the field
+            L_name (string): name of the left-handed part
+            R_name (string): name of the right-handed part
+            Lc_name (string): name of the conjugate of the left-handed part
+            Rc_name (string): name of the conjugate of the right-handed part
+            num_of_inds (int): number of indices of the corresponding tensor
+            has_flavor (bool): specifies if there are several generations
+        """
         self.name = name
         self.L_name = L_name
         self.R_name = R_name
@@ -289,6 +374,10 @@ class VectorLikeFermion(object):
                          dimension=1.5, statistics=fermion))
 
     def quadratic_terms(self):
+        """
+        Construct the terms i FLc (D FL) - i (D FLc) FL + i FRc D FR
+        - i (D FRc) FR - (FLc FR + FRc FL)
+        """
         n = self.num_of_inds
         fL, fR, fLc, fRc = map(self._create_op_field, [self.L_name, self.R_name,
                                                        self.Lc_name, self.Rc_name])
@@ -302,7 +391,25 @@ class VectorLikeFermion(object):
         return half * (kinL + kinR + kinLc + kinRc) + OpSum(-mass1, -mass2)
 
 class MajoranaFermion(object):
+    """
+    Representation for heavy Majorana fermions.
+
+    The ``has_flavor`` argument to the constructor is a bool that
+    specifies whether there are several generations of the heavy field.
+
+    Attributes:
+        name (string): name identifier of the corresponding tensor
+        c_name (string): name identifier of the conjugate tensor
+        num_of_inds (int): number of indices of the corresponding tensor
+    """
     def __init__(self, name, c_name, num_of_inds, has_flavor=True):
+        """
+        Args:
+            name (string): name identifier of the corresponding tensor
+            c_name (string): name identifier of the conjugate tensor
+            num_of_inds (int): number of indices of the corresponding tensor
+            has_flavor (bool): specifies if there are several generations
+        """
         self.name = name
         self.c_name = c_name
         self.num_of_inds = num_of_inds
@@ -315,15 +422,15 @@ class MajoranaFermion(object):
     def der(self):
         n = self.num_of_inds
         factor = OpSum(number_op(1j) * Op(sigma4bar(n + 1, -1, 0)))
-        f = Op(Tensor(self.name, [0] + list(range(-2, -n - 1, -1)), is_field=True,
-                      dimension=1.5, statistics=fermion))
+        f = Op(Tensor(self.name, [0] + list(range(-2, -n - 1, -1)),
+                      is_field=True, dimension=1.5, statistics=fermion))
         return factor * f.derivative(n + 1)
 
     def c_der(self):
         n = self.num_of_inds
         factor = OpSum(number_op(1j) * Op(sigma4bar(n + 1, 0, -1)))
-        f = Op(Tensor(self.c_name, [0] + list(range(-2, -n - 1, -1)), is_field=True,
-                      dimension=1.5, statistics=fermion))
+        f = Op(Tensor(self.c_name, [0] + list(range(-2, -n - 1, -1)),
+                      is_field=True, dimension=1.5, statistics=fermion))
         return factor * f.derivative(n + 1)
 
     def pre_eps(self, op_sum):
@@ -345,6 +452,9 @@ class MajoranaFermion(object):
                 (self.name, inv_mass * self.app_eps(self.c_der() + variation))]
 
     def quadratic_terms(self):
+        """
+        Construct the terms (i Fc (D F) - i (D Fc) F - (FF + Fc Fc))/2
+        """
         n = self.num_of_inds
         f = Op(Tensor(self.name, list(range(n)), is_field=True,
                          dimension=1.5, statistics=fermion))
@@ -362,6 +472,19 @@ class MajoranaFermion(object):
         return half * (kin + kinc + OpSum(-mass1, -mass2))
 
 def integrate(heavy_fields, interaction_lagrangian, max_dim=6):
+    """
+    Integrate out heavy fields.
+
+    Heavy field classes: ``RealScalar``, ``ComplexScalar``, ``RealVector``, 
+    ``ComplexVector``, ``VectorLikeFermion`` or ``MajoranaFermion``.
+
+    Args:
+        heavy_fields (list of heavy fields): to be integrated out
+        interaction_lagrangian (``efttools.operators.OperatorSum``):
+            from which to integrate out the heavy fields
+        max_dim (int): maximum dimension of the operators in the effective
+                       lagrangian
+    """
     eoms = dict(concat([field.equations_of_motion(interaction_lagrangian)
                         for field in heavy_fields]))
     replaced_eoms = {field_name:
@@ -373,11 +496,3 @@ def integrate(heavy_fields, interaction_lagrangian, max_dim=6):
     total_lagrangian = quadratic_lagrangian + interaction_lagrangian
     return total_lagrangian.replace_all(replaced_eoms, max_dim)
 
-# def integrate(heavy_fields, interaction_lagrangian, max_dim=6):
-#     eoms = dict(concat([field.equations_of_motion(interaction_lagrangian)
-#                         for field in heavy_fields]))
-#     quadratic_lagrangian = sum([field.quadratic_terms()
-#                                 for field in heavy_fields],
-#                                OpSum())
-#     total_lagrangian = quadratic_lagrangian + interaction_lagrangian
-#     return total_lagrangian.replace_all(eoms, max_dim)
