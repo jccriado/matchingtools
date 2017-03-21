@@ -1,0 +1,670 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Tutorial &#8212; efttools  documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Modules documentation" href="moddoc.html" />
+    <link rel="prev" title="Welcome to efttools’s documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="tutorial">
+<h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="creation-of-models">
+<h2>Creation of models<a class="headerlink" href="#creation-of-models" title="Permalink to this headline">¶</a></h2>
+<p>The construction of a model is done in two steps: the creation of the
+tensors and fields and the definition of the interaction lagrangian.</p>
+<p>The basic building block for a lagrangian is tensor, an object of the
+class <a class="reference internal" href="moddoc.html#efttools.operators.Tensor" title="efttools.operators.Tensor"><code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code></a>. Direct usage of the <code class="docutils literal"><span class="pre">Tensor</span></code>
+constructor obscures the code. There are two classes defined to make the
+process of creating tensors easier and cleaner,
+<a class="reference internal" href="moddoc.html#efttools.operators.TensorBuilder" title="efttools.operators.TensorBuilder"><code class="xref py py-class docutils literal"><span class="pre">TensorBuilder</span></code></a> and
+<a class="reference internal" href="moddoc.html#efttools.operators.FieldBuilder" title="efttools.operators.FieldBuilder"><code class="xref py py-class docutils literal"><span class="pre">FieldBuilder</span></code></a>.</p>
+<p>When a field has covariant derivatives applied to it, that is
+represented internally in the attributes of its representative
+<code class="docutils literal"><span class="pre">Tensor</span></code> object. For aesthetical reasons and easeness of usage,
+instead of manually modifying the attributes, it&#8217;s better to use
+the function <a class="reference internal" href="moddoc.html#efttools.operators.D" title="efttools.operators.D"><code class="xref py py-class docutils literal"><span class="pre">D</span></code></a> to create covariant
+derivatives of fields.</p>
+<p><code class="docutils literal"><span class="pre">efttools</span></code> handles lagrangians that are polynomials of the fields.
+They are thus a sum of terms that are products of tensors. They are
+represented as <a class="reference internal" href="moddoc.html#efttools.operators.OperatorSum" title="efttools.operators.OperatorSum"><code class="xref py py-class docutils literal"><span class="pre">OperatorSum</span></code></a> objects, with only one
+attribute: a list of its terms. Each term should be an operator, that is,
+a product of tensors represented by an <a class="reference internal" href="moddoc.html#efttools.operators.Operator" title="efttools.operators.Operator"><code class="xref py py-class docutils literal"><span class="pre">Operator</span></code></a>
+object with only one attribute: a list of its factors.</p>
+<p>Instead of using the constructors for both classes, the functions
+<a class="reference internal" href="moddoc.html#efttools.operators.OpSum" title="efttools.operators.OpSum"><code class="xref py py-class docutils literal"><span class="pre">OpSum</span></code></a> and <a class="reference internal" href="moddoc.html#efttools.operators.Op" title="efttools.operators.Op"><code class="xref py py-class docutils literal"><span class="pre">Op</span></code></a> are
+available to make the definitions clearer.</p>
+<p><code class="docutils literal"><span class="pre">efttools</span></code> treats in a special way tensors whose name starts and
+ends with square or curly brakets. A tensor name enclosed in square
+brakets is understood as a (complex) number to be read from the name
+using <code class="docutils literal"><span class="pre">float(name[1:-1])</span></code>. The function <a class="reference internal" href="moddoc.html#efttools.operators.number_op" title="efttools.operators.number_op"><code class="xref py py-func docutils literal"><span class="pre">number_op()</span></code></a>
+is to be used to create operators with such tensors inside.</p>
+<p>When the name of a tensor starts and ends with curly brakets it&#8217;s
+it represents some symbolic constant that appears exponentiated.
+The name should be of the form <code class="docutils literal"><span class="pre">&quot;{base^exponent}&quot;</span></code>. Curly brakets
+allow for the summation of the exponents of tensors that appear in
+the same tensor and have the same base and indices. This is used
+mainly to produce more readable results. The function designed to
+create operators containing such tensors is <a class="reference internal" href="moddoc.html#efttools.operators.symbol_op" title="efttools.operators.symbol_op"><code class="xref py py-func docutils literal"><span class="pre">symbol_op()</span></code></a>.</p>
+<div class="section" id="creation-of-tensors">
+<h3>Creation of tensors<a class="headerlink" href="#creation-of-tensors" title="Permalink to this headline">¶</a></h3>
+<p>Create a tensor as:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">my_tensor</span> <span class="o">=</span> <span class="n">TensorBuilder</span><span class="p">(</span><span class="s2">&quot;my_tensor&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and then use it inside an operator:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Op</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">my_tensor</span><span class="p">(</span><span class="n">ind1</span><span class="p">,</span> <span class="n">ind2</span><span class="p">,</span> <span class="o">...</span><span class="p">),</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>with <code class="docutils literal"><span class="pre">ind1</span></code>, <code class="docutils literal"><span class="pre">ind2</span></code>, ... being integers.</p>
+</div>
+<div class="section" id="creation-of-fields">
+<h3>Creation of fields<a class="headerlink" href="#creation-of-fields" title="Permalink to this headline">¶</a></h3>
+<p>Create a field as:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">my_field</span> <span class="o">=</span> <span class="n">FieldBuilder</span><span class="p">(</span><span class="s2">&quot;my_field&quot;</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">statistics</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where dimension (float) represents the energy dimensions of the field
+and statistics is either equal to efttools.algebra.boson or
+efttools.algebra.fermion. Then use it inside an operator:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Op</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">my_field</span><span class="p">(</span><span class="n">ind1</span><span class="p">,</span> <span class="n">ind2</span><span class="p">,</span> <span class="o">...</span><span class="p">),</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>with <code class="docutils literal"><span class="pre">ind1</span></code>, <code class="docutils literal"><span class="pre">ind2</span></code>, ... being integers.</p>
+</div>
+<div class="section" id="definition-of-the-lagrangian">
+<h3>Definition of the lagrangian<a class="headerlink" href="#definition-of-the-lagrangian" title="Permalink to this headline">¶</a></h3>
+<p>Define the interaction lagrangian as an operator sum:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">int_lag</span> <span class="o">=</span> <span class="n">OpSum</span><span class="p">(</span><span class="n">op1</span><span class="p">,</span> <span class="n">op2</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Each argument to the function <code class="docutils literal"><span class="pre">OpSum</span></code> should be an operator defined as:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">op1</span> <span class="o">=</span> <span class="n">Op</span><span class="p">(</span><span class="n">tens1</span><span class="p">(</span><span class="n">ind1</span><span class="p">,</span> <span class="n">ind2</span><span class="p">,</span> <span class="o">...</span><span class="p">),</span> <span class="n">field1</span><span class="p">(</span><span class="n">ind3</span><span class="p">,</span> <span class="n">ind4</span><span class="p">,</span> <span class="o">...</span><span class="p">),</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The arguments of the function <code class="docutils literal"><span class="pre">Op</span></code> are tensors (and fields). Their
+indices are integer numbers. Nevative integers are reserved for free
+indices. Free indices are not meant to be used in the operators
+appearing in the lagrangian, but later in the definition of its
+transformations.</p>
+<p>Non-negative integers represent contracted indices. Contraction
+is expressed by repetition of indices.</p>
+<p>To introduce the covariant derivative with index <code class="docutils literal"><span class="pre">ind</span></code> of a tensor
+<code class="docutils literal"><span class="pre">tens</span></code> inside an operator, use the function <code class="docutils literal"><span class="pre">D</span></code> in the following way:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">D</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">tens</span><span class="p">(</span><span class="n">ind1</span><span class="p">,</span> <span class="n">ind2</span><span class="p">,</span> <span class="o">...</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>If a numeric coefficient <code class="docutils literal"><span class="pre">num</span></code> is needed for some operator <code class="docutils literal"><span class="pre">op</span></code>
+it can be introduced as:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">number_op</span><span class="p">(</span><span class="n">num</span><span class="p">)</span> <span class="o">*</span> <span class="n">op</span>
+</pre></div>
+</div>
+<p>A symbolic constant <code class="docutils literal"><span class="pre">s</span></code> to some power <code class="docutils literal"><span class="pre">p</span></code> can multiply an operator as:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">symbol_op</span><span class="p">(</span><span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> <span class="o">*</span> <span class="n">op</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="integration">
+<h2>Integration<a class="headerlink" href="#integration" title="Permalink to this headline">¶</a></h2>
+<p>To integrate some heavy fields out of a previously constructed lagrangian
+the heavy fields should be specified first. The heavy fields should be objects
+of any of the following classes:</p>
+<ul class="simple">
+<li><a class="reference internal" href="moddoc.html#efttools.integration.RealScalar" title="efttools.integration.RealScalar"><code class="xref py py-class docutils literal"><span class="pre">RealScalar</span></code></a></li>
+<li><a class="reference internal" href="moddoc.html#efttools.integration.ComplexScalar" title="efttools.integration.ComplexScalar"><code class="xref py py-class docutils literal"><span class="pre">ComplexScalar</span></code></a></li>
+<li><a class="reference internal" href="moddoc.html#efttools.integration.RealVector" title="efttools.integration.RealVector"><code class="xref py py-class docutils literal"><span class="pre">RealVector</span></code></a></li>
+<li><a class="reference internal" href="moddoc.html#efttools.integration.ComplexVector" title="efttools.integration.ComplexVector"><code class="xref py py-class docutils literal"><span class="pre">ComplexVector</span></code></a></li>
+<li><a class="reference internal" href="moddoc.html#efttools.integration.VectorLikeFermion" title="efttools.integration.VectorLikeFermion"><code class="xref py py-class docutils literal"><span class="pre">VectorLikeFermion</span></code></a></li>
+<li><a class="reference internal" href="moddoc.html#efttools.integration.MajoranaFermion" title="efttools.integration.MajoranaFermion"><code class="xref py py-class docutils literal"><span class="pre">MajoranaFermion</span></code></a></li>
+</ul>
+<p>Create a heavy field using the constructors of these classes:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">heavy_field</span> <span class="o">=</span> <span class="n">HeavyFieldClass</span><span class="p">(</span><span class="s2">&quot;field_name&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then collect the heavy fields in a list and use the function
+<a class="reference internal" href="moddoc.html#efttools.integration.integrate" title="efttools.integration.integrate"><code class="xref py py-func docutils literal"><span class="pre">integrate()</span></code></a> to perform the integration:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">heavy_fields</span> <span class="o">=</span> <span class="p">[</span><span class="n">heavy_field_1</span><span class="p">,</span> <span class="n">heavy_field_2</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+<span class="n">eff_lag</span> <span class="o">=</span> <span class="n">integrate</span><span class="p">(</span><span class="n">heavy_fields</span><span class="p">,</span> <span class="n">int_lag</span><span class="p">,</span> <span class="n">max_dim</span><span class="o">=...</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="transformations-of-the-effective-lagrangian">
+<h2>Transformations of the effective lagrangian<a class="headerlink" href="#transformations-of-the-effective-lagrangian" title="Permalink to this headline">¶</a></h2>
+<p>An effective lagrangian obtained from integration of heavy fields
+usually contains operators that aren&#8217;t independent. Several
+transformations can be applied to them to write the lagrangian
+in terms of a set of operators (a basis) that spans the space
+of effective operators.</p>
+<p>These transformations are such as Fierz identities or substitutions
+of the equations of motion of the light particles. All of them consist
+of the subsitution of operators or parts of them by sums of other
+operators. The operations described in this section applied to
+effective lagrangians or to any other kind of operators sum.</p>
+<p>The first step to simplify an effective lagrangian is to collect and
+multiply numeric coefficients and constant tensors that appear several
+times inside the same operator. To do this, use:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">simplified_lag_1</span> <span class="o">=</span> <span class="n">collect_numbers_and_symbols</span><span class="p">(</span><span class="n">effective_lagrangian</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then we can define a set of rules as a list of pairs
+<code class="docutils literal"><span class="pre">(pattern,</span> <span class="pre">replacement)</span></code> where <code class="docutils literal"><span class="pre">pattern</span></code> is an operator
+and <code class="docutils literal"><span class="pre">replacement</span></code> is an operator sum:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">rules</span> <span class="o">=</span> <span class="p">[(</span><span class="n">Op</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="n">OpSum</span><span class="p">(</span><span class="o">...</span><span class="p">)),</span> <span class="p">(</span><span class="n">Op</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="n">OpSum</span><span class="p">(</span><span class="o">...</span><span class="p">)),</span> <span class="o">...</span><span class="p">]</span>
+</pre></div>
+</div>
+<p><code class="docutils literal"><span class="pre">pattern</span></code> may contain tensors with negative indices corresponding
+to indices that are not contracted inside <code class="docutils literal"><span class="pre">pattern</span></code>. In that
+cases, the operators in replacement should also contain the same
+negative indices. When <code class="docutils literal"><span class="pre">pattern</span></code> is substituted inside an operator
+<code class="docutils literal"><span class="pre">op</span></code>, the indices in <code class="docutils literal"><span class="pre">op</span></code> outside <code class="docutils literal"><span class="pre">pattern</span></code> that are contracted
+with indices inside pattern appear as contracted with the
+corresponding ones in the operators of <code class="docutils literal"><span class="pre">replacement</span></code>. For example,
+to replace <span class="math">\(t_{ij}r_{ik}\)</span> by <span class="math">\(-s_{mnk}u_{nmj}\)</span> we would
+write the rule:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">Op</span><span class="p">(</span><span class="n">t</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">r</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">)),</span> <span class="n">OpSum</span><span class="p">(</span><span class="o">-</span><span class="n">Op</span><span class="p">(</span><span class="n">s</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="n">u</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">))))</span>
+</pre></div>
+</div>
+<p>The operators of the basis should be represented by tensor with a name
+identifing the operator. They can be defined using
+<a class="reference internal" href="moddoc.html#efttools.operators.tensor_op" title="efttools.operators.tensor_op"><code class="xref py py-func docutils literal"><span class="pre">efttools.operators.tensor_op()</span></code></a> when they don&#8217;t have
+free indices and <a class="reference internal" href="moddoc.html#efttools.operators.flavor_tensor_op" title="efttools.operators.flavor_tensor_op"><code class="xref py py-func docutils literal"><span class="pre">efttools.operators.flavor_tensor_op()</span></code></a>
+when they do. So we usually define:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Op1</span> <span class="o">=</span> <span class="n">tensor_op</span><span class="p">(</span><span class="s2">&quot;Op1&quot;</span><span class="p">)</span>
+<span class="n">Op2</span> <span class="o">=</span> <span class="n">tensor_op</span><span class="p">(</span><span class="s2">&quot;Op2&quot;</span><span class="p">)</span>
+<span class="o">...</span>
+
+<span class="n">Opf1</span> <span class="o">=</span> <span class="n">flavor_tensor_op</span><span class="p">(</span><span class="s2">&quot;Opf1&quot;</span><span class="p">)</span>
+<span class="n">Opf2</span> <span class="o">=</span> <span class="n">flavor_tensor_op</span><span class="p">(</span><span class="s2">&quot;Opf1&quot;</span><span class="p">)</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+<p>and then specify how to identify them using rules:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">op_def_rules</span> <span class="o">=</span> <span class="p">[(</span><span class="n">Op</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="n">OpSum</span><span class="p">(</span><span class="n">Op1</span><span class="p">)),</span>
+                <span class="p">(</span><span class="n">Op</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="n">OpSum</span><span class="p">(</span><span class="n">Op2</span><span class="p">)),</span>
+                <span class="o">...</span>
+                <span class="p">(</span><span class="n">Op</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="n">OpSum</span><span class="p">(</span><span class="n">Opf1</span><span class="p">(</span><span class="n">i1</span><span class="p">,</span> <span class="n">i2</span><span class="p">,</span> <span class="o">...</span><span class="p">))),</span>
+                <span class="p">(</span><span class="n">Op</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="n">OpSum</span><span class="p">(</span><span class="n">Opf2</span><span class="p">(</span><span class="n">i1</span><span class="p">,</span> <span class="n">i2</span><span class="p">,</span> <span class="o">...</span><span class="p">)))</span>
+                <span class="o">...</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Then we are ready to apply the rules using <a class="reference internal" href="moddoc.html#efttools.transformations.apply_rules_until" title="efttools.transformations.apply_rules_until"><code class="xref py py-func docutils literal"><span class="pre">apply_rules_until()</span></code></a>
+to get to the basis:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">basis_op_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Op1&quot;</span><span class="p">,</span> <span class="s2">&quot;Op2&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="s2">&quot;Opf1&quot;</span><span class="p">,</span> <span class="s2">&quot;Opf2&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+<span class="n">simplified_lag_2</span> <span class="o">=</span> <span class="n">apply_rules_until</span><span class="p">(</span>
+    <span class="n">simplified_lag_1</span><span class="p">,</span> <span class="n">rules</span> <span class="o">+</span> <span class="n">op_def_rules</span><span class="p">,</span> <span class="n">basis_op_names</span><span class="p">,</span> <span class="n">max_iter</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal"><span class="pre">max_iter</span></code> is the maximum number of applications of rules to each
+operator.</p>
+</div>
+<div class="section" id="output-of-the-results">
+<h2>Output of the results<a class="headerlink" href="#output-of-the-results" title="Permalink to this headline">¶</a></h2>
+<p>It&#8217;s usually convenient to organize the final results by presenting
+the coefficient to each operator of the effective lagrangian.
+When a set of rules has been applied to the effective lagrangian so
+that it is written as an <a class="reference internal" href="moddoc.html#efttools.operators.OperatorSum" title="efttools.operators.OperatorSum"><code class="xref py py-class docutils literal"><span class="pre">efttools.operators.OperatorSum</span></code></a> whose
+elements are <code class="xref py py-class docutils literal"><span class="pre">efttool.operators.Operator</span></code> objects each of which
+contains one tensor representing the actual operator in the basis and
+other tensors representing the coefficient the operator has.</p>
+<p>To output the results in this form in a human readable format, the
+<a class="reference internal" href="moddoc.html#efttools.output.Writer" title="efttools.output.Writer"><code class="xref py py-class docutils literal"><span class="pre">Writer</span></code></a> is provided. If <code class="docutils literal"><span class="pre">op_names</span></code> is a list of the names
+of the tensors representing the operators in the basis and <code class="docutils literal"><span class="pre">lag</span></code> is
+the lagrangian that we want to write, we do:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">lag_writer</span> <span class="o">=</span> <span class="n">Writer</span><span class="p">(</span><span class="n">eff_lag</span><span class="p">,</span> <span class="n">op_names</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To write the results to a file in plain text, just use:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">lag_writer</span><span class="o">.</span><span class="n">write_text_file</span><span class="p">(</span><span class="s2">&quot;filename&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To write it in LaTeX two python dictionaries expressing how the tensors
+that appear in the coefficients and how the name of the coefficients
+for the operators should be written in LaTeX:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">tensors_latex</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;tensor1&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;latexrep&quot;</span><span class="p">,</span> <span class="s2">&quot;tensor2&quot;</span><span class="p">:</span> <span class="o">...</span><span class="p">,</span> <span class="o">...</span><span class="p">}</span>
+<span class="n">ops_latex</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;op1&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;latexrep&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>The values of the dictionary should be code to be written inside some
+LaTeX equation environment. It is recommended to use <code class="docutils literal"><span class="pre">r&quot;...&quot;</span></code> instead
+of <code class="docutils literal"><span class="pre">&quot;...&quot;</span></code> to easily write instructions as <code class="docutils literal"><span class="pre">\instr</span></code> instead of
+the form <code class="docutils literal"><span class="pre">\\instr</span></code> that would be needed for the case with just
+<code class="docutils literal"><span class="pre">&quot;...&quot;</span></code>. The placeholders for the indices should be written in
+python&#8217;s <code class="docutils literal"><span class="pre">str.format</span></code> style <code class="docutils literal"><span class="pre">&quot;{}&quot;</span></code>. This implies that whenever
+curly braces are needed for the LaTeX code, double braces <code class="docutils literal"><span class="pre">{{...}}</span></code>
+should be used.</p>
+<p>The symbols to de used to represent indices should be given also as
+a list of strings containing the LaTeX code representing them:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">indices_latex</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;i&quot;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Finally we can write the LaTeX document using:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">lag_writer</span><span class="o">.</span><span class="n">write_latex</span><span class="p">(</span><span class="s2">&quot;filename&quot;</span><span class="p">,</span> <span class="n">tensors_latex</span><span class="p">,</span> <span class="n">ops_latex</span><span class="p">,</span> <span class="n">indices_latex</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Or we can instead use <code class="xref py py-meth docutils literal"><span class="pre">Writer.show_latex()</span></code> to write it, compile it
+and show it all in method:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">lag_writer</span><span class="o">.</span><span class="n">show_latex</span><span class="p">(</span><span class="s2">&quot;filename&quot;</span><span class="p">,</span> <span class="n">pdf_viewer</span><span class="p">,</span> <span class="n">tensors_latex</span><span class="p">,</span>
+                      <span class="n">ops_latex</span><span class="p">,</span> <span class="n">indices_latex</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="a-simple-example">
+<h2>A simple example<a class="headerlink" href="#a-simple-example" title="Permalink to this headline">¶</a></h2>
+<p>In this section we will be creating a simple model with symmetry <span class="math">\(SU(2)\times U(1)\)</span> containing a complex scalar doublet <span class="math">\(\phi\)</span> (the Higgs) with hypercharge <span class="math">\(1/2\)</span> and a real scalar triplet <span class="math">\(\Xi\)</span> with zero hypercharge that couple as:</p>
+<div class="math">
+\[\mathcal{L}_{int} = - \kappa\Xi^a\phi^\dagger\sigma^a\phi
+- \lambda \Xi^a \Xi^a \phi^\dagger\phi,\]</div>
+<p>where <span class="math">\(\kappa\)</span> and <span class="math">\(\lambda\)</span> are a coupling constants and <span class="math">\(\sigma^a\)</span> are the Pauli matrices. We will then integrate out the heavy scalar <span class="math">\(\Xi\)</span> to obtain an effective lagrangian which we will finally write in terms of the operators</p>
+<div class="math">
+\[\mathcal{O}_\phi=(\phi^\dagger\phi)^3,\;
+\mathcal{O}_{\phi 4}=(\phi^\dagger\phi)^2\]</div>
+<div class="section" id="creation-of-the-model">
+<h3>Creation of the model<a class="headerlink" href="#creation-of-the-model" title="Permalink to this headline">¶</a></h3>
+<p>The basic building blocks of our model are <strong>tensors</strong> and <strong>fields</strong>. Some examples of the tensors we may need are: structure constants of a group, Clebsch-Gordan coefficients, coupling constants (possibly with flavor indices), masses, numeric coefficients...</p>
+<p>For our example, we will need three tensors, the Pauli matrices and the coupling constants:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">sigma</span> <span class="o">=</span> <span class="n">TensorBuilder</span><span class="p">(</span><span class="s2">&quot;sigma&quot;</span><span class="p">)</span>
+<span class="n">kappa</span> <span class="o">=</span> <span class="n">TensorBuilder</span><span class="p">(</span><span class="s2">&quot;kappa&quot;</span><span class="p">)</span>
+<span class="k">lambda</span> <span class="o">=</span> <span class="n">TensorBuilder</span><span class="p">(</span><span class="s2">&quot;lambda&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We will also use three fields: the Higgs doublet, its conjugate and the new scalar:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">phi</span> <span class="o">=</span> <span class="n">FieldBuilder</span><span class="p">(</span><span class="s2">&quot;phi&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">boson</span><span class="p">)</span>
+<span class="n">phic</span> <span class="o">=</span> <span class="n">FieldBuilder</span><span class="p">(</span><span class="s2">&quot;phic&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">boson</span><span class="p">)</span>
+<span class="n">Xi</span> <span class="o">=</span> <span class="n">FieldBuilder</span><span class="p">(</span><span class="s2">&quot;Xi&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">boson</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The second argument of <code class="docutils literal"><span class="pre">FieldBuilder</span></code> represent the energy dimensions of the field, and the third corresponds its the statistics and can either be <code class="docutils literal"><span class="pre">boson</span></code> or <code class="docutils literal"><span class="pre">`fermion</span></code>.</p>
+<p>Now we are ready to write the interaction lagrangian. To create a sum of operators we use the function <code class="docutils literal"><span class="pre">OpSum</span></code> and pass as arguments the operators to be added together. To create an operator, the function <code class="docutils literal"><span class="pre">Op</span></code> should be used. Its arguments are the tensors and fields that form the operator. Each tensor is called as a function with some non-negative integer arguments, the index indentifiers. Repeated integer index identifiers means contraction of the corresponding indices. In our example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">interaction_lagrangian</span> <span class="o">=</span> <span class="o">-</span><span class="n">OpSum</span><span class="p">(</span>
+     <span class="n">Op</span><span class="p">(</span><span class="n">kappa</span><span class="p">(),</span> <span class="n">Xi</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">phic</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">sigma</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">phi</span><span class="p">(</span><span class="mi">2</span><span class="p">)),</span>
+     <span class="n">Op</span><span class="p">(</span><span class="k">lambda</span><span class="p">(),</span> <span class="n">Xi</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">Xi</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">phic</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">phi</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>Notice the minus sign in front of <code class="docutils literal"><span class="pre">OpSum</span></code>. Minus signs are defined in the library for operators and operator sums. Multiplication <code class="docutils literal"><span class="pre">*</span></code> is defined for operators too (as the concatenation of the tensors they contain).</p>
+</div>
+<div class="section" id="id1">
+<h3>Integration<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>Before doing the integration of the heavy fields, we must specify who they are.
+The heavy fields should be objects of any of the classes: <code class="docutils literal"><span class="pre">RealScalar</span></code>, <code class="docutils literal"><span class="pre">ComplexScalar</span></code>, <code class="docutils literal"><span class="pre">RealVector</span></code>, <code class="docutils literal"><span class="pre">ComplexVector</span></code>, <code class="docutils literal"><span class="pre">VectorLikeFermion</span></code> and <code class="docutils literal"><span class="pre">MajoranaFermion</span></code>.</p>
+<p>If we wanted to integrate out the heavy <span class="math">\(\Xi\)</span> we would do first:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">heavy_Xi</span> <span class="o">=</span> <span class="n">RealScalar</span><span class="p">(</span><span class="s2">&quot;Xi&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now it is ready to be integrated out. Using the function <code class="docutils literal"><span class="pre">integrate</span></code>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">heavy_fields</span> <span class="o">=</span> <span class="p">[</span><span class="n">heavy_Xi1</span><span class="p">]</span>
+<span class="n">max_dim</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="n">effective_lagrangian</span> <span class="o">=</span> <span class="n">integrate</span><span class="p">(</span>
+    <span class="n">heavy_fields</span><span class="p">,</span> <span class="n">interaction_lagrangian</span><span class="p">,</span> <span class="n">max_dim</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal"><span class="pre">heavy_fields</span></code> is a list of objects of the classes for heavy fields and <code class="docutils literal"><span class="pre">max_dim</span></code> is the maximum dimension allowed for the operators in the effective lagrangian.</p>
+</div>
+<div class="section" id="id2">
+<h3>Transformations of the effective lagrangian<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>The results of the integration usually involve operators that aren&#8217;t independent. We can use rules to transform them and write the final result in a basis of the space of operators. A rule is a transformation to be applied to operators to obtain an equivalent operator sum.</p>
+<p>In our case, after the integration we get operators that contain <span class="math">\((\phi^\dagger\sigma^a\phi)(\phi^\dagger\sigma^a\phi)\)</span>. This product can be rewritten in terms of the operator <span class="math">\((\phi^\dagger\phi)^2\)</span>. To do this, we can use the <span class="math">\(SU(2)\)</span> Fierz identity:</p>
+<div class="math">
+\[\sigma^a_{ij}\sigma^a_{kl}=2\delta_{il}\delta_{kj}-\delta_{ij}\delta_{kl}.\]</div>
+<p>We can define a rule to transform everything that matches the left-hand side of the equality into the right-hand with the code:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">fierz_rule</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">Op</span><span class="p">(</span><span class="n">sigma</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="n">sigma</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">)),</span>
+    <span class="n">OpSum</span><span class="p">(</span><span class="n">number_op</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">Op</span><span class="p">(</span><span class="n">delta</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">),</span> <span class="n">delta</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">)),</span>
+          <span class="o">-</span><span class="n">Op</span><span class="p">(</span><span class="n">delta</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="n">delta</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">))))</span>
+</pre></div>
+</div>
+<p>Notice the use of the function <code class="docutils literal"><span class="pre">number_op</span></code>. To introduce a (complex) number <code class="docutils literal"><span class="pre">x</span></code> as a coefficient to an operator, the function <code class="docutils literal"><span class="pre">number_op</span></code> can be used as <code class="docutils literal"><span class="pre">number_op(x)</span> <span class="pre">*</span> <span class="pre">Op(...)</span></code>.</p>
+<p>Observe also the appearance of negative indices to represent free (not contracted) indpices. In a rule (given as a tuple with two elements), the free indices in the first element (the pattern) should be</p>
+<p>We should now define the basis of operators in which we want to express the effective lagrangian. We may use the function <code class="docutils literal"><span class="pre">tensor_op</span></code> to create operators with only one tensor inside them as:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Ophi</span> <span class="o">=</span> <span class="n">tensor_op</span><span class="p">(</span><span class="s2">&quot;Ophi&quot;</span><span class="p">)</span>
+<span class="n">Ophi4</span> <span class="o">=</span> <span class="n">tensor_op</span><span class="p">(</span><span class="s2">&quot;Ophi4&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and then use some rules to express them in terms of the fields and tensors that appear in the effective lagrangian:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">definition_rules</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="n">Op</span><span class="p">(</span><span class="n">phic</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">phi</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">phic</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">phi</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">phic</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">phi</span><span class="p">(</span><span class="mi">2</span><span class="p">)),</span>
+     <span class="n">OpSum</span><span class="p">(</span><span class="n">Ophi</span><span class="p">)),</span>
+    <span class="p">(</span><span class="n">Op</span><span class="p">(</span><span class="n">phic</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">phi</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">phic</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">phi</span><span class="p">(</span><span class="mi">1</span><span class="p">)),</span>
+     <span class="n">OpSum</span><span class="p">(</span><span class="n">Ophi4</span><span class="p">))]</span>
+</pre></div>
+</div>
+<p>To apply the Fierz identity to every operator until we get to the chosen basis, we do:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">rules</span> <span class="o">=</span> <span class="p">[</span><span class="n">fierz_rule</span><span class="p">]</span> <span class="o">+</span> <span class="n">definition_rules</span>
+<span class="n">final_op_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Ophi&quot;</span><span class="p">,</span> <span class="s2">&quot;Ophi4&quot;</span><span class="p">]</span>
+<span class="n">max_iterations</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">transf_eff_lag</span> <span class="o">=</span> <span class="n">apply_rules_until</span><span class="p">(</span>
+    <span class="n">effective_lagrangian</span><span class="p">,</span> <span class="n">rules</span><span class="p">,</span> <span class="n">final_op_names</span><span class="p">,</span> <span class="n">max_iterations</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="output">
+<h3>Output<a class="headerlink" href="#output" title="Permalink to this headline">¶</a></h3>
+<p>The class <code class="docutils literal"><span class="pre">Writer</span></code> can be used to represent the coefficients of the operators of a lagrangian as plain text and write it to a file:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">eff_lag_writer</span> <span class="o">=</span> <span class="n">Writer</span><span class="p">(</span><span class="n">trasnf_eff_lag</span><span class="p">,</span> <span class="n">final_op_names</span><span class="p">)</span>
+<span class="n">eff_lag_writer</span><span class="o">.</span><span class="n">write_text_file</span><span class="p">(</span><span class="s2">&quot;Xi_example&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>It can also to write a LaTeX file with the representation of these coefficients and export it to pdf to show it directly. For this to be done, we should define how the objects that we are using have to be represented in LaTeX code and the symbols we want to be used as indices (in this case empty, as no indices will appear in the coefficients):</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">latex_tensor_reps</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;kappa&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\kappa&quot;</span><span class="p">,</span> <span class="s2">&quot;lambda&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\lambda&quot;</span><span class="p">}</span>
+<span class="n">latex_op_reps</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Ophi&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathcal</span><span class="si">{O}</span><span class="s2">_{\phi}&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;Ophi4&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\mathcal</span><span class="si">{O}</span><span class="s2">_{\phi 4}&quot;</span><span class="p">}</span>
+
+<span class="n">latex_indices</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">eff_lag_writer</span><span class="o">.</span><span class="n">show_pdf</span><span class="p">(</span>
+    <span class="s2">&quot;Xi_example&quot;</span><span class="p">,</span> <span class="n">pdf_viewer</span><span class="p">,</span> <span class="n">latex_tensor_reps</span><span class="p">,</span>
+    <span class="n">latex_op_reps</span><span class="p">,</span> <span class="n">latex_indices</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Where <code class="docutils literal"><span class="pre">pdf_viewer</span></code> is the command-line name of a pdf viewer to show the result.</p>
+</div>
+</div>
+<div class="section" id="an-example-with-a-heavy-vector-and-a-heavy-fermion">
+<h2>An example with a heavy vector and a heavy fermion<a class="headerlink" href="#an-example-with-a-heavy-vector-and-a-heavy-fermion" title="Permalink to this headline">¶</a></h2>
+<p>Here we will illustrate more features of the library as the use of covariant derivatives, or the management of Lorentz and flavor indices.</p>
+<p>The model will now be the Standard Model coupled to a family of color-singlet vector <span class="math">\(\mathcal{L}^i_\mu\)</span> with representation <span class="math">\(2_{1/2}\)</span> under <span class="math">\(SU(2)\times U(1)\)</span> and another family of vector-like leptons <span class="math">\(E^i\)</span> with the same representation as the right-handed electron <span class="math">\(e_R\)</span> of the Standard Model. The interaction lagrangian will be:</p>
+<div class="math">
+\[ \begin{align}\begin{aligned}\mathcal{L}_{int} =
+    - \gamma_i \mathcal{L}_\mu^{\dagger i} D^\mu \phi
+    - \gamma_i (D^\mu\phi)^\dagger\mathcal{L}^i_\mu
+    - (\lambda^E_l)_{ij} \bar{E}^i_R \phi^\dagger l^j_L\\    - (\lambda^E_l)^*_{ij} \bar{l}^j_L \phi E^i_R
+    - z^E_{ijk} \bar{E}^i_{L} \mathcal{L}^{j\dagger}_\mu \gamma^\mu l^k_L
+    - z^{E*}_{ijk} \bar{l}^k_{L} \mathcal{L}^j_\mu \gamma^\mu E^i_L\end{aligned}\end{align} \]</div>
+<div class="section" id="id3">
+<h3>Creation of the model<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p>As before, we first create the tensors:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">gamma</span> <span class="o">=</span> <span class="n">TensorBuilder</span><span class="p">(</span><span class="s2">&quot;gamma&quot;</span><span class="p">)</span>
+<span class="n">gammac</span> <span class="o">=</span> <span class="n">TensorBuilder</span><span class="p">(</span><span class="s2">&quot;gammac&quot;</span><span class="p">)</span>
+
+<span class="n">lambdaEl</span> <span class="o">=</span> <span class="n">TensorBuilder</span><span class="p">(</span><span class="s2">&quot;lambdaElc&quot;</span><span class="p">)</span>
+<span class="n">lambdaElc</span> <span class="o">=</span> <span class="n">TensorBuilder</span><span class="p">(</span><span class="s2">&quot;lambdaElc&quot;</span><span class="p">)</span>
+
+<span class="n">zE</span> <span class="o">=</span> <span class="n">TensorBuilder</span><span class="p">(</span><span class="s2">&quot;zE&quot;</span><span class="p">)</span>
+<span class="n">zEc</span> <span class="o">=</span> <span class="n">TensorBuilder</span><span class="p">(</span><span class="s2">&quot;zEc&quot;</span><span class="p">)</span>
+
+<span class="n">sigmaSU2</span> <span class="o">=</span> <span class="n">TensorBuilder</span><span class="p">(</span><span class="s2">&quot;sigmaSU2&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and the fields:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">phi</span> <span class="o">=</span> <span class="n">TensorBuilder</span><span class="p">(</span><span class="s2">&quot;phi&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">boson</span><span class="p">)</span>
+<span class="n">phic</span> <span class="o">=</span> <span class="n">TensorBuilder</span><span class="p">(</span><span class="s2">&quot;phic&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">boson</span><span class="p">)</span>
+
+<span class="n">lL</span> <span class="o">=</span> <span class="n">TensorBuilder</span><span class="p">(</span><span class="s2">&quot;lL&quot;</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="n">fermion</span><span class="p">)</span>
+<span class="n">lLc</span> <span class="o">=</span> <span class="n">TensorBuilder</span><span class="p">(</span><span class="s2">&quot;lLc&quot;</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="n">fermion</span><span class="p">)</span>
+
+<span class="n">L</span> <span class="o">=</span> <span class="n">TensorBuilder</span><span class="p">(</span><span class="s2">&quot;L&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">boson</span><span class="p">)</span>
+<span class="n">Lc</span> <span class="o">=</span> <span class="n">TensorBuilder</span><span class="p">(</span><span class="s2">&quot;Lc&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">boson</span><span class="p">)</span>
+
+<span class="n">EL</span> <span class="o">=</span> <span class="n">TensorBuilder</span><span class="p">(</span><span class="s2">&quot;EL&quot;</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="n">fermion</span><span class="p">)</span>
+<span class="n">ER</span> <span class="o">=</span> <span class="n">TensorBuilder</span><span class="p">(</span><span class="s2">&quot;ER&quot;</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="n">fermion</span><span class="p">)</span>
+<span class="n">ELc</span> <span class="o">=</span> <span class="n">TensorBuilder</span><span class="p">(</span><span class="s2">&quot;ELc&quot;</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="n">fermion</span><span class="p">)</span>
+<span class="n">ERc</span> <span class="o">=</span> <span class="n">TensorBuilder</span><span class="p">(</span><span class="s2">&quot;ERc&quot;</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="n">fermion</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For every two-component spinor we need to define two fields: one is the conjugate of the other. Therefore, a Dirac spinor requires four <code class="docutils literal"><span class="pre">FieldBuider</span></code> definitions. The integration part of the library is prepared to deal with spinor in two-component formalism. The tensor builders <code class="docutils literal"><span class="pre">epsUp</span></code>, <code class="docutils literal"><span class="pre">epsUpDot</span></code>, <code class="docutils literal"><span class="pre">epsDown</span></code>, <code class="docutils literal"><span class="pre">epsDownDot</span></code>, <code class="docutils literal"><span class="pre">sigma4</span></code> and <code class="docutils literal"><span class="pre">sigma4bar</span></code>, corresponding to the tensors <span class="math">\(\epsilon^{\alpha\beta}\)</span>, <span class="math">\(\epsilon^{\dot{\alpha}\dot{\beta}}\)</span>, <span class="math">\(\epsilon_{\alpha\beta}\)</span>, <span class="math">\(\epsilon_{\dot{\alpha}\dot{\beta}}\)</span>, <span class="math">\(\sigma^\mu_{\alpha\dot{\beta}}\)</span> and <span class="math">\(\sigma_\mu^{\dot{\alpha}\beta}$\)</span> are already defined in the library.</p>
+<p>The next step now is defining the lagrangian. To introduce covariant derivatives of a tensor, the function <code class="docutils literal"><span class="pre">D</span></code> should be used. Its first argument is its Lorenz index and the second is the tensor for which the derivative is to be taken:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">interaction_lagrangian</span> <span class="o">=</span> <span class="o">-</span><span class="n">OpSum</span><span class="p">(</span>
+    <span class="n">Op</span><span class="p">(</span><span class="n">gamma</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">Lc</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">D</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">phi</span><span class="p">(</span><span class="mi">2</span><span class="p">))),</span>
+    <span class="n">Op</span><span class="p">(</span><span class="n">gammac</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">D</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">phic</span><span class="p">(</span><span class="mi">2</span><span class="p">)),</span> <span class="n">L</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span>
+
+    <span class="n">Op</span><span class="p">(</span><span class="n">lambdaEl</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">ERc</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">phic</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">lL</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span>
+    <span class="n">Op</span><span class="p">(</span><span class="n">lambdaElc</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">lLc</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">phi</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span> <span class="n">ER</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span>
+
+    <span class="n">Op</span><span class="p">(</span><span class="n">zE</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">ELc</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">Lc</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+       <span class="n">sigma4bar</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">lL</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span>
+    <span class="n">Op</span><span class="p">(</span><span class="n">zEc</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">lLc</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">L</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+       <span class="n">sigma4bar</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">EL</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id4">
+<h3>Integration<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<p>The heavy fields are:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">heavy_L</span> <span class="o">=</span> <span class="n">ComplexVector</span><span class="p">(</span><span class="s2">&quot;L&quot;</span><span class="p">,</span> <span class="s2">&quot;Lc&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">heavy_E</span> <span class="o">=</span> <span class="n">VectorLikeFermion</span><span class="p">(</span><span class="s2">&quot;E&quot;</span><span class="p">,</span> <span class="s2">&quot;EL&quot;</span><span class="p">,</span> <span class="s2">&quot;ER&quot;</span><span class="p">,</span> <span class="s2">&quot;ELc&quot;</span><span class="p">,</span> <span class="s2">&quot;ERc&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">heavy_fields</span> <span class="o">=</span> <span class="p">[</span><span class="n">heavy_L</span><span class="p">,</span> <span class="n">heavy_E</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>The first argument to the constructors of the real boson classes is the name of the corresponding field and the second argument is the number of indices this field carries. For the complex boson and Majorana fermion cases the first two arguments correspond, respectively, to the field and its conjugate, whereas the third one is the number of indices. For vector-like fermions, the args are, in order: the name of the fermion, the names of the fields representing its left-handed, right-handed, conjugate left-handed and conjugate right-handed parts, and the number of indices.</p>
+<p>To integrate them out to get an effective lagrangian with operators up to dimension 6, we do:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">effective_lagrangian</span> <span class="o">=</span> <span class="n">integrate</span><span class="p">(</span><span class="n">heavy_fields</span><span class="p">,</span> <span class="n">interaction_lagrangian</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id5">
+<h3>Transformations of the effective lagrangian<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<p>Let&#8217;s say we are interested in the mixed contribution of <span class="math">\(L_\mu\)</span> and <span class="math">\(E\)</span>. We can collect the corresponding terms using the fact that they will contain the masses of both heavy fields. The masses are automatically given the name <code class="docutils literal"><span class="pre">&quot;M{name}&quot;</span></code> where <code class="docutils literal"><span class="pre">{name}</span></code> is the name of the field:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">mixed_eff_lag</span> <span class="o">=</span> <span class="n">OpSum</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">op</span> <span class="k">for</span> <span class="n">op</span> <span class="ow">in</span> <span class="n">mixed_eff_lag</span><span class="o">.</span><span class="n">operators</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">contains_symbol</span><span class="p">(</span><span class="s2">&quot;ML&quot;</span><span class="p">)</span> <span class="ow">and</span>
+                            <span class="n">op</span><span class="o">.</span><span class="n">contains_symbol</span><span class="p">(</span><span class="s2">&quot;ME&quot;</span><span class="p">))])</span>
+</pre></div>
+</div>
+<p>The function <code class="docutils literal"><span class="pre">Operator.contains</span></code> checks whether the tensor name passed to it appears in the operator. Masses are represented by a special kind of tensor, a symbol. They are identified by their name beginning with <code class="docutils literal"><span class="pre">&quot;{&quot;</span></code>, ending with <code class="docutils literal"><span class="pre">&quot;}&quot;</span></code> and containing one <code class="docutils literal"><span class="pre">&quot;^&quot;</span></code>. This identifiers are used to tell the library to treat this tensor as some power of a constant and collect and multiply its ocurrences inside an operator. The equivalent to <code class="docutils literal"><span class="pre">Operator.contains</span></code> for symbols is <code class="docutils literal"><span class="pre">Operator.contains_symbol</span></code>, which we have used above.</p>
+<p>The operators corresponding to the mixed contributiones that appear after integration are <span class="math">\((\bar{l}^i_L \gamma^\mu D_\mu\phi)(\phi^\dagger l^j_L)\)</span> and it conjugate. Suppose that we want to write the final result in terms of the operators`</p>
+<div class="math">
+\[\left(\mathcal{O}^{(1)}_{\phi l}\right)_{ij} =
+\bar{l}^i_L \gamma^\mu l^j_L \phi^\dagger D_\mu \phi;
+\;\;\;\;\;\;
+\left(\mathcal{O}^{(3)}_{\phi l}\right)_{ij} =
+(\bar{l}^i_L \sigma^a \gamma^\mu l^j_L)
+(\phi^\dagger \sigma^a D_\mu \phi);\]</div>
+<p>and their complex conjugates. We would then use the identity</p>
+<div class="math">
+\[(\bar{l}^i_L \gamma^\mu D_\mu\phi)(\phi^\dagger l^j_L) =
+\frac{1}{2}\left(
+\bar{l}^i_L \gamma^\mu l^j_L \phi^\dagger D_\mu \phi
++(\bar{l}^i_L \sigma^a \gamma^\mu l^j_L)
+(\phi^\dagger \sigma^a D_\mu \phi)\right)\]</div>
+<p>We can substitute everything that matches the left-hand side by the right-hand side and the conjugate of the LHS by the conjugate of the RHS using the rules:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">rules</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="c1"># Pattern</span>
+     <span class="n">Op</span><span class="p">(</span><span class="n">lLc</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">sigma4bar</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">D</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">phi</span><span class="p">(</span><span class="mi">1</span><span class="p">)),</span>
+        <span class="n">phic</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">lL</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">)),</span>
+
+     <span class="c1"># Replacement</span>
+     <span class="n">OpSum</span><span class="p">(</span><span class="n">number_op</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">Op</span><span class="p">(</span><span class="n">lLc</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">sigma4bar</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+                               <span class="n">lL</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="n">phic</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">D</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">phi</span><span class="p">(</span><span class="mi">4</span><span class="p">))),</span>
+           <span class="n">number_op</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">Op</span><span class="p">(</span><span class="n">lLc</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">sigmaSU2</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+                               <span class="n">sigma4bar</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">lL</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span>
+                               <span class="n">phic</span><span class="p">(</span><span class="mi">7</span><span class="p">),</span> <span class="n">sigmaSU2</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
+                               <span class="n">D</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">phi</span><span class="p">(</span><span class="mi">8</span><span class="p">))))),</span>
+
+    <span class="p">(</span><span class="c1"># Pattern</span>
+     <span class="n">Op</span><span class="p">(</span><span class="n">lLc</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">sigma4bar</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">phi</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">D</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">phic</span><span class="p">(</span><span class="mi">4</span><span class="p">)),</span> <span class="n">lL</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">)),</span>
+
+     <span class="c1"># Replacement</span>
+     <span class="n">OpSum</span><span class="p">(</span><span class="n">number_op</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">Op</span><span class="p">(</span><span class="n">lLc</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">sigma4bar</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+                               <span class="n">lL</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="n">D</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">phic</span><span class="p">(</span><span class="mi">4</span><span class="p">)),</span> <span class="n">phi</span><span class="p">(</span><span class="mi">4</span><span class="p">)),</span>
+           <span class="n">number_op</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">Op</span><span class="p">(</span><span class="n">lLc</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">sigmaSU2</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+                               <span class="n">sigma4bar</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">lL</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span>
+                               <span class="n">D</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">phic</span><span class="p">(</span><span class="mi">7</span><span class="p">)),</span> <span class="n">sigmaSU2</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
+                               <span class="n">phi</span><span class="p">(</span><span class="mi">8</span><span class="p">))))]</span>
+</pre></div>
+</div>
+<p>We now have to define the basis of operators in which we want the final lagrangian written. We use the function <code class="docutils literal"><span class="pre">flavor_op</span></code> to create a callable such that, when called with several arguments, it returns an operator with a single tensor whose indices are the arguments given:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">O1phil</span> <span class="o">=</span> <span class="n">flavor_op</span><span class="p">(</span><span class="s2">&quot;O1phil&quot;</span><span class="p">)</span>
+<span class="n">O1philc</span> <span class="o">=</span> <span class="n">flavor_op</span><span class="p">(</span><span class="s2">&quot;O1philc&quot;</span><span class="p">)</span>
+<span class="n">O3phil</span> <span class="o">=</span> <span class="n">flavor_op</span><span class="p">(</span><span class="s2">&quot;O3phil&quot;</span><span class="p">)</span>
+<span class="n">O3philc</span> <span class="o">=</span> <span class="n">flavor_op</span><span class="p">(</span><span class="s2">&quot;O3philc&quot;</span><span class="p">)</span>
+
+<span class="n">definition_rules</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="n">Op</span><span class="p">(</span><span class="n">lLc</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">sigma4bar</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="n">lL</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="n">phic</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">D</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">phi</span><span class="p">(</span><span class="mi">4</span><span class="p">))),</span>
+     <span class="n">OpSum</span><span class="p">(</span><span class="n">O1phil</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">))),</span>
+
+    <span class="p">(</span><span class="n">Op</span><span class="p">(</span><span class="n">lLc</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">sigma4bar</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="n">lL</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="n">D</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">phic</span><span class="p">(</span><span class="mi">4</span><span class="p">)),</span> <span class="n">phi</span><span class="p">(</span><span class="mi">4</span><span class="p">)),</span>
+     <span class="n">OpSum</span><span class="p">(</span><span class="n">O1philc</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">))),</span>
+
+    <span class="p">(</span><span class="n">Op</span><span class="p">(</span><span class="n">lLc</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">sigmaSU2</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="n">sigma4bar</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">lL</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span>
+        <span class="n">phic</span><span class="p">(</span><span class="mi">7</span><span class="p">),</span> <span class="n">sigmaSU2</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">D</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">phi</span><span class="p">(</span><span class="mi">8</span><span class="p">))),</span>
+     <span class="n">OpSum</span><span class="p">(</span><span class="n">O3phil</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">))),</span>
+
+    <span class="p">(</span><span class="n">Op</span><span class="p">(</span><span class="n">lLc</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">sigmaSU2</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="n">sigma4bar</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">lL</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span>
+        <span class="n">D</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">phic</span><span class="p">(</span><span class="mi">7</span><span class="p">)),</span> <span class="n">sigmaSU2</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">phi</span><span class="p">(</span><span class="mi">8</span><span class="p">))</span>
+     <span class="n">OpSum</span><span class="p">(</span><span class="n">O3philc</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">)))]</span>
+</pre></div>
+</div>
+<p>Finally, we just call <code class="docutils literal"><span class="pre">apply_rules_until</span></code> to move the operators the desired base:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">all_rules</span> <span class="o">=</span> <span class="n">rules</span> <span class="o">+</span> <span class="n">definition_rules</span>
+<span class="n">final_op_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;O1phil&quot;</span><span class="p">,</span> <span class="s2">&quot;O1philc&quot;</span><span class="p">,</span> <span class="s2">&quot;O3phil&quot;</span><span class="p">,</span> <span class="s2">&quot;O3philc&quot;</span><span class="p">]</span>
+<span class="n">transf_eff_lag</span> <span class="o">=</span> <span class="n">apply_rules_until</span><span class="p">(</span>
+    <span class="n">effective_lagrangian</span><span class="p">,</span> <span class="n">all_rules</span><span class="p">,</span> <span class="n">final_op_names</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id6">
+<h3>Output<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h3>
+<p>We can do as in the previous example to write a text file with the results:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">eff_lag_writer</span> <span class="o">=</span> <span class="n">Writer</span><span class="p">(</span><span class="n">trasnf_eff_lag</span><span class="p">,</span> <span class="n">final_op_names</span><span class="p">)</span>
+<span class="n">eff_lag_writer</span><span class="o">.</span><span class="n">write_text_file</span><span class="p">(</span><span class="s2">&quot;L_E_example&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now let&#8217;s specify the LaTeX representation. When there&#8217;s indices in the tensors we should give the positions where they should appear by using the <code class="docutils literal"><span class="pre">str.format</span></code> -style <code class="docutils literal"><span class="pre">&quot;{}&quot;</span></code> placeholders:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">latex_tensor_reps</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;gamma&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\gamma_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;gammac&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;\gamma^*_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;lambdaEl&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;(\lambda^E_l)_{{</span><span class="si">{}{}</span><span class="s2">}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;lambdaElc&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;(\lambda^E_l)^*_{{</span><span class="si">{}{}</span><span class="s2">}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;zE&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;z^E_{{</span><span class="si">{}{}{}</span><span class="s2">}}&quot;</span>
+    <span class="s2">&quot;zEc&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;z^{{E*}}_{{</span><span class="si">{}{}{}</span><span class="s2">}}&quot;</span><span class="p">}</span>
+
+<span class="n">latex_op_reps</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;O1phil&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;(\mathcal{{O}}^{{(1)}}_{{\phi l}})_{{</span><span class="si">{}{}</span><span class="s2">}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;O1philc&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;(\mathcal{{O}}^{{(1)}}^*_{{\phi l}})_{{</span><span class="si">{}{}</span><span class="s2">}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;O3phil&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;(\mathcal{{O}}^{{(3)}}_{{\phi l}})_{{</span><span class="si">{}{}</span><span class="s2">}}&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;O3philc&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;(\mathcal{{O}}^{{(3)}}^*_{{\phi l}})_{{</span><span class="si">{}{}</span><span class="s2">}}&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Then we are ready to show the pdf:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">latex_indices</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;i&quot;</span><span class="p">,</span> <span class="s2">&quot;j&quot;</span><span class="p">,</span> <span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="s2">&quot;l&quot;</span><span class="p">,</span> <span class="s2">&quot;m&quot;</span><span class="p">,</span> <span class="s2">&quot;n&quot;</span><span class="p">]</span>
+<span class="n">eff_lag_writer</span><span class="o">.</span><span class="n">show_pdf</span><span class="p">(</span>
+    <span class="s2">&quot;L_E_example&quot;</span><span class="p">,</span> <span class="n">pdf_viewer</span><span class="p">,</span> <span class="n">latex_tensor_reps</span><span class="p">,</span>
+    <span class="n">latex_op_reps</span><span class="p">,</span> <span class="n">latex_indices</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Tutorial</a><ul>
+<li><a class="reference internal" href="#creation-of-models">Creation of models</a><ul>
+<li><a class="reference internal" href="#creation-of-tensors">Creation of tensors</a></li>
+<li><a class="reference internal" href="#creation-of-fields">Creation of fields</a></li>
+<li><a class="reference internal" href="#definition-of-the-lagrangian">Definition of the lagrangian</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#integration">Integration</a></li>
+<li><a class="reference internal" href="#transformations-of-the-effective-lagrangian">Transformations of the effective lagrangian</a></li>
+<li><a class="reference internal" href="#output-of-the-results">Output of the results</a></li>
+<li><a class="reference internal" href="#a-simple-example">A simple example</a><ul>
+<li><a class="reference internal" href="#creation-of-the-model">Creation of the model</a></li>
+<li><a class="reference internal" href="#id1">Integration</a></li>
+<li><a class="reference internal" href="#id2">Transformations of the effective lagrangian</a></li>
+<li><a class="reference internal" href="#output">Output</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#an-example-with-a-heavy-vector-and-a-heavy-fermion">An example with a heavy vector and a heavy fermion</a><ul>
+<li><a class="reference internal" href="#id3">Creation of the model</a></li>
+<li><a class="reference internal" href="#id4">Integration</a></li>
+<li><a class="reference internal" href="#id5">Transformations of the effective lagrangian</a></li>
+<li><a class="reference internal" href="#id6">Output</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to efttools&#8217;s documentation!</a></li>
+      <li>Next: <a href="moddoc.html" title="next chapter">Modules documentation</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/tutorial.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Juan Carlos Criado Alamo.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/tutorial.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

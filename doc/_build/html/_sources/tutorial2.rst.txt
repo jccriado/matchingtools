@@ -1,0 +1,17 @@
+`efttools` revolves around the manipulation of tensors, which are objects
+of the class :class:`efttools.algebra.Tensor`. Every kind of object that appears
+inside a lagrangian including fields, coupling constants, structure constants,
+numeric coefficients and masses can be represented by an instance of this class.
+
+.. autoclass:: efttools.algebra.Tensor
+
+Direct usage of the ``Tensor`` constructor obscures the code. Two classes
+are defined to make the process of creating tensors easier and cleaner,
+:class:`efttools.algebra.TensorBuilder` and
+:class:`efttools.algebra.FieldBuilder`.
+
+.. autoclass:: efttools.algebra.TensorBuilder
+   :members: __call__
+
+.. autoclass:: efttools.algebra.FieldBuilder
+   :members: __call__

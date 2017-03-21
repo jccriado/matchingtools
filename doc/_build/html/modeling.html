@@ -1,0 +1,205 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Creation of models &#8212; efttools  documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="The operators module" href="operators.html" />
+    <link rel="prev" title="Tutorial" href="tutorial.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="creation-of-models">
+<h1>Creation of models<a class="headerlink" href="#creation-of-models" title="Permalink to this headline">¶</a></h1>
+<p>The construction of a model is done in two steps: the creation of the
+tensors and fields and the definition of the interaction lagrangian.</p>
+<p>The basic building block for a lagrangian is tensor, an object of the
+class <a class="reference internal" href="operators.html#efttools.operators.Tensor" title="efttools.operators.Tensor"><code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code></a>. Direct usage of the <code class="docutils literal"><span class="pre">Tensor</span></code>
+constructor obscures the code. There are two classes defined to make the
+process of creating tensors easier and cleaner,
+<a class="reference internal" href="operators.html#efttools.operators.TensorBuilder" title="efttools.operators.TensorBuilder"><code class="xref py py-class docutils literal"><span class="pre">TensorBuilder</span></code></a> and
+<a class="reference internal" href="operators.html#efttools.operators.FieldBuilder" title="efttools.operators.FieldBuilder"><code class="xref py py-class docutils literal"><span class="pre">FieldBuilder</span></code></a>.</p>
+<p>When a field has covariant derivatives applied to it, that is
+represented internally in the attributes of its representative
+<code class="docutils literal"><span class="pre">Tensor</span></code> object. For aesthetical reasons and easeness of usage,
+instead of manually modifying the attributes, it&#8217;s better to use
+the function <a class="reference internal" href="operators.html#efttools.operators.D" title="efttools.operators.D"><code class="xref py py-class docutils literal"><span class="pre">D</span></code></a> to create covariant
+derivatives of fields.</p>
+<p><code class="docutils literal"><span class="pre">efttools</span></code> handles lagrangians that are polynomials of the fields.
+They are thus a sum of terms that are products of tensors. They are
+represented as <a class="reference internal" href="operators.html#efttools.operators.OperatorSum" title="efttools.operators.OperatorSum"><code class="xref py py-class docutils literal"><span class="pre">OperatorSum</span></code></a> objects, with only one
+attribute: a list of its terms. Each term should be an operator, that is,
+a product of tensors represented by an <a class="reference internal" href="operators.html#efttools.operators.Operator" title="efttools.operators.Operator"><code class="xref py py-class docutils literal"><span class="pre">Operator</span></code></a>
+object with only one attribute: a list of its factors.</p>
+<p>Instead of using the constructors for both classes, the functions
+<a class="reference internal" href="operators.html#efttools.operators.OpSum" title="efttools.operators.OpSum"><code class="xref py py-class docutils literal"><span class="pre">OpSum</span></code></a> and <a class="reference internal" href="operators.html#efttools.operators.Op" title="efttools.operators.Op"><code class="xref py py-class docutils literal"><span class="pre">Op</span></code></a> are
+available to make the definitions clearer.</p>
+<p><code class="docutils literal"><span class="pre">efttools</span></code> treats in a special way tensors whose name starts and
+ends with square or curly brakets. A tensor name enclosed in square
+brakets is understood as a (complex) number to be read from the name
+using <code class="docutils literal"><span class="pre">float(name[1:-1])</span></code>. The function <a class="reference internal" href="operators.html#efttools.operators.number_op" title="efttools.operators.number_op"><code class="xref py py-func docutils literal"><span class="pre">number_op()</span></code></a>
+is to be used to create operators with such tensors inside.</p>
+<p>When the name of a tensor starts and ends with curly brakets it&#8217;s
+understood that it represents some constant that appears exponentiated.
+The name should be of the form <code class="docutils literal"><span class="pre">&quot;{base^exponent}&quot;</span></code> curly brakets
+allow for the summation of the exponents of tensors that appear in
+the same tensor and have the same base and indices. This is used
+mainly to produce more readable results. The function designed to
+create operators containing such tensors is <a class="reference internal" href="operators.html#efttools.operators.symbol_op" title="efttools.operators.symbol_op"><code class="xref py py-func docutils literal"><span class="pre">symbol_op()</span></code></a>.</p>
+<div class="section" id="creation-of-tensors">
+<h2>Creation of tensors<a class="headerlink" href="#creation-of-tensors" title="Permalink to this headline">¶</a></h2>
+<p>Create a tensor as:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">my_tensor</span> <span class="o">=</span> <span class="n">TensorBuilder</span><span class="p">(</span><span class="s2">&quot;my_tensor&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and then use it inside an operator:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Op</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">my_tensor</span><span class="p">(</span><span class="n">ind1</span><span class="p">,</span> <span class="n">ind2</span><span class="p">,</span> <span class="o">...</span><span class="p">),</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>with <code class="docutils literal"><span class="pre">ind1</span></code>, <code class="docutils literal"><span class="pre">ind2</span></code>, ... being integers.</p>
+</div>
+<div class="section" id="creation-of-fields">
+<h2>Creation of fields<a class="headerlink" href="#creation-of-fields" title="Permalink to this headline">¶</a></h2>
+<p>Create a field as:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">my_field</span> <span class="o">=</span> <span class="n">FieldBuilder</span><span class="p">(</span><span class="s2">&quot;my_field&quot;</span><span class="p">,</span> <span class="n">dimension</span><span class="p">,</span> <span class="n">statistics</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where dimension (float) represents the energy dimensions of the field
+and statistics is either equal to efttools.algebra.boson or
+efttools.algebra.fermion. Then use it inside an operator:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Op</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">my_field</span><span class="p">(</span><span class="n">ind1</span><span class="p">,</span> <span class="n">ind2</span><span class="p">,</span> <span class="o">...</span><span class="p">),</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>with <code class="docutils literal"><span class="pre">ind1</span></code>, <code class="docutils literal"><span class="pre">ind2</span></code>, ... being integers.</p>
+</div>
+<div class="section" id="definition-of-the-lagrangian">
+<h2>Definition of the lagrangian<a class="headerlink" href="#definition-of-the-lagrangian" title="Permalink to this headline">¶</a></h2>
+<p>Define the interaction lagrangian as an operator sum:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">int_lag</span> <span class="o">=</span> <span class="n">OpSum</span><span class="p">(</span><span class="n">op1</span><span class="p">,</span> <span class="n">op2</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Each argument to the function <code class="docutils literal"><span class="pre">OpSum</span></code> should be an operator defined as:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">op1</span> <span class="o">=</span> <span class="n">Op</span><span class="p">(</span><span class="n">tens1</span><span class="p">(</span><span class="n">ind1</span><span class="p">,</span> <span class="n">ind2</span><span class="p">,</span> <span class="o">...</span><span class="p">),</span> <span class="n">field1</span><span class="p">(</span><span class="n">ind3</span><span class="p">,</span> <span class="n">ind4</span><span class="p">,</span> <span class="o">...</span><span class="p">),</span> <span class="o">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The arguments of the function <code class="docutils literal"><span class="pre">Op</span></code> are tensors (and fields). Their
+indices are integer numbers. Nevative integers are reserved for free
+indices. Free indices are not meant to be used in the operators
+appearing in the lagrangian, but later in the definition of its
+transformations.</p>
+<p>Non-negative integers represent contracted indices. Contraction
+is expressed by repetition of indices.</p>
+<p>To introduce the covariant derivative with index <code class="docutils literal"><span class="pre">ind</span></code> of a tensor
+<code class="docutils literal"><span class="pre">tens</span></code> inside an operator, use the function <code class="docutils literal"><span class="pre">D</span></code> in the following way:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">D</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">tens</span><span class="p">(</span><span class="n">ind1</span><span class="p">,</span> <span class="n">ind2</span><span class="p">,</span> <span class="o">...</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>If a numeric coefficient <code class="docutils literal"><span class="pre">num</span></code> is needed for some operator <code class="docutils literal"><span class="pre">op</span></code>
+it can be introduced as:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">number_op</span><span class="p">(</span><span class="n">num</span><span class="p">)</span> <span class="o">*</span> <span class="n">op</span>
+</pre></div>
+</div>
+<p>A symbolic constant <code class="docutils literal"><span class="pre">s</span></code> to some power <code class="docutils literal"><span class="pre">p</span></code> can multiply an operator as:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">symbol_op</span><span class="p">(</span><span class="s2">&quot;s&quot;</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> <span class="o">*</span> <span class="n">op</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Creation of models</a><ul>
+<li><a class="reference internal" href="#creation-of-tensors">Creation of tensors</a></li>
+<li><a class="reference internal" href="#creation-of-fields">Creation of fields</a></li>
+<li><a class="reference internal" href="#definition-of-the-lagrangian">Definition of the lagrangian</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="tutorial.html" title="previous chapter">Tutorial</a></li>
+      <li>Next: <a href="operators.html" title="next chapter">The <code class="docutils literal"><span class="pre">operators</span></code> module</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/modeling.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Juan Carlos Criado Alamo.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/modeling.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,983 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Modules documentation &#8212; efttools  documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Tutorial" href="tutorial.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="modules-documentation">
+<h1>Modules documentation<a class="headerlink" href="#modules-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-efttools.operators">
+<span id="the-operators-module"></span><h2>The <code class="docutils literal"><span class="pre">operators</span></code> module<a class="headerlink" href="#module-efttools.operators" title="Permalink to this headline">¶</a></h2>
+<p>Core module with the definitions of the basic building blocks: the
+classes <a class="reference internal" href="#efttools.operators.Tensor" title="efttools.operators.Tensor"><code class="xref py py-class docutils literal"><span class="pre">Tensor</span></code></a>, <a class="reference internal" href="#efttools.operators.Operator" title="efttools.operators.Operator"><code class="xref py py-class docutils literal"><span class="pre">Operator</span></code></a>, and <a class="reference internal" href="#efttools.operators.OperatorSum" title="efttools.operators.OperatorSum"><code class="xref py py-class docutils literal"><span class="pre">OperatorSum</span></code></a>.
+Implements the Leibniz rule for derivatives and the algorithms for
+matching and replacing as well as functional derivatives.</p>
+<p>Defines interfaces for the creation of tensors, fields, operators and
+operator sums: <a class="reference internal" href="#efttools.operators.TensorBuilder" title="efttools.operators.TensorBuilder"><code class="xref py py-class docutils literal"><span class="pre">TensorBuilder</span></code></a>, <a class="reference internal" href="#efttools.operators.FieldBuilder" title="efttools.operators.FieldBuilder"><code class="xref py py-class docutils literal"><span class="pre">FieldBuilder</span></code></a>,
+<a class="reference internal" href="#efttools.operators.Op" title="efttools.operators.Op"><code class="xref py py-func docutils literal"><span class="pre">Op()</span></code></a> and <a class="reference internal" href="#efttools.operators.OpSum" title="efttools.operators.OpSum"><code class="xref py py-func docutils literal"><span class="pre">OpSum()</span></code></a>; the interface for creating derivatives
+of single tensors: the function <a class="reference internal" href="#efttools.operators.D" title="efttools.operators.D"><code class="xref py py-func docutils literal"><span class="pre">D()</span></code></a>; and interfaces for creating
+special single-tensor associated to (complex) numbers and powers of
+constants.</p>
+<p>Defines the Lorentz tensors <a class="reference internal" href="#efttools.operators.epsUp" title="efttools.operators.epsUp"><code class="xref py py-data docutils literal"><span class="pre">epsUp</span></code></a>, <a class="reference internal" href="#efttools.operators.epsUpDot" title="efttools.operators.epsUpDot"><code class="xref py py-data docutils literal"><span class="pre">epsUpDot</span></code></a>,
+<a class="reference internal" href="#efttools.operators.epsDown" title="efttools.operators.epsDown"><code class="xref py py-data docutils literal"><span class="pre">epsDown</span></code></a>, <a class="reference internal" href="#efttools.operators.epsDownDot" title="efttools.operators.epsDownDot"><code class="xref py py-data docutils literal"><span class="pre">epsDownDot</span></code></a>, <a class="reference internal" href="#efttools.operators.sigma4" title="efttools.operators.sigma4"><code class="xref py py-data docutils literal"><span class="pre">sigma4</span></code></a> and
+<a class="reference internal" href="#efttools.operators.sigma4bar" title="efttools.operators.sigma4bar"><code class="xref py py-data docutils literal"><span class="pre">sigma4bar</span></code></a>.</p>
+<dl class="class">
+<dt id="efttools.operators.Tensor">
+<em class="property">class </em><code class="descclassname">efttools.operators.</code><code class="descname">Tensor</code><span class="sig-paren">(</span><em>name</em>, <em>indices</em>, <em>is_field=False</em>, <em>num_of_der=0</em>, <em>dimension=0</em>, <em>statistics=True</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.operators.Tensor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Basic building block for operators.</p>
+<p>A tensor might have some derivatives applied to it. The
+indices correponding to the derivatives are given by the first
+indices in the list of indices of the Tensor.</p>
+<dl class="attribute">
+<dt id="efttools.operators.Tensor.name">
+<code class="descname">name</code><a class="headerlink" href="#efttools.operators.Tensor.name" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>string</em> &#8211; identifier</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="efttools.operators.Tensor.indices">
+<code class="descname">indices</code><a class="headerlink" href="#efttools.operators.Tensor.indices" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>list of ints</em> &#8211; indices of the tensor and the
+derivaties applied to it</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="efttools.operators.Tensor.is_field">
+<code class="descname">is_field</code><a class="headerlink" href="#efttools.operators.Tensor.is_field" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> &#8211; specifies whether it is non-constant</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="efttools.operators.Tensor.num_of_der">
+<code class="descname">num_of_der</code><a class="headerlink" href="#efttools.operators.Tensor.num_of_der" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; number of derivatives acting</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="efttools.operators.Tensor.dimension">
+<code class="descname">dimension</code><a class="headerlink" href="#efttools.operators.Tensor.dimension" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; energy dimensions</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="efttools.operators.Tensor.statistics">
+<code class="descname">statistics</code><a class="headerlink" href="#efttools.operators.Tensor.statistics" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> &#8211; True for bosons and False for fermions</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="efttools.operators.Operator">
+<em class="property">class </em><code class="descclassname">efttools.operators.</code><code class="descname">Operator</code><span class="sig-paren">(</span><em>tensors</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.operators.Operator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Container for a list of tensors with their indices contracted.</p>
+<p>Indices repeated in different tensors mean contraction. Contracted
+indices should be positive. Negative indices represent free indices
+and should appear in order: -1, -2, ...</p>
+<p>The methods include the basic derivation, matching and replacing
+operations, as well as the implementation of functional derivatives.</p>
+<dl class="attribute">
+<dt id="efttools.operators.Operator.tensors">
+<code class="descname">tensors</code><a class="headerlink" href="#efttools.operators.Operator.tensors" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>[Tensor]</em> &#8211; list of the tensors contained</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="efttools.operators.Operator.variation">
+<code class="descname">variation</code><span class="sig-paren">(</span><em>field_name</em>, <em>statistics</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.operators.Operator.variation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take functional derivative of the spacetime integral of self:</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>field_name</strong> (<em>string</em>) &#8211; the name of the field with respect to
+which the functional derivative is taken</li>
+<li><strong>statistics</strong> (<em>bool</em>) &#8211; statistics of the field</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="efttools.operators.Operator.replace_first">
+<code class="descname">replace_first</code><span class="sig-paren">(</span><em>field_name</em>, <em>operator_sum</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.operators.Operator.replace_first" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replace the first ocurrence of a field.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>field_name</strong> (<em>string</em>) &#8211; name of the field to be replaced</li>
+<li><strong>operator_sum</strong> (<a class="reference internal" href="#efttools.operators.OperatorSum" title="efttools.operators.OperatorSum"><em>OperatorSum</em></a>) &#8211; replacement</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">An OperatorSum resulting from replacing the first ocurrence of
+the field by its replacement</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="efttools.operators.Operator.replace_all">
+<code class="descname">replace_all</code><span class="sig-paren">(</span><em>substitutions</em>, <em>max_dim</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.operators.Operator.replace_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replace all ocurrences of several fields.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>substitutions</strong> (<em></em><em>[</em><em></em><em>(</em><em>string</em><em>, </em><a class="reference internal" href="#efttools.operators.OperatorSum" title="efttools.operators.OperatorSum"><em>OperatorSum</em></a><em>)</em><em></em><em>]</em><em></em>) &#8211; list of pairs with the first element of the pair being the
+name of a field to be replaced and the second being the
+replacement.</li>
+<li><strong>max_dim</strong> (<em>int</em>) &#8211; maximum dimension of the operators in the result</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">An OperatorSum resulting from replacing every ocurrence of the
+fields by their replacements</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="efttools.operators.Operator.match_first">
+<code class="descname">match_first</code><span class="sig-paren">(</span><em>pattern</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.operators.Operator.match_first" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match the first ocurrence of a pattern</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pattern</strong> (<code class="docutils literal"><span class="pre">Operator</span></code>) &#8211; contains the tensors and index structure
+to be matched</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>if the matching succeeds, an Operator with the first occurrence</dt>
+<dd>of the pattern substituted by a &#8220;generic&#8221; tensor (with a sign
+change if needed); None otherwise</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="efttools.operators.Operator.__eq__">
+<code class="descname">__eq__</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.operators.Operator.__eq__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match self with other operator. All tensors and index contractions
+should match. No sign differences allowed. All free indices should
+be equal.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="efttools.operators.OperatorSum">
+<em class="property">class </em><code class="descclassname">efttools.operators.</code><code class="descname">OperatorSum</code><span class="sig-paren">(</span><em>operators=None</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.operators.OperatorSum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Container for lists of operators representing their sum.</p>
+<p>The methods perform the basic operations defined for operators
+generalized for sums of them</p>
+<dl class="attribute">
+<dt id="efttools.operators.OperatorSum.operators">
+<code class="descname">operators</code><a class="headerlink" href="#efttools.operators.OperatorSum.operators" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>[Operator]</em> &#8211; the operators whose sum is represented</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="efttools.operators.OperatorSum.variation">
+<code class="descname">variation</code><span class="sig-paren">(</span><em>field_name</em>, <em>statistics</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.operators.OperatorSum.variation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take functional derivative of the spacetime integral of self.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>field_name</strong> (<em>string</em>) &#8211; the name of the field with respect to
+which the functional derivative is taken</li>
+<li><strong>statistics</strong> (<em>bool</em>) &#8211; statistics of the field</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="efttools.operators.OperatorSum.replace_all">
+<code class="descname">replace_all</code><span class="sig-paren">(</span><em>substitutions</em>, <em>max_dim</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.operators.OperatorSum.replace_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replace all ocurrences of several fields.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>substitutions</strong> (<em></em><em>[</em><em></em><em>(</em><em>string</em><em>, </em><a class="reference internal" href="#efttools.operators.OperatorSum" title="efttools.operators.OperatorSum"><em>OperatorSum</em></a><em>)</em><em></em><em>]</em><em></em>) &#8211; list of pairs with the first element of the pair being the
+name of a field to be replaced and the second being the
+replacement.</li>
+<li><strong>max_dim</strong> (<em>int</em>) &#8211; maximum dimension of the operators in the result</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">An OperatorSum resulting from replacing every ocurrence of the
+fields by their replacements</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="efttools.operators.TensorBuilder">
+<em class="property">class </em><code class="descclassname">efttools.operators.</code><code class="descname">TensorBuilder</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.operators.TensorBuilder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interface for the creation of constant tensors.</p>
+<dl class="attribute">
+<dt id="efttools.operators.TensorBuilder.name">
+<code class="descname">name</code><a class="headerlink" href="#efttools.operators.TensorBuilder.name" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>string</em> &#8211; the <code class="docutils literal"><span class="pre">name</span></code> attribute of the tensors to be created</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="efttools.operators.TensorBuilder.__call__">
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>*indices</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.operators.TensorBuilder.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a Tensor object with the given indices and
+the following attributes: <code class="docutils literal"><span class="pre">is_field</span> <span class="pre">=</span> <span class="pre">False</span></code>,
+<code class="docutils literal"><span class="pre">num_of_der</span> <span class="pre">=</span> <span class="pre">0</span></code>, <code class="docutils literal"><span class="pre">dimension</span> <span class="pre">=</span> <span class="pre">0</span></code>, <code class="docutils literal"><span class="pre">statistics</span> <span class="pre">=</span> <span class="pre">boson</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="efttools.operators.FieldBuilder">
+<em class="property">class </em><code class="descclassname">efttools.operators.</code><code class="descname">FieldBuilder</code><span class="sig-paren">(</span><em>name</em>, <em>dimension</em>, <em>statistics</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.operators.FieldBuilder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interface for the creation of fields.</p>
+<dl class="attribute">
+<dt id="efttools.operators.FieldBuilder.name">
+<code class="descname">name</code><a class="headerlink" href="#efttools.operators.FieldBuilder.name" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>string</em> &#8211; identifier of the fields to be created</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="efttools.operators.FieldBuilder.dimension">
+<code class="descname">dimension</code><a class="headerlink" href="#efttools.operators.FieldBuilder.dimension" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; energy dimensions of the fields to be created</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="efttools.operators.FieldBuilder.statistics">
+<code class="descname">statistics</code><a class="headerlink" href="#efttools.operators.FieldBuilder.statistics" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>bool</em> &#8211; statistics of the fields to be created</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="efttools.operators.FieldBuilder.__call__">
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>*indices</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.operators.FieldBuilder.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a Tensor object with the given indices and
+the following attributes: <code class="docutils literal"><span class="pre">is_field</span> <span class="pre">=</span> <span class="pre">True</span></code>,
+<code class="docutils literal"><span class="pre">num_of_der</span> <span class="pre">=</span> <span class="pre">0</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="efttools.operators.D">
+<code class="descclassname">efttools.operators.</code><code class="descname">D</code><span class="sig-paren">(</span><em>index</em>, <em>tensor</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.operators.D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interface for the creation of tensors with derivatives applied.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="efttools.operators.D_op">
+<code class="descclassname">efttools.operators.</code><code class="descname">D_op</code><span class="sig-paren">(</span><em>index</em>, <em>*tensors</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.operators.D_op" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interface for the creation of operator sums of obtained from
+de application of derivatives to producs of tensors.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="efttools.operators.Op">
+<code class="descclassname">efttools.operators.</code><code class="descname">Op</code><span class="sig-paren">(</span><em>*tensors</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.operators.Op" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interface for the creation of operators</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="efttools.operators.OpSum">
+<code class="descclassname">efttools.operators.</code><code class="descname">OpSum</code><span class="sig-paren">(</span><em>*operators</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.operators.OpSum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interface for the creation of operator sums</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="efttools.operators.number_op">
+<code class="descclassname">efttools.operators.</code><code class="descname">number_op</code><span class="sig-paren">(</span><em>number</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.operators.number_op" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an operator correponding to a number.</p>
+<p>Square brackets around the name of a tensor mean that it should be
+treated as a (complex) number.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="efttools.operators.symbol_op">
+<code class="descclassname">efttools.operators.</code><code class="descname">symbol_op</code><span class="sig-paren">(</span><em>symbol</em>, <em>exponent</em>, <em>indices=None</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.operators.symbol_op" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an operator corresponding to a tensor exponentiated to some power.</p>
+<p>Curly braces around the name of a tensor mean that what&#8217;s inside is of
+the form &#8220;base^exponent&#8221; and that it may be collected together with
+others with the same base and indices, adding the exponents.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="efttools.operators.tensor_op">
+<code class="descclassname">efttools.operators.</code><code class="descname">tensor_op</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.operators.tensor_op" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="efttools.operators.flavor_tensor_op">
+<code class="descclassname">efttools.operators.</code><code class="descname">flavor_tensor_op</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.operators.flavor_tensor_op" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interface for the creation of one-tensor operators with indices</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="efttools.operators.kdelta">
+<code class="descclassname">efttools.operators.</code><code class="descname">kdelta</code><em class="property"> = &lt;efttools.operators.TensorBuilder object&gt;</em><a class="headerlink" href="#efttools.operators.kdelta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Kronecker delta. To be replaced by the correponding
+index contraction appearing instead (module transformations).</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="efttools.operators.generic">
+<code class="descclassname">efttools.operators.</code><code class="descname">generic</code><em class="property"> = &lt;efttools.operators.FieldBuilder object&gt;</em><a class="headerlink" href="#efttools.operators.generic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic tensor to be used for intermediate steps in calculations
+and in the output of matching.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="efttools.operators.epsUp">
+<code class="descclassname">efttools.operators.</code><code class="descname">epsUp</code><em class="property"> = &lt;efttools.operators.TensorBuilder object&gt;</em><a class="headerlink" href="#efttools.operators.epsUp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Totally anti-symmetric tensor with two two-component spinor
+undotted superindices</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="efttools.operators.epsUpDot">
+<code class="descclassname">efttools.operators.</code><code class="descname">epsUpDot</code><em class="property"> = &lt;efttools.operators.TensorBuilder object&gt;</em><a class="headerlink" href="#efttools.operators.epsUpDot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Totally anti-symmetric tensor with two two-component spinor
+dotted superindices</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="efttools.operators.epsDown">
+<code class="descclassname">efttools.operators.</code><code class="descname">epsDown</code><em class="property"> = &lt;efttools.operators.TensorBuilder object&gt;</em><a class="headerlink" href="#efttools.operators.epsDown" title="Permalink to this definition">¶</a></dt>
+<dd><p>Totally anti-symmetric tensor with two two-component spinor
+undotted subindices</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="efttools.operators.epsDownDot">
+<code class="descclassname">efttools.operators.</code><code class="descname">epsDownDot</code><em class="property"> = &lt;efttools.operators.TensorBuilder object&gt;</em><a class="headerlink" href="#efttools.operators.epsDownDot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Totally anti-symmetric tensor with two two-component spinor
+dotted subindices</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="efttools.operators.sigma4bar">
+<code class="descclassname">efttools.operators.</code><code class="descname">sigma4bar</code><em class="property"> = &lt;efttools.operators.TensorBuilder object&gt;</em><a class="headerlink" href="#efttools.operators.sigma4bar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tensor with one lorentz index, one two-component spinor dotted
+superindex and one two-component spinor undotted superindex.
+Represents the four-vector of 2x2 matrices built out identity
+and minus the Pauli matrices.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="efttools.operators.sigma4">
+<code class="descclassname">efttools.operators.</code><code class="descname">sigma4</code><em class="property"> = &lt;efttools.operators.TensorBuilder object&gt;</em><a class="headerlink" href="#efttools.operators.sigma4" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tensor with one lorentz index, one two-component spinor undotted
+subindex and one two-component spinor dotted subindex.
+Represents the four-vector of 2x2 matrices built out identity
+and the Pauli matrices.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-efttools.integration">
+<span id="the-integration-module"></span><h2>The <code class="docutils literal"><span class="pre">integration</span></code> module<a class="headerlink" href="#module-efttools.integration" title="Permalink to this headline">¶</a></h2>
+<p>Module for the integration of heavy fields from a high-energy
+lagrangian. Contains the function <a class="reference internal" href="#efttools.integration.integrate" title="efttools.integration.integrate"><code class="xref py py-func docutils literal"><span class="pre">integrate()</span></code></a> and the classes
+for representing the different types of heavy fields.</p>
+<dl class="class">
+<dt id="efttools.integration.RealScalar">
+<em class="property">class </em><code class="descclassname">efttools.integration.</code><code class="descname">RealScalar</code><span class="sig-paren">(</span><em>name</em>, <em>num_of_inds</em>, <em>has_flavor=True</em>, <em>order=2</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.integration.RealScalar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Representation for heavy real scalar bosons.</p>
+<p>The <code class="docutils literal"><span class="pre">has_flavor</span></code> argument to the constructor is a bool that
+specifies whether there are several generations of the heavy field,
+whereas the <code class="docutils literal"><span class="pre">order</span></code> argument gives a maximum order in the
+derivatives for the propagator.</p>
+<dl class="attribute">
+<dt id="efttools.integration.RealScalar.name">
+<code class="descname">name</code><a class="headerlink" href="#efttools.integration.RealScalar.name" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>string</em> &#8211; name identifier of the corresponding tensor</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="efttools.integration.RealScalar.num_of_inds">
+<code class="descname">num_of_inds</code><a class="headerlink" href="#efttools.integration.RealScalar.num_of_inds" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; number of indices of the corresponding tensor</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="efttools.integration.ComplexScalar">
+<em class="property">class </em><code class="descclassname">efttools.integration.</code><code class="descname">ComplexScalar</code><span class="sig-paren">(</span><em>name</em>, <em>c_name</em>, <em>num_of_inds</em>, <em>has_flavor=True</em>, <em>order=2</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.integration.ComplexScalar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Representation for heavy complex scalar bosons.</p>
+<p>The <code class="docutils literal"><span class="pre">has_flavor</span></code> argument to the constructor is a bool that
+specifies whether there are several generations of the heavy field,
+whereas the <code class="docutils literal"><span class="pre">order</span></code> argument gives a maximum order in the
+derivatives for the propagator.</p>
+<dl class="attribute">
+<dt id="efttools.integration.ComplexScalar.name">
+<code class="descname">name</code><a class="headerlink" href="#efttools.integration.ComplexScalar.name" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>string</em> &#8211; name identifier of the corresponding tensor</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="efttools.integration.ComplexScalar.c_name">
+<code class="descname">c_name</code><a class="headerlink" href="#efttools.integration.ComplexScalar.c_name" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>string</em> &#8211; name identifier of the conjugate tensor</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="efttools.integration.ComplexScalar.num_of_inds">
+<code class="descname">num_of_inds</code><a class="headerlink" href="#efttools.integration.ComplexScalar.num_of_inds" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; number of indices of the corresponding tensor</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="efttools.integration.RealVector">
+<em class="property">class </em><code class="descclassname">efttools.integration.</code><code class="descname">RealVector</code><span class="sig-paren">(</span><em>name</em>, <em>num_of_inds</em>, <em>has_flavor=True</em>, <em>order=2</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.integration.RealVector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Representation for heavy real vector bosons.</p>
+<p>The <code class="docutils literal"><span class="pre">has_flavor</span></code> argument to the constructor is a bool that
+specifies whether there are several generations of the heavy field,
+whereas the <code class="docutils literal"><span class="pre">order</span></code> argument gives a maximum order in the
+derivatives for the propagator.</p>
+<dl class="attribute">
+<dt id="efttools.integration.RealVector.name">
+<code class="descname">name</code><a class="headerlink" href="#efttools.integration.RealVector.name" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>string</em> &#8211; name identifier of the corresponding tensor</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="efttools.integration.RealVector.num_of_inds">
+<code class="descname">num_of_inds</code><a class="headerlink" href="#efttools.integration.RealVector.num_of_inds" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; number of indices of the corresponding tensor</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="efttools.integration.ComplexVector">
+<em class="property">class </em><code class="descclassname">efttools.integration.</code><code class="descname">ComplexVector</code><span class="sig-paren">(</span><em>name</em>, <em>c_name</em>, <em>num_of_inds</em>, <em>has_flavor=True</em>, <em>order=2</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.integration.ComplexVector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Representation for heavy complex vector bosons.</p>
+<p>The <code class="docutils literal"><span class="pre">has_flavor</span></code> argument to the constructor is a bool that
+specifies whether there are several generations of the heavy field,
+whereas the <code class="docutils literal"><span class="pre">order</span></code> argument gives a maximum order in the
+derivatives for the propagator.</p>
+<dl class="attribute">
+<dt id="efttools.integration.ComplexVector.name">
+<code class="descname">name</code><a class="headerlink" href="#efttools.integration.ComplexVector.name" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>string</em> &#8211; name identifier of the corresponding tensor</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="efttools.integration.ComplexVector.c_name">
+<code class="descname">c_name</code><a class="headerlink" href="#efttools.integration.ComplexVector.c_name" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>string</em> &#8211; name identifier of the conjugate tensor</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="efttools.integration.ComplexVector.num_of_inds">
+<code class="descname">num_of_inds</code><a class="headerlink" href="#efttools.integration.ComplexVector.num_of_inds" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; number of indices of the corresponding tensor</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="efttools.integration.VectorLikeFermion">
+<em class="property">class </em><code class="descclassname">efttools.integration.</code><code class="descname">VectorLikeFermion</code><span class="sig-paren">(</span><em>name</em>, <em>L_name</em>, <em>R_name</em>, <em>Lc_name</em>, <em>Rc_name</em>, <em>num_of_inds</em>, <em>has_flavor=True</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.integration.VectorLikeFermion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Representation for heavy vector-like fermions</p>
+<p>The <code class="docutils literal"><span class="pre">has_flavor</span></code> argument to the constructor is a bool that
+specifies whether there are several generations of the heavy field.</p>
+<dl class="attribute">
+<dt id="efttools.integration.VectorLikeFermion.name">
+<code class="descname">name</code><a class="headerlink" href="#efttools.integration.VectorLikeFermion.name" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>string</em> &#8211; name of the field</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="efttools.integration.VectorLikeFermion.L_name">
+<code class="descname">L_name</code><a class="headerlink" href="#efttools.integration.VectorLikeFermion.L_name" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>string</em> &#8211; name of the left-handed part</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="efttools.integration.VectorLikeFermion.R_name">
+<code class="descname">R_name</code><a class="headerlink" href="#efttools.integration.VectorLikeFermion.R_name" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>string</em> &#8211; name of the right-handed part</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="efttools.integration.VectorLikeFermion.Lc_name">
+<code class="descname">Lc_name</code><a class="headerlink" href="#efttools.integration.VectorLikeFermion.Lc_name" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>string</em> &#8211; name of the conjugate of the left-handed part</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="efttools.integration.VectorLikeFermion.Rc_name">
+<code class="descname">Rc_name</code><a class="headerlink" href="#efttools.integration.VectorLikeFermion.Rc_name" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>string</em> &#8211; name of the conjugate of the right-handed part</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="efttools.integration.VectorLikeFermion.num_of_inds">
+<code class="descname">num_of_inds</code><a class="headerlink" href="#efttools.integration.VectorLikeFermion.num_of_inds" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; number of indices of the corresponding tensor</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="efttools.integration.MajoranaFermion">
+<em class="property">class </em><code class="descclassname">efttools.integration.</code><code class="descname">MajoranaFermion</code><span class="sig-paren">(</span><em>name</em>, <em>c_name</em>, <em>num_of_inds</em>, <em>has_flavor=True</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.integration.MajoranaFermion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Representation for heavy Majorana fermions.</p>
+<p>The <code class="docutils literal"><span class="pre">has_flavor</span></code> argument to the constructor is a bool that
+specifies whether there are several generations of the heavy field.</p>
+<dl class="attribute">
+<dt id="efttools.integration.MajoranaFermion.name">
+<code class="descname">name</code><a class="headerlink" href="#efttools.integration.MajoranaFermion.name" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>string</em> &#8211; name identifier of the corresponding tensor</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="efttools.integration.MajoranaFermion.c_name">
+<code class="descname">c_name</code><a class="headerlink" href="#efttools.integration.MajoranaFermion.c_name" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>string</em> &#8211; name identifier of the conjugate tensor</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="efttools.integration.MajoranaFermion.num_of_inds">
+<code class="descname">num_of_inds</code><a class="headerlink" href="#efttools.integration.MajoranaFermion.num_of_inds" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>int</em> &#8211; number of indices of the corresponding tensor</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="efttools.integration.integrate">
+<code class="descclassname">efttools.integration.</code><code class="descname">integrate</code><span class="sig-paren">(</span><em>heavy_fields</em>, <em>interaction_lagrangian</em>, <em>max_dim=6</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.integration.integrate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integrate out heavy fields.</p>
+<p>Heavy field classes: <code class="docutils literal"><span class="pre">RealScalar</span></code>, <code class="docutils literal"><span class="pre">ComplexScalar</span></code>, <code class="docutils literal"><span class="pre">RealVector</span></code>,
+<code class="docutils literal"><span class="pre">ComplexVector</span></code>, <code class="docutils literal"><span class="pre">VectorLikeFermion</span></code> or <code class="docutils literal"><span class="pre">MajoranaFermion</span></code>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>heavy_fields</strong> (<em>list of heavy fields</em>) &#8211; to be integrated out</li>
+<li><strong>interaction_lagrangian</strong> (<code class="docutils literal"><span class="pre">efttools.operators.OperatorSum</span></code>) &#8211; from which to integrate out the heavy fields</li>
+<li><strong>max_dim</strong> (<em>int</em>) &#8211; maximum dimension of the operators in the effective
+lagrangian</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-efttools.transformations">
+<span id="the-transformations-module"></span><h2>The <code class="docutils literal"><span class="pre">transformations</span></code> module<a class="headerlink" href="#module-efttools.transformations" title="Permalink to this headline">¶</a></h2>
+<p>Module dedicated to the transformation and simplification of
+operators and operator sums. Defines functions for collecting
+numeric and symbolic factors.</p>
+<p>Implements the function <a class="reference internal" href="#efttools.transformations.apply_rules_until" title="efttools.transformations.apply_rules_until"><code class="xref py py-func docutils literal"><span class="pre">apply_rules_until()</span></code></a> for the
+systematic substitution of patterns inside operators in an
+operator sum until writing the sum it in a given basis of
+operators; and the function <a class="reference internal" href="#efttools.transformations.collect" title="efttools.transformations.collect"><code class="xref py py-func docutils literal"><span class="pre">collect()</span></code></a> for collecting the
+coefficients of each operator in a given list.</p>
+<dl class="function">
+<dt id="efttools.transformations.collect_numbers">
+<code class="descclassname">efttools.transformations.</code><code class="descname">collect_numbers</code><span class="sig-paren">(</span><em>operator</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.transformations.collect_numbers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collect all the tensors representing numbers into a single one.</p>
+<p>A tensor is understood to represent a number when its name
+is of the form <code class="docutils literal"><span class="pre">&quot;[number]&quot;</span></code>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="efttools.transformations.collect_symbols">
+<code class="descclassname">efttools.transformations.</code><code class="descname">collect_symbols</code><span class="sig-paren">(</span><em>operator</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.transformations.collect_symbols" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collect all the tensors representing each symbolic constant
+with exponent into a single one.</p>
+<p>A tensor is understood to represent a symbolic constant with
+exponent when its name is of the form <code class="docutils literal"><span class="pre">&quot;{base^exponent}&quot;</span></code>.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="efttools.transformations.collect_numbers_and_symbols">
+<code class="descclassname">efttools.transformations.</code><code class="descname">collect_numbers_and_symbols</code><span class="sig-paren">(</span><em>op_sum</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.transformations.collect_numbers_and_symbols" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collect all the tensors representing all numeric factors and each
+symbolic constant into a single one for all the operators in the sum.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="efttools.transformations.apply_rule">
+<code class="descclassname">efttools.transformations.</code><code class="descname">apply_rule</code><span class="sig-paren">(</span><em>operator</em>, <em>pattern</em>, <em>replacement</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.transformations.apply_rule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replace the first occurrence of <code class="docutils literal"><span class="pre">pattern</span></code> by <code class="docutils literal"><span class="pre">replacement</span></code>
+in <code class="docutils literal"><span class="pre">operator</span></code></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="efttools.transformations.apply_rules_until">
+<code class="descclassname">efttools.transformations.</code><code class="descname">apply_rules_until</code><span class="sig-paren">(</span><em>op_sum</em>, <em>rules</em>, <em>final_tensor_names</em>, <em>max_iterations</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.transformations.apply_rules_until" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply all the given rules to the operator sum.</p>
+<p>With the adecuate set of rules this function can be used to express
+an effective lagrangian in a specific basis of operators, represented
+by tensors whose names should be given in the argument
+<cite>final_tensor_names</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>op_sum</strong> (<code class="xref py py-class docutils literal"><span class="pre">efttools.operator.OperatorSum</span></code>) &#8211; to which the rules
+should be applied.</li>
+<li><strong>rules</strong> (list of pairs (<a class="reference internal" href="#efttools.operators.Operator" title="efttools.operators.Operator"><code class="xref py py-class docutils literal"><span class="pre">efttools.operators.Operator</span></code></a>, <a class="reference internal" href="#efttools.operators.OperatorSum" title="efttools.operators.OperatorSum"><code class="xref py py-class docutils literal"><span class="pre">efttools.operators.OperatorSum</span></code></a>)) &#8211; The first element
+of each pair represents a pattern to be subtituted in each
+operator by the second element using <a class="reference internal" href="#efttools.transformations.apply_rule" title="efttools.transformations.apply_rule"><code class="xref py py-func docutils literal"><span class="pre">apply_rule()</span></code></a>.</li>
+<li><strong>final_tensor_names</strong> (<em>list of strings</em>) &#8211; do not apply any rules
+to an operator that contains a tensor with any of this names</li>
+<li><strong>max_iterations</strong> (<em>int</em>) &#8211; maximum number of application of rules to
+each operator.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">OperatorSum containing the result of the application of rules.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="efttools.transformations.collect_by_tensors">
+<code class="descclassname">efttools.transformations.</code><code class="descname">collect_by_tensors</code><span class="sig-paren">(</span><em>op_sum</em>, <em>tensor_names</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.transformations.collect_by_tensors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collect the coefficients of the given tensors.</p>
+<p>Usually, these tensors represent operators of a basis
+in which the effective lagrangian is expressed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>op_sum</strong> (<a class="reference internal" href="#efttools.operators.OperatorSum" title="efttools.operators.OperatorSum"><em>OperatorSum</em></a>) &#8211; whose terms are to be collectd</li>
+<li><strong>tensor_names</strong> (<em>list of strings</em>) &#8211; names of the tensors
+whose coefficients will be obtained</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A pair (collection, rest) where collection is a list of
+pairs (name, coef) where name is the name of each of the
+tensors and coef is an OperatorSum representing its
+coefficients; and where rest is an OperatorSum with the
+operators that didn&#8217;t contain a tensor with one of the
+given names.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="efttools.transformations.collect">
+<code class="descclassname">efttools.transformations.</code><code class="descname">collect</code><span class="sig-paren">(</span><em>op_sum</em>, <em>tensor_names</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.transformations.collect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simplify the numeric and exponentiated symbolic tensors
+(using <a class="reference internal" href="#efttools.transformations.collect_numbers_and_symbols" title="efttools.transformations.collect_numbers_and_symbols"><code class="xref py py-func docutils literal"><span class="pre">collect_numbers_and_symbols()</span></code></a>) and collect
+the coefficients of the given tensors (using
+<a class="reference internal" href="#efttools.transformations.collect_by_tensors" title="efttools.transformations.collect_by_tensors"><code class="xref py py-func docutils literal"><span class="pre">collect_by_tensors()</span></code></a>).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>op_sum</strong> (<a class="reference internal" href="#efttools.operators.OperatorSum" title="efttools.operators.OperatorSum"><em>OperatorSum</em></a>) &#8211; whose terms are to be collectd</li>
+<li><strong>tensor_names</strong> (<em>list of strings</em>) &#8211; names of the tensors
+whose coefficients will be obtained</li>
+<li><strong>verbose</strong> (<em>bool</em>) &#8211; specify whether to write messages
+signaling the start and end of the computation.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-efttools.output">
+<span id="the-output-module"></span><h2>The <code class="docutils literal"><span class="pre">output</span></code> module<a class="headerlink" href="#module-efttools.output" title="Permalink to this headline">¶</a></h2>
+<p>Module dedicated to the conversion of
+operator sums to plain text and latex code.</p>
+<p>Defines the class <a class="reference internal" href="#efttools.output.Writer" title="efttools.output.Writer"><code class="xref py py-class docutils literal"><span class="pre">Writer</span></code></a> to represent
+the coefficients of some given operators in
+both formats.</p>
+<dl class="class">
+<dt id="efttools.output.Writer">
+<em class="property">class </em><code class="descclassname">efttools.output.</code><code class="descname">Writer</code><span class="sig-paren">(</span><em>op_sum</em>, <em>op_names</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.output.Writer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to write an operator sum in various formats.</p>
+<p>The coefficients of the tensors with the given names
+are collected and prepared to be written.</p>
+<dl class="attribute">
+<dt>
+<code class="descname">collection (list of pairs (string, list of pairs</code></dt>
+<dd><p>(complex, Operator)): the first element of each
+pair in the main list is the name of the tensor having
+the second part as coefficient. The pairs in the list
+that is the second element represent a numeric coefficient
+and an Operator (product of tensors) that multiplied
+together and summed with the others give the complete
+coefficient.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="efttools.output.Writer.rest">
+<code class="descname">rest</code><a class="headerlink" href="#efttools.output.Writer.rest" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>list of pairs (complex, Operator)</em> &#8211; represents a sum
+of the operators that couldn&#8217;t be collected with their
+corresponding coefficients.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="efttools.output.Writer.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>op_sum</em>, <em>op_names</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.output.Writer.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>op_sum</strong> (<a class="reference internal" href="#efttools.operators.OperatorSum" title="efttools.operators.OperatorSum"><em>OperatorSum</em></a>) &#8211; to be represented</li>
+<li><strong>op_names</strong> (<em>list of strings</em>) &#8211; the names of the tensors
+(represented as tensors) whose coefficients are
+to be collected and written</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="efttools.output.Writer.__str__">
+<code class="descname">__str__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#efttools.output.Writer.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plain text representation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="efttools.output.Writer.write_text_file">
+<code class="descname">write_text_file</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.output.Writer.write_text_file" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="efttools.output.Writer.latex_code">
+<code class="descname">latex_code</code><span class="sig-paren">(</span><em>structures</em>, <em>op_reps</em>, <em>inds</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.output.Writer.latex_code" title="Permalink to this definition">¶</a></dt>
+<dd><p>Representation as LaTeX <code class="docutils literal"><span class="pre">align</span></code> environments</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>structures</strong> (<em>dict</em>) &#8211; the keys are the names of all the tensors.
+The corresponding values are the LaTeX formula
+representation, using python`s <code class="docutils literal"><span class="pre">str.format</span></code> notation
+<code class="docutils literal"><span class="pre">&quot;{}&quot;</span></code> to specify the positions where the indices
+should appear.</li>
+<li><strong>structures</strong> &#8211; the keys are the names of all the operators
+in the basis. The corresponding values are the LaTeX formula
+representation.</li>
+<li><strong>inds</strong> (<em>list of strings</em>) &#8211; the symbols to be used to represent
+the indices, in the order in which they should appear.v</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="efttools.output.Writer.write_latex">
+<code class="descname">write_latex</code><span class="sig-paren">(</span><em>filename</em>, <em>structures</em>, <em>op_reps</em>, <em>inds</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.output.Writer.write_latex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write a LaTeX document with the representation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>filename</strong> (<em>string</em>) &#8211; the name of the file without the extension
+<code class="docutils literal"><span class="pre">&quot;.tex&quot;</span></code> in which to write</li>
+<li><strong>structures</strong> (<em>dict</em>) &#8211; the keys are the names of all the tensors.
+The corresponding values are the LaTeX formula
+representation, using python`s <code class="docutils literal"><span class="pre">str.format</span></code> notation
+<code class="docutils literal"><span class="pre">&quot;{}&quot;</span></code> to specify the positions where the indices
+should appear.</li>
+<li><strong>structures</strong> &#8211; the keys are the names of all the operators
+in the basis. The corresponding values are the LaTeX formula
+representation.</li>
+<li><strong>inds</strong> (<em>list of strings</em>) &#8211; the symbols to be used to represent
+the indices, in the order in which they should appear.v</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="efttools.output.Writer.show_pdf">
+<code class="descname">show_pdf</code><span class="sig-paren">(</span><em>filename</em>, <em>pdf_viewer</em>, <em>structures</em>, <em>op_reps</em>, <em>inds</em><span class="sig-paren">)</span><a class="headerlink" href="#efttools.output.Writer.show_pdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Directly show the pdf file with the results, obtained
+using <code class="docutils literal"><span class="pre">pdflatex</span></code> on the <code class="docutils literal"><span class="pre">.tex</span></code> file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>filename</strong> (<em>string</em>) &#8211; the name of the files without the extension
+<code class="docutils literal"><span class="pre">&quot;.tex&quot;</span></code> and <code class="docutils literal"><span class="pre">.pdf</span></code> in which to write.</li>
+<li><strong>pdfviewer</strong> (<em>string</em>) &#8211; name of the program (callable from the
+command-line) to show the pdf.</li>
+<li><strong>structures</strong> (<em>dict</em>) &#8211; the keys are the names of all the tensors.
+The corresponding values are the LaTeX formula
+representation, using python`s <code class="docutils literal"><span class="pre">str.format</span></code> notation
+<code class="docutils literal"><span class="pre">&quot;{}&quot;</span></code> to specify the positions where the indices
+should appear.</li>
+<li><strong>structures</strong> &#8211; the keys are the names of all the operators
+in the basis. The corresponding values are the LaTeX formula
+representation.</li>
+<li><strong>inds</strong> (<em>list of strings</em>) &#8211; the symbols to be used to represent
+the indices, in the order in which they should appear.v</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Modules documentation</a><ul>
+<li><a class="reference internal" href="#module-efttools.operators">The <code class="docutils literal"><span class="pre">operators</span></code> module</a></li>
+<li><a class="reference internal" href="#module-efttools.integration">The <code class="docutils literal"><span class="pre">integration</span></code> module</a></li>
+<li><a class="reference internal" href="#module-efttools.transformations">The <code class="docutils literal"><span class="pre">transformations</span></code> module</a></li>
+<li><a class="reference internal" href="#module-efttools.output">The <code class="docutils literal"><span class="pre">output</span></code> module</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="tutorial.html" title="previous chapter">Tutorial</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/moddoc.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Juan Carlos Criado Alamo.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/moddoc.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

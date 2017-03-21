@@ -1,0 +1,18 @@
+Modules documentation
+*********************
+
+The ``operators`` module
+========================
+
+.. automodule:: efttools.operators
+   :members:
+   :special-members:
+
+The ``integration`` module
+==========================
+
+The ``transformations`` module
+==============================
+
+The ``output`` module
+=====================
