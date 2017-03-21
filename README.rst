@@ -1,4 +1,4 @@
-``efttools`` is a Python package for doing computations related
+EFTTools is Python package for doing computations related
 to Effective Field Theory.
 
 
