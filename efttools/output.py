@@ -88,7 +88,7 @@ def display_number(number):
     elif number.real == 0:
         return "{:+.3}i".format(number.imag)
     else:
-        return "({:+.3} + {1:+.3}i)".format(number.real, number.imag)
+        return "+({:+.3} + {1:+.3}i)".format(number.real, number.imag)
 
 def display_exponent(number):
     if number == 1:
@@ -183,7 +183,7 @@ class Writer(object):
                 out_str += display_number(num) + " "
                 out_str += display_operator(op, structures, inds)
                 out_str += r"\\ &"
-                if i%20 == 19:
+                if i%15 == 14:
                     out_str += "\n" + r"+\cdots\end{align*}" + "\n"
                     out_str += r"\begin{align*}" + "\n" + r"\cdots &"
                 out_str += "\n"

@@ -291,6 +291,7 @@ latex_SM = {
     "yuc": r"y^{{u*}}_{{{}{}}}",
     "V": r"V_{{{}{}}}",
     "Vc": r"V^\dagger_{{{1}{0}}}",
+    "deltaFlavor": r"\delta_{{{}{}}}",
     
     # Fields
     "phi": r"\phi_{}",

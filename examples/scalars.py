@@ -39,7 +39,7 @@ kappaS3 = TensorBuilder("kappaS3")
 ylS1  = TensorBuilder("ylS1")
 ylS1c = TensorBuilder("ylS1c")
 
-yeS2 = TensorBuilder("yeS2")
+vyeS2 = TensorBuilder("yeS2")
 yeS2c = TensorBuilder("yeS2c")
 
 yevarphi = TensorBuilder("yevarphi")
@@ -196,18 +196,26 @@ zeta = FieldBuilder("zeta", 1, boson)
 zetac = FieldBuilder("zetac", 1, boson)
 
 # Hypercharge 1/3 SU(3) sextet
+# (the sextet index is represented by two SU(3) triplet indices
+# for which the field is antisymmetric)
 Omega1 = FieldBuilder("Omega1", 1, boson)
 Omega1c = FieldBuilder("Omega1c", 1, boson)
 
 # Hypercharge -2/3 SU(3) sextet
+# (the sextet index is represented by two SU(3) triplet indices
+# for which the field is antisymmetric)
 Omega2 = FieldBuilder("Omega2", 1, boson)
 Omega2c = FieldBuilder("Omega2c", 1, boson)
 
 # Hypercharge 4/3 SU(3) sextet
+# (the sextet index is represented by two SU(3) triplet indices
+# for which the field is antisymmetric)
 Omega4 = FieldBuilder("Omega4", 1, boson)
 Omega4c = FieldBuilder("Omega4c", 1, boson)
 
 # Hypercharge 1/3 SU(3) sextet, SU(2) triplet
+# (the sextet index is represented by two SU(3) triplet indices
+# for which the field is antisymmetric)
 Upsilon = FieldBuilder("Upsilon", 1, boson)
 Upsilonc = FieldBuilder("Upsilonc", 1, boson)
 
@@ -461,7 +469,7 @@ All the heavy scalar fields that couple linearly through renormalizable
 interactions to the Standard Model.
 """
 
-# -- Latex representation ----------------------------------------------------
+# -- LaTeX representation ----------------------------------------------------
 
 latex_tensors_scalars = {
     "kappaS": r"\kappa_{{\mathcal{{S}}_{}}}",

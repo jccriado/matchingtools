@@ -85,39 +85,47 @@ lambdaDelta1Sigma1c = TensorBuilder("lambdaDelta1Sigma1c")
 lambdaDelta3Sigma1 = TensorBuilder("lambdaDelta3Sigma1")
 lambdaDelta3Sigma1c = TensorBuilder("lambdaDelta3Sigma1c")
 
-# -- Fields ------------------------------------------------------------------
+# -- Fields (SU(3) singlets) -------------------------------------------------
 
+# Neutral vector-like SU(2) singlet
 NL = FieldBuilder("NL", 1.5, fermion)
 NR = FieldBuilder("NR", 1.5, fermion)
 NLc = FieldBuilder("NLc", 1.5, fermion)
 NRc = FieldBuilder("NRc", 1.5, fermion)
 
+# Neutral Majorana SU(2) singlet
 Nmaj = FieldBuilder("Nmaj", 1.5, fermion)
 Nmajc = FieldBuilder("Nmajc", 1.5, fermion)
 
+# Hypercharge -1 vector-like SU(2) singlet
 EL = FieldBuilder("EL", 1.5, fermion)
 ER = FieldBuilder("ER", 1.5, fermion)
 ELc = FieldBuilder("ELc", 1.5, fermion)
 ERc = FieldBuilder("ERc", 1.5, fermion)
 
+# Hypercharge -1/2 vector-like SU(2) doublet
 Delta1L = FieldBuilder("Delta1L", 1.5, fermion)
 Delta1R = FieldBuilder("Delta1R", 1.5, fermion)
 Delta1Lc = FieldBuilder("Delta1Lc", 1.5, fermion)
 Delta1Rc = FieldBuilder("Delta1Rc", 1.5, fermion)
 
+# Hypercharge -3/2 vector-like SU(2) doublet
 Delta3L = FieldBuilder("Delta3L", 1.5, fermion)
 Delta3R = FieldBuilder("Delta3R", 1.5, fermion)
 Delta3Lc = FieldBuilder("Delta3Lc", 1.5, fermion)
 Delta3Rc = FieldBuilder("Delta3Rc", 1.5, fermion)
 
+# Hypercharge 0 vector-like SU(2) triplet
 Sigma0L = FieldBuilder("Sigma0L", 1.5, fermion)
 Sigma0R = FieldBuilder("Sigma0R", 1.5, fermion)
 Sigma0Lc = FieldBuilder("Sigma0Lc", 1.5, fermion)
 Sigma0Rc = FieldBuilder("Sigma0Rc", 1.5, fermion)
 
+# Hypercharge 0 Majorana SU(2) triplet
 Sigma0maj = FieldBuilder("Sigma0maj", 1.5, fermion)
 Sigma0majc = FieldBuilder("Sigma0majc", 1.5, fermion)
 
+# Hypercharge -1 vector-like SU(2) triplet
 Sigma1L = FieldBuilder("Sigma1L", 1.5, fermion)
 Sigma1R = FieldBuilder("Sigma1R", 1.5, fermion)
 Sigma1Lc = FieldBuilder("Sigma1Lc", 1.5, fermion)
@@ -132,10 +140,10 @@ leptons_interaction_lagrangian = -OpSum(
     Op(lambdaDelta1ec(0, 1), eRc(2, 1), phic(3), Delta1L(2, 3, 0)),
 
     # Delta3
-    Op(lambdaDelta3e(0, 1), Delta1Lc(2, 3, 0),
+    Op(lambdaDelta3e(0, 1), Delta3Lc(2, 3, 0),
        epsSU2(3, 4), phic(4), eR(2, 1)),
     Op(lambdaDelta3ec(0, 1), eRc(2, 1),
-       epsSU2(3, 4), phi(4), Delta1L(2, 3, 0)),
+       epsSU2(3, 4), phi(4), Delta3L(2, 3, 0)),
 
     # N
     Op(lambdaNLl(0, 1), NL(2, 0), epsSU2(3, 4), phi(4),
@@ -237,6 +245,7 @@ leptons_interaction_lagrangian = -OpSum(
     Op(lambdaDelta3Sigma1c(0, 1), Sigma1Lc(2, 4, 1), epsSU2(5, 6), phi(6),
        sigmaSU2(4, 5, 3), Delta3R(2, 3, 0)))
 
+
 # -- Heavy fields ------------------------------------------------------------
 
 heavy_N = VectorLikeFermion("N", "NL", "NR", "NLc", "NRc", 2)
@@ -254,6 +263,10 @@ heavy_Sigma1 = VectorLikeFermion("Sigma1", "Sigma1L", "Sigma1R",
 
 heavy_fields = [heavy_N, heavy_Nmaj, heavy_E, heavy_Delta1, heavy_Delta3,
                 heavy_Sigma0, heavy_Sigma0maj, heavy_Sigma1]
+"""
+All the heavy lepton (SU(3) singlet fermion) fields that couple linearly 
+through renormalizable interactions to the Standard Model.
+"""
 
 
 # -- LaTeX representation ----------------------------------------------------
@@ -329,14 +342,15 @@ latex_tensors_leptons = {
     "lambdaDelta3Sigma1c":
     r"(\lambda_{{\Sigma_{{1}}}}^{{Delta_3}})^*_{{{}{}}}",
 
+    # Masses
     "MN": r"M_{{N_{}}}",
     "MNmaj": r"M_{{N^{{(maj)}}_{}}}",
     "ME": r"M_{{E_{}}}",
-    "MDelta1": r"M_{{Delta_{{1{}}}}}",
-    "MDelta3": r"M_{{Delta_{{3{}}}}}",
-    "MSigma0": r"M_{{Sigma_{{0{}}}}}",
-    "MSigma0maj": r"M_{{Sigma^{{(maj)}}_{{0{}}}}}",
-    "MSigma1": r"M_{{Sigma_{{1{}}}}}"}
+    "MDelta1": r"M_{{\Delta_{{1{}}}}}",
+    "MDelta3": r"M_{{\Delta_{{3{}}}}}",
+    "MSigma0": r"M_{{\Sigma_{{0{}}}}}",
+    "MSigma0maj": r"M_{{\Sigma^{{(maj)}}_{{0{}}}}}",
+    "MSigma1": r"M_{{\Sigma_{{1{}}}}}"}
 
 
 if __name__ == "__main__":

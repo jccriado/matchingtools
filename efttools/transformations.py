@@ -177,7 +177,7 @@ def sum_numbers(op_sum):
                 break
         if not collected:
             collection.append((new_op, num))
-    return [(o, num) for o, num in collection if num != 0]
+    return [(o, num) for o, num in collection if abs(num) > 10**(-10)]
 
 def collect_by_tensors(op_sum, tensor_names):
     """
