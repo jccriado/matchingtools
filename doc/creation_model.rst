@@ -3,11 +3,20 @@ Creation of models
 
 .. currentmodule:: efttools.operators
 
+.. note:: This section assumes that the classes and functions
+   from :mod:`efttools.operators` that it uses are in the namespace.
+   To import all the classes and functions that appear here do::
+
+      from efttools.operators import (
+	  Tensor, Operator, OperatorSum
+          TensorBuilder, FieldBuilder, D, Op, OpSum,
+	  number_op, symbol_op)
+	     
 The construction of a model is done in two steps: the creation of the
 tensors and fields and the definition of the interaction lagrangian.
 
 The basic building block for a lagrangian is tensor, an object of the
-class :class:`Tensor`. Direct usage of the ``Tensor``
+class :class:`Tensor`. Direct usage of the :class:`Tensor`
 constructor obscures the code. There are two classes defined to make the
 process of creating tensors easier and cleaner,
 :class:`TensorBuilder` and
@@ -15,12 +24,12 @@ process of creating tensors easier and cleaner,
 
 When a field has covariant derivatives applied to it, that is
 represented internally in the attributes of its representative
-``Tensor`` object. For aesthetical reasons and easeness of usage,
+:class:`Tensor` object. For aesthetical reasons and easeness of usage,
 instead of manually modifying the attributes, it's better to use
 the function :class:`D` to create covariant
 derivatives of fields.
 
-``efttools`` handles lagrangians that are polynomials of the fields.
+*efttools* handles lagrangians that are polynomials of the fields.
 They are thus a sum of terms that are products of tensors. They are
 represented as :class:`OperatorSum` objects, with only one
 attribute: a list of its terms. Each term should be an operator, that is,
@@ -31,7 +40,14 @@ Instead of using the constructors for both classes, the functions
 :class:`OpSum` and :class:`Op` are
 available to make the definitions clearer.
 
-``efttools`` treats in a special way tensors whose name starts and
+Minus signs are defined in the library for operators (
+:meth:`Operator.__minus__`) and operator sums
+(:meth:`OperatorSum.__minus__`). Multiplication ``*``
+is defined for operators too (as the
+concatenation of the tensors they contain,
+see :meth:`Operator.__mul__`).
+
+*efttools* treats in a special way tensors whose name starts and
 ends with square or curly brakets. A tensor name enclosed in square
 brakets is understood as a (complex) number to be read from the name
 using ``float(name[1:-1])``. The function :func:`number_op`
@@ -67,8 +83,8 @@ Create a field as::
   my_field = FieldBuilder("my_field", dimension, statistics)
 
 where dimension (float) represents the energy dimensions of the field
-and statistics is either equal to efttools.algebra.boson or
-efttools.algebra.fermion. Then use it inside an operator::
+and statistics is either equal to :data:`efttools.algebra.boson` or
+:data:`efttools.algebra.fermion`. Then use it inside an operator::
 
   Op(..., my_field(ind1, ind2, ...), ...)
 
@@ -81,21 +97,23 @@ Define the interaction lagrangian as an operator sum::
 
   int_lag = OpSum(op1, op2, ...)
 
-Each argument to the function ``OpSum`` should be an operator defined as::
+Each argument to the function :func:`efttools.operators.OpSum` should
+be an operator defined as::
 
   op1 = Op(tens1(ind1, ind2, ...), field1(ind3, ind4, ...), ...)
 
-The arguments of the function ``Op`` are tensors (and fields). Their
-indices are integer numbers. Nevative integers are reserved for free
-indices. Free indices are not meant to be used in the operators
-appearing in the lagrangian, but later in the definition of its
-transformations.
+The arguments of the function :func:`efttools.operators.Op` are
+tensors (and fields). Their indices are integer numbers. Negative
+integers are reserved for free indices. Free indices are not meant
+to be used in the operators appearing in the lagrangian, but later
+in the definition of their transformations.
 
 Non-negative integers represent contracted indices. Contraction
 is expressed by repetition of indices.
 
 To introduce the covariant derivative with index ``ind`` of a tensor
-``tens`` inside an operator, use the function ``D`` in the following way::
+``tens`` inside an operator, use the function
+:func:`efttools.operators.D` in the following way::
 
   D(ind, tens(ind1, ind2, ...))
 

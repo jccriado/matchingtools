@@ -21,6 +21,15 @@ import sys
 sys.path.insert(0, os.path.abspath('..'))
 
 
+# -- Omit values of the variables documented ------------------------------
+from sphinx.ext.autodoc import ModuleLevelDocumenter, DataDocumenter
+
+def add_directive_header(self, sig):
+    ModuleLevelDocumenter.add_directive_header(self, sig)
+    # Rest of original method ignored
+
+DataDocumenter.add_directive_header = add_directive_header
+
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -155,5 +164,5 @@ texinfo_documents = [
      'Miscellaneous'),
 ]
 
+autodoc_member_order = 'bysource'
 
-autodoc_member_order = 'by_source'

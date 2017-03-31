@@ -6,9 +6,9 @@ The ``operators`` module
 
 .. automodule:: efttools.operators
 
-.. autoclass:: efttools.operators.Tensor
+.. autoclass:: Tensor
 
-.. autoclass:: efttools.operators.Operator
+.. autoclass:: Operator
 	       
    .. automethod:: variation
 
@@ -20,70 +20,70 @@ The ``operators`` module
 
    .. automethod:: __eq__
 
-.. autoclass:: efttools.operators.OperatorSum
+.. autoclass:: OperatorSum
 
    .. automethod:: variation
 
    .. automethod:: replace_all
 
-.. autoclass:: efttools.operators.TensorBuilder
+.. autoclass:: TensorBuilder
 
    .. automethod:: __call__
 
-.. autoclass:: efttools.operators.FieldBuilder
+.. autoclass:: FieldBuilder
 
    .. automethod:: __call__
 
-.. autofunction:: efttools.operators.D
+.. autofunction:: D
 
-.. autofunction:: efttools.operators.D_op
+.. autofunction:: D_op
 
-.. autofunction:: efttools.operators.Op
+.. autofunction:: Op
 
-.. autofunction:: efttools.operators.OpSum		  
+.. autofunction:: OpSum		  
 
-.. autofunction:: efttools.operators.number_op
+.. autofunction:: number_op
 
-.. autofunction:: efttools.operators.symbol_op
+.. autofunction:: symbol_op
 
-.. autofunction:: efttools.operators.tensor_op
+.. autofunction:: tensor_op
 
-.. autofunction:: efttools.operators.flavor_tensor_op
+.. autofunction:: flavor_tensor_op
 
-.. autodata:: efttools.operators.kdelta
+.. autodata:: kdelta
 
-.. autodata:: efttools.operators.generic
+.. autodata:: generic
 
-.. autodata:: efttools.operators.epsUp
+.. autodata:: epsUp
 
-.. autodata:: efttools.operators.epsUpDot
+.. autodata:: epsUpDot
 
-.. autodata:: efttools.operators.epsDown
+.. autodata:: epsDown
 
-.. autodata:: efttools.operators.epsDownDot
+.. autodata:: epsDownDot
 
-.. autodata:: efttools.operators.sigma4bar
+.. autodata:: sigma4bar
 
-.. autodata:: efttools.operators.sigma4
+.. autodata:: sigma4
 
 The ``integration`` module
 ==========================
 
 .. automodule:: efttools.integration
 
-.. autoclass:: efttools.integration.RealScalar
+.. autoclass:: RealScalar
 
-.. autoclass:: efttools.integration.ComplexScalar
+.. autoclass:: ComplexScalar
 
-.. autoclass:: efttools.integration.RealVector
+.. autoclass:: RealVector
 
-.. autoclass:: efttools.integration.ComplexVector
+.. autoclass:: ComplexVector
 
-.. autoclass:: efttools.integration.VectorLikeFermion
+.. autoclass:: VectorLikeFermion
 
-.. autoclass:: efttools.integration.MajoranaFermion
+.. autoclass:: MajoranaFermion
 
-.. autofunction:: efttools.integration.integrate
+.. autofunction:: integrate
 
 The ``transformations`` module
 ==============================
@@ -122,3 +122,29 @@ The ``output`` module
    .. automethod:: write_latex
 
    .. automethod:: show_pdf
+
+The ``extras.SM`` module
+========================
+
+.. automodule:: efttools.extras.SM
+   :members:
+
+The ``extras.SU2`` module
+=========================
+
+.. automodule:: efttools.extras.SU2
+   :members:
+
+
+The ``extras.Lorentz`` module
+=============================
+
+.. automodule:: efttools.extras.Lorentz
+   :members:
+
+The ``extras.SM_dim_6_basis`` module
+====================================
+
+.. automodule:: efttools.extras.SM_dim_6_basis
+   :members:      
+

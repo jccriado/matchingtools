@@ -3,19 +3,24 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to efttools's documentation!
+Welcome to efttools' documentation!
 ====================================
 
+*efttools* is Python library for doing calculations related
+to Effective Field Theory.
+
+It provides the tools to create a lagrangian and integrate out heavy
+fields at the tree level. It also includes functions for applying
+customizable transformations (for example, Fierz identities or
+simplification using equations of motion of the light fields) to the
+effective lagrangian to simplify it or write it in terms of a chosen
+effective operator basis.
+
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
    :caption: Contents:
 
+   installation
    tutorial
+   examples
    moddoc
-   
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

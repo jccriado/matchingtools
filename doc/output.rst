@@ -3,6 +3,12 @@ Output of the results
 
 .. currentmodule:: efttools.output
 
+.. note:: This section assumes that the class
+   :mod:`efttools.output.Writer` that it uses is in the namespace.
+   To import it, do::
+
+      from efttools.output import Writer
+		   
 It's usually convenient to organize the final results by presenting
 the coefficient to each operator of the effective lagrangian.
 When a set of rules has been applied to the effective lagrangian so

@@ -82,7 +82,7 @@ def remove_kdeltas(operator):
     corresponding index contraction.
     """
     for pos, tensor in enumerate(operator.tensors):
-        if tensor.name== "kdelta":
+        if tensor.name == "kdelta":
             new_op = OperatorSum([operator.remove_tensor(pos)])
             n = new_op.operators[0].max_index + 1
             new_op = Operator([generic(n, n)]).replace_first("generic", new_op)
@@ -99,44 +99,30 @@ def apply_rule(operator, pattern, replacement):
         return None
     return new_op.replace_first("generic", replacement)
 
-def apply_rules_until_aux(op_sum, rules, final_tensor_names, done):
+def apply_rules_aux(op_sum, rules):
     """
-    Auxiliary function for :func:`apply_rules_until`. 
+    Auxiliary function for :func:`apply_rules`. 
 
     Do the actual computations for each iteration.
     """
-
-    new_op_sum = OperatorSum()
-    for operator in op_sum.operators:
-        operator = remove_kdeltas(operator)
-
-        # Apply the first rule that matches
-        for i, (pattern, replacement) in enumerate(rules):
+    for pattern, replacement in rules:
+        new_op_sum = OperatorSum()
+        for operator in op_sum.operators:
+            operator = remove_kdeltas(operator)
             new_ops = apply_rule(operator, pattern, replacement)
             if new_ops is not None:
                 new_op_sum += new_ops
-                break
-        else:
-            # If none matches, don't change the operator
-            new_op_sum += OperatorSum([operator])
+            else:
+                new_op_sum += OperatorSum([operator])
+        op_sum = new_op_sum
+    return new_op_sum
 
-    # Collect final operators (done) and obtaing the remaining ones
-    remaining = []
-    for operator in new_op_sum.operators:
-        if any(operator.contains(name) for name in final_tensor_names):
-            done.append(operator)
-        else:
-            remaining.append(operator)
-    return done, remaining
-
-def apply_rules_until(op_sum, rules, final_tensor_names, max_iterations):
+def apply_rules(op_sum, rules, max_iterations, verbose=True):
     """
     Apply all the given rules to the operator sum.
 
     With the adecuate set of rules this function can be used to express
-    an effective lagrangian in a specific basis of operators, represented
-    by tensors whose names should be given in the argument
-    `final_tensor_names`.
+    an effective lagrangian in a specific basis of operators
 
     Args:
         op_sum (:class:`efttools.operator.OperatorSum`): to which the rules
@@ -144,20 +130,25 @@ def apply_rules_until(op_sum, rules, final_tensor_names, max_iterations):
         rules (list of pairs (:class:`efttools.operators.Operator`, :class:`efttools.operators.OperatorSum`)): The first element
             of each pair represents a pattern to be subtituted in each
             operator by the second element using :func:`apply_rule`.
-        final_tensor_names (list of strings): do not apply any rules
-            to an operator that contains a tensor with any of this names
         max_iterations (int): maximum number of application of rules to
             each operator.
+        verbose (bool): specifies whether to print messages signaling
+            the start and end of the integration process
 
     Return:
         OperatorSum containing the result of the application of rules.
     """
-    remaining = op_sum.operators
-    done = []
+    if verbose:
+        sys.stdout.write("Applying rules... ")
+        sys.stdout.flush()
+    
     for i in range(0, max_iterations):
-        done, remaining = apply_rules_until_aux(
-                OperatorSum(remaining), rules, final_tensor_names, done)
-    return OperatorSum(done + remaining)
+        op_sum =  apply_rules_aux(op_sum, rules)
+
+    if verbose:
+        sys.stdout.write("done.\n")
+        
+    return op_sum
 
 def sum_numbers(op_sum):
     """
@@ -213,9 +204,10 @@ def collect_by_tensors(op_sum, tensor_names):
     for op in op_sum.operators:
         for pos, tensor in enumerate(op.tensors):
             if tensor.name in tensor_names:
-                collected = collection.get(tensor.name, OperatorSum())
+                n = len(tensor.indices)
+                collected = collection.get((tensor.name, n), OperatorSum())
                 new_ops = OperatorSum([op.remove_tensor(pos)])
-                collection[tensor.name] = collected + new_ops
+                collection[(tensor.name, n)] = collected + new_ops
                 break
         else:
             rest.append(op)

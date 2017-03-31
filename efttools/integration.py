@@ -4,6 +4,8 @@ lagrangian. Contains the function :func:`integrate` and the classes
 for representing the different types of heavy fields.
 """
 
+import sys
+
 from operators import (
     Tensor, Op, OpSum,
     apply_derivatives, concat, number_op, symbol_op,
@@ -471,7 +473,7 @@ class MajoranaFermion(object):
         mass2 = self.mass * c_f * c_f1 * Op(epsUpDot(0, n))
         return half * (kin + kinc + OpSum(-mass1, -mass2))
 
-def integrate(heavy_fields, interaction_lagrangian, max_dim=6):
+def integrate(heavy_fields, interaction_lagrangian, max_dim=6, verbose=True):
     """
     Integrate out heavy fields.
 
@@ -483,8 +485,14 @@ def integrate(heavy_fields, interaction_lagrangian, max_dim=6):
         interaction_lagrangian (``efttools.operators.OperatorSum``):
             from which to integrate out the heavy fields
         max_dim (int): maximum dimension of the operators in the effective
-                       lagrangian
+            lagrangian
+        verbose (bool): specifies whether to print messages signaling
+            the start and end of the integration process.
     """
+    if verbose:
+        sys.stdout.write("Integrating... ")
+        sys.stdout.flush()
+
     eoms = dict(concat([field.equations_of_motion(interaction_lagrangian)
                         for field in heavy_fields]))
     replaced_eoms = {field_name:
@@ -494,5 +502,21 @@ def integrate(heavy_fields, interaction_lagrangian, max_dim=6):
                                 for field in heavy_fields],
                                OpSum())
     total_lagrangian = quadratic_lagrangian + interaction_lagrangian
-    return total_lagrangian.replace_all(replaced_eoms, max_dim)
+    result = total_lagrangian.replace_all(replaced_eoms, max_dim)
+
+    if verbose:
+        sys.stdout.write("done.\n")
+
+    return result
+
+
+
+
+
+
+
+
+
+
+
 

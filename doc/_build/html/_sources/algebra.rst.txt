@@ -1,6 +1,0 @@
-The ``algebra`` module
-**********************
-
-.. automodule:: efttools.algebra.operators
-   :members:
-   :special-members:

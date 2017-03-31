@@ -133,26 +133,27 @@ class Writer(object):
         """
         Plain text representation
         """
-        total = "Collected:\n{coll}\nRest:\n  {rest}"
+        total = "Collected:\n{coll}\nRest:\n{rest}"
         op_form = "  {name}:\n{coef}\n"
         coef_term_form = "    {} {}"
         return total.format(
             coll = "\n".join(op_form.format(
-                name = str(op_name),
+                name = op_name.format(*list(range(-1, -n_inds-1, -1))),
                 coef = "\n".join(coef_term_form.format(num, op_coef)
                                   for num, op_coef in coef_lst))
-                              for op_name, coef_lst in self.collection),
+                             for (op_name, n_inds), coef_lst in
+                             self.collection),
             rest = "\n".join(str(num) + str(op) for num, op in self.rest))
 
     def latex_code(self, structures, op_reps, inds):
         """
-        Representation as LaTeX ``align`` environments
+        Representation as LaTeX's amsmath ``align`` environments
 
         Args:
             structures (dict): the keys are the names of all the tensors.
                 The corresponding values are the LaTeX formula
                 representation, using python`s ``str.format`` notation 
-                ``"{}"`` to specify the positions where the indices
+                ``"{}"`` to specify the popsitions where the indices
                 should appear.
             structures (dict): the keys are the names of all the operators
                 in the basis. The corresponding values are the LaTeX formula
@@ -161,30 +162,32 @@ class Writer(object):
                 the indices, in the order in which they should appear.v
         """
         out_str = "Collected operators:\n"
-        for op_name, coef_lst in self.collection:
-            out_str += "\\begin{align*}\n"
-            out_str += op_reps.get(op_name, str(op_name)) + "= & \n "
+        for (op_name, n_inds), coef_lst in self.collection:
+            out_str += r"\begin{align*}" + "\n"
+            out_str += op_reps[op_name].format(*inds[:n_inds]) + "= & \n "
             for i, (op_coef, num) in enumerate(coef_lst):
                 out_str += display_number(num) + " "
                 out_str += display_operator(op_coef, structures, inds)
                 if i < len(coef_lst) - 1:
                     if i%3 == 2:
-                        out_str += "\\\\ &"
+                        out_str += r"\\ &"
                     if i%50 == 49:
-                        out_str += "\n\\cdots\\end{align*}\n"
-                        out_str += "\\begin{align*}\\dots + "
+                        out_str += "\n" r"\cdots\end{align*}" + "\n"
+                        out_str += r"\begin{align*}\cdots"
                 out_str += "\n  "
-            out_str += "\\end{align*}\n"
+            out_str += r"\end{align*}" + "\n"
         if self.rest:
             out_str += "\nRest:\n"
-            out_str += "\\begin{align*}\n"
+            out_str += r"\begin{align*}" + "\n &"
             for i, (op, num) in enumerate(self.rest):
                 out_str += display_number(num) + " "
-                out_str += display_operator(op, structures, inds) + " + "
-                if i%1 == 0:
-                    out_str += "\\\\"
+                out_str += display_operator(op, structures, inds)
+                out_str += r"\\ &"
+                if i%20 == 19:
+                    out_str += "\n" + r"+\cdots\end{align*}" + "\n"
+                    out_str += r"\begin{align*}" + "\n" + r"\cdots &"
                 out_str += "\n"
-            out_str += "\\end{align*}\n"
+            out_str += r"\end{align*}" + "\n"
         return out_str
 
     def write_text_file(self, filename):
@@ -211,11 +214,11 @@ class Writer(object):
         """
         out_str = self.latex_code(structures, op_reps, inds)
         with open(filename + ".tex", "w") as f:
-            f.write(("\\documentclass{{article}}\n" +
-                     "\\usepackage{{amsmath}}\n" +
-                     "\\usepackage{{amssymb}}\n" +
-                     "\\begin{{document}}\n{}" +
-                     "\\end{{document}}").format(
+            f.write((r"\documentclass{{article}}" + "\n" +
+                     r"\usepackage{{amsmath}}" + "\n" +
+                     r"\usepackage{{amssymb}}" + "\n" +
+                     r"\begin{{document}}" + "\n" + "{}" + "\n" +
+                     r"\end{{document}}").format(
                          self.latex_code(structures, op_reps, inds)))
 
     def show_pdf(self, filename, pdf_viewer, structures, op_reps, inds):

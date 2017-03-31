@@ -3,6 +3,16 @@ Transformations of the effective lagrangian
 
 .. currentmodule:: efttools.transformations
 
+.. note:: This section assumes that the functions
+   from :mod:`efttools.transformations` and
+   :mod:`efttools.transformations` that it uses are in the namespace.
+   To import all the functions that appear here do::
+
+     from efttools.operators import number_op, flavor_op
+     
+     from efttools.transformations import (
+         collect_numbers_and_symbols, apply_rules_until)
+		   
 An effective lagrangian obtained from integration of heavy fields
 usually contains operators that aren't independent. Several
 transformations can be applied to them to write the lagrangian

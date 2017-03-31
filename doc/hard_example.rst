@@ -2,9 +2,15 @@
 An example with a heavy vector and a heavy fermion
 ==================================================
 
-Here we will illustrate more features of the library as the use of covariant derivatives, or the management of Lorentz and flavor indices.
+Here we will illustrate more features of the library as the use of
+covariant derivatives, or the management of Lorentz and flavor indices.
 
-The model will now be the Standard Model coupled to a family of color-singlet vector :math:`\mathcal{L}^i_\mu` with representation :math:`2_{1/2}` under :math:`SU(2)\times U(1)` and another family of vector-like leptons :math:`E^i` with the same representation as the right-handed electron :math:`e_R` of the Standard Model. The interaction lagrangian will be:
+The model will now be the Standard Model coupled to a family of
+color-singlet vector :math:`\mathcal{L}^i_\mu` with representation
+:math:`2_{1/2}` under :math:`SU(2)\times U(1)` and another family of
+vector-like leptons :math:`E^i` with the same representation as the
+right-handed electron :math:`e_R` of the Standard Model. The
+interaction lagrangian will be:
 
 .. math::
     \mathcal{L}_{int} = 
@@ -18,6 +24,20 @@ The model will now be the Standard Model coupled to a family of color-singlet ve
 
 Creation of the model
 ---------------------
+
+The imports that we will need are::
+
+  from efttools.operators import (
+      TensorBuilder, FieldBuilder, Op, OpSum,
+      number_op, tensor_op, flavor_op,
+      sigma4, sigma4bar)
+
+  from efttools.integration import (
+      ComplexVector, VectorLikeFermion, integrate)
+
+  from efttools.transformations import apply_rules_until
+
+  from efttools.output import Writer
 
 As before, we first create the tensors::
 
@@ -49,9 +69,23 @@ and the fields::
   ERc = TensorBuilder("ERc", 1.5, fermion)
 
 
-For every two-component spinor we need to define two fields: one is the conjugate of the other. Therefore, a Dirac spinor requires four ``FieldBuider`` definitions. The integration part of the library is prepared to deal with spinor in two-component formalism. The tensor builders ``epsUp``, ``epsUpDot``, ``epsDown``, ``epsDownDot``, ``sigma4`` and ``sigma4bar``, corresponding to the tensors :math:`\epsilon^{\alpha\beta}`, :math:`\epsilon^{\dot{\alpha}\dot{\beta}}`, :math:`\epsilon_{\alpha\beta}`, :math:`\epsilon_{\dot{\alpha}\dot{\beta}}`, :math:`\sigma^\mu_{\alpha\dot{\beta}}` and :math:`\sigma_\mu^{\dot{\alpha}\beta}$` are already defined in the library.
+For every two-component spinor we need to define two fields: one
+is the conjugate of the other. Therefore, a Dirac spinor requires
+four :class:`efttools.operators.FieldBuider` definitions. The integration
+part of the library is prepared to deal with spinors in two-component
+formalism. The tensor builders :data:`eftools.operators.epsUp`,
+:data:`eftools.operators.epsUpDot`, :data:`eftools.operators.epsDown`,
+:data:`eftools.operators.epsDownDot`, :data:`eftools.operators.sigma4`
+and :class:`eftools.operators.sigma4bar`, corresponding to the tensors
+:math:`\epsilon^{\alpha\beta}`, :math:`\epsilon^{\dot{\alpha}\dot{\beta}}`,
+:math:`\epsilon_{\alpha\betfa}`, :math:`\epsilon_{\dot{\alpha}\dot{\beta}}`,
+:math:`\sigma^\mu_{\alpha\dot{\beta}}` and
+:math:`\sigma_\mu^{\dot{\alpha}\beta}$` are already defined in the library.
 
-The next step now is defining the lagrangian. To introduce covariant derivatives of a tensor, the function ``D`` should be used. Its first argument is its Lorenz index and the second is the tensor for which the derivative is to be taken::
+The next step now is defining the lagrangian. To introduce covariant
+derivatives of a tensor, the function :func:`efttools.operators.D`
+should be used. Its first argument is its Lorenz index and the second
+is the tensor for which the derivative is to be taken::
 
   interaction_lagrangian = -OpSum(
       Op(gamma(0), Lc(1, 2, 0), D(1, phi(2))),
@@ -74,9 +108,8 @@ The heavy fields are::
   heavy_E = VectorLikeFermion("E", "EL", "ER", "ELc", "ERc", 2)
   heavy_fields = [heavy_L, heavy_E]
 
-The first argument to the constructors of the real boson classes is the name of the corresponding field and the second argument is the number of indices this field carries. For the complex boson and Majorana fermion cases the first two arguments correspond, respectively, to the field and its conjugate, whereas the third one is the number of indices. For vector-like fermions, the args are, in order: the name of the fermion, the names of the fields representing its left-handed, right-handed, conjugate left-handed and conjugate right-handed parts, and the number of indices.
-
-To integrate them out to get an effective lagrangian with operators up to dimension 6, we do::
+To integrate them out to get an effective lagrangian with operators up
+to dimension 6, we do::
 
   effective_lagrangian = integrate(heavy_fields, interaction_lagrangian, 6)
 
@@ -89,9 +122,22 @@ Let's say we are interested in the mixed contribution of :math:`L_\mu` and :math
                           if (op.contains_symbol("ML") and
 			      op.contains_symbol("ME"))])
 
-The function ``Operator.contains`` checks whether the tensor name passed to it appears in the operator. Masses are represented by a special kind of tensor, a symbol. They are identified by their name beginning with ``"{"``, ending with ``"}"`` and containing one ``"^"``. This identifiers are used to tell the library to treat this tensor as some power of a constant and collect and multiply its ocurrences inside an operator. The equivalent to ``Operator.contains`` for symbols is ``Operator.contains_symbol``, which we have used above.
+The method :meth:`efttools.operators.Operator.contains` checks whether the
+tensor name passed to it appears in the operator. Masses are represented by
+a special kind of tensor (a "symbol"). They are identified by their name
+beginning with ``"{"``, ending with ``"}"`` and containing one ``"^"``.
+This identifiers are used to tell the library to treat this tensor as some
+power of a constant and collect and multiply its ocurrences inside an
+operator by adding the exponents. The equivalent to
+:meth:`efttools.operators.Operator.contains`
+for symbols is :meth:`efttools.operators.Operator.contains_symbol`,
+which we have used above.
 
-The operators corresponding to the mixed contributiones that appear after integration are :math:`(\bar{l}^i_L \gamma^\mu D_\mu\phi)(\phi^\dagger l^j_L)` and it conjugate. Suppose that we want to write the final result in terms of the operators`
+The operators corresponding to the mixed contributiones that appear
+after integration are
+:math:`(\bar{l}^i_L \gamma^\mu D_\mu\phi)(\phi^\dagger l^j_L)` and
+it conjugate. Suppose that we want to write the final result in terms
+of the operators
 
 .. math::
    \left(\mathcal{O}^{(1)}_{\phi l}\right)_{ij} = 
@@ -110,7 +156,9 @@ and their complex conjugates. We would then use the identity
    +(\bar{l}^i_L \sigma^a \gamma^\mu l^j_L)
    (\phi^\dagger \sigma^a D_\mu \phi)\right)
 
-We can substitute everything that matches the left-hand side by the right-hand side and the conjugate of the LHS by the conjugate of the RHS using the rules::
+We can substitute everything that matches the left-hand side by the
+right-hand side and the conjugate of the LHS by the conjugate of the
+RHS using the rules::
 
   rules = [
       (# Pattern
@@ -137,7 +185,8 @@ We can substitute everything that matches the left-hand side by the right-hand s
 				 D(4, phic(7)), sigmaSU2(2, 7, 8),
 				 phi(8))))]
 
-We now have to define the basis of operators in which we want the final lagrangian written. We use the function ``flavor_op`` to create a callable such that, when called with several arguments, it returns an operator with a single tensor whose indices are the arguments given::
+We now have to define the basis of operators in which we want the
+final lagrangian written::
 
   O1phil = flavor_op("O1phil")
   O1philc = flavor_op("O1philc")
@@ -163,7 +212,8 @@ We now have to define the basis of operators in which we want the final lagrangi
 	  D(4, phic(7)), sigmaSU2(2, 7, 8), phi(8))
        OpSum(O3philc(-1, -2)))]
 
-Finally, we just call ``apply_rules_until`` to move the operators the desired base::
+Finally, we just call :func:`efttools.transformations.apply_rules_until`
+to move the operators the desired base::
 
   all_rules = rules + definition_rules
   final_op_names = ["O1phil", "O1philc", "O3phil", "O3philc"]
@@ -178,7 +228,9 @@ We can do as in the previous example to write a text file with the results::
   eff_lag_writer = Writer(trasnf_eff_lag, final_op_names)
   eff_lag_writer.write_text_file("L_E_example")
 
-Now let's specify the LaTeX representation. When there's indices in the tensors we should give the positions where they should appear by using the ``str.format`` -style ``"{}"`` placeholders::
+Now let's specify the LaTeX representation. When there's indices in the
+tensors we should give the positions where they should appear by using
+python's ``str.format`` style ``"{}"`` placeholders::
 
   latex_tensor_reps = {
       "gamma": r"\gamma_{}",

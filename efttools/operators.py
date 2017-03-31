@@ -59,7 +59,7 @@ class Tensor(object):
                                   ",".join(map(str, self.non_der_indices)))
         return der_str + ten_str
 
-    __repr__ = __str__
+    # __repr__ = __str__
 
     def __eq__(self, other):
         return (self.name == other.name and
@@ -105,7 +105,7 @@ class Operator(object):
     def __str__(self):
         return "".join(map(str, self.tensors))
 
-    __repr__ = __str__
+    # __repr__ = __str__
 
     def __mul__(self, other):
         return Operator(self.tensors + other.tensors)
@@ -332,7 +332,7 @@ class OperatorSum(object):
     def __str__(self):
         return " + ".join(map(str, self.operators))
 
-    __repr__ = __str__
+    # __repr__ = __str__
 
     def __add__(self, other):
         return OperatorSum(self.operators + other.operators)

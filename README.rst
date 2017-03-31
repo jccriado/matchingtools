@@ -1,6 +1,5 @@
-EFTTools is Python package for doing computations related
+*efttools* is Python library for doing calculations related
 to Effective Field Theory.
-
 
 It provides the tools to create a lagrangian and integrate out heavy
 fields at the tree level. It also includes functions for applying

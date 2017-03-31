@@ -1,29 +1,36 @@
 import context
+import sys
 
-from efttools.algebra import (
-    Tensor, Op, OpSum,
-    TensorBuilder, FieldBuilder, D,
-    number_op, symbol_op, tensor_op,
-    boson, fermion, kdelta,
-    sigma4, sigma4bar, epsUp, epsUpDot, epsDown, epsDownDot,
-    collect_numbers_and_symbols, collect_by_tensors,
-    apply_rules_until)
 
-from efttools.integration import (
-    integrate, RealScalar, ComplexScalar)
+# -- Core tools --------------------------------------------------------------
 
-# -- Flavor tensors --
+from efttools.operators import (
+    TensorBuilder, FieldBuilder, D, Op, OpSum,
+    number_op, symbol_op, tensor_op, flavor_tensor_op,
+    boson, fermion, kdelta)
 
-mu2phi = TensorBuilder("mu2phi")
-lambdaphi = TensorBuilder("lambdaphi")
-ye = TensorBuilder("ye")
-yec = TensorBuilder("yec")
-yd = TensorBuilder("yd")
-ydc = TensorBuilder("ydc")
-yu = TensorBuilder("yu")
-yuc = TensorBuilder("yuc")
-V = TensorBuilder("V")
-Vc = TensorBuilder("Vc")
+from efttools.integration import integrate, RealScalar, ComplexScalar
+
+from efttools.output import Writer
+
+
+# -- Predefined tensors and rules --------------------------------------------
+
+from efttools.extras.SM import (
+    mu2phi, lambdaphi, ye, yec, yd, ydc, yu, yuc, V, Vc,
+    phi, phic, lL, lLc, qL, qLc, eR, eRc, dR, dRc, uR, uRc,
+    bFS, wFS, gFS, latex_SM)
+
+from efttools.extras.Lorentz import (
+    sigma4, sigma4bar, epsUp, epsUpDot, epsDown, epsDownDot, latex_Lorentz)
+
+from efttools.extras.SU3 import TSU3, epsSU3, latex_SU3
+
+from efttools.extras.SU2 import (
+    epsSU2, sigmaSU2, CSU2, CSU2c, epsSU2quadruplets, fSU2, latex_SU2)
+
+
+# -- Tensors -----------------------------------------------------------------
 
 kappaS = TensorBuilder("kappaS")
 lambdaS = TensorBuilder("lambdaS")
@@ -54,73 +61,197 @@ kappaXi1c = TensorBuilder("kappaXi1c")
 lambdaXi1 = TensorBuilder("lambdaXi1")
 lambdaTildeXi1 = TensorBuilder("lambdaTildeXi1")
 
-# -- Group tensors --
+lambdaTheta1 = TensorBuilder("lambdaTheta1")
+lambdaTheta1c = TensorBuilder("lambdaTheta1c")
 
-epsSU2 = TensorBuilder("epsSU2")
-sigmaSU2 = TensorBuilder("sigmaSU2")
-fSU2 = TensorBuilder("fSU2")
+lambdaTheta3 = TensorBuilder("lambdaTheta3")
+lambdaTheta3c = TensorBuilder("lambdaTheta3c")
 
-lambdaColor = TensorBuilder("lambdaColor")
+yqlomega1 = TensorBuilder("yqlomega1")
+yqlomega1c = TensorBuilder("yqlomega1c")
+yqqomega1 = TensorBuilder("yqqomega1")
+yqqomega1c = TensorBuilder("yqqomega1c")
+yeuomega1 = TensorBuilder("yeuomega1")
+yeuomega1c = TensorBuilder("yeuomega1c")
+yduomega1 = TensorBuilder("yduomega1")
+yduomega1c = TensorBuilder("yduomega1c")
 
-# -- Fields --
+ydomega2 = TensorBuilder("ydomega2")
+ydomega2c = TensorBuilder("ydomega2c")
 
-phi = FieldBuilder("phi", 1, boson)
-phic = FieldBuilder("phic", 1, boson)
-lL = FieldBuilder("lL", 1.5, fermion)
-lLc = FieldBuilder("lLc", 1.5, fermion)
-qL = FieldBuilder("qL", 1.5, fermion)
-qLc = FieldBuilder("qLc", 1.5, fermion)
-eR = FieldBuilder("eR", 1.5, fermion)
-eRc = FieldBuilder("eRc", 1.5, fermion)
-dR = FieldBuilder("dR", 1.5, fermion)
-dRc = FieldBuilder("dRc", 1.5, fermion)
-uR = FieldBuilder("uR", 1.5, fermion)
-uRc = FieldBuilder("uRc", 1.5, fermion)
+yedomega4 = TensorBuilder("yedomega4")
+yedomega4c = TensorBuilder("yedomega4c")
+yuuomega4 = TensorBuilder("yuuomega4")
+yuuomega4c = TensorBuilder("yuuomega4c")
 
+yldPi1 = TensorBuilder("yldPi1")
+yldPi1c = TensorBuilder("yldPi1c")
+
+yluPi7 = TensorBuilder("yluPi7")
+yluPi7c = TensorBuilder("yluPi7c")
+yeqPi7 = TensorBuilder("yeqPi7")
+yeqPi7c = TensorBuilder("yeqPi7c")
+
+yqlzeta = TensorBuilder("yqlzeta")
+yqlzetac = TensorBuilder("yqlzetac")
+yqqzeta = TensorBuilder("yqqzeta")
+yqqzetac = TensorBuilder("yqqzetac")
+
+yudOmega1 = TensorBuilder("yudOmega1")
+yudOmega1c = TensorBuilder("yudOmega1c")
+yqqOmega1 = TensorBuilder("yqqOmega1")
+yqqOmega1c = TensorBuilder("yqqOmega1c")
+
+ydOmega2 = TensorBuilder("ydOmega2")
+ydOmega2c = TensorBuilder("ydOmega2c")
+
+yuOmega4 = TensorBuilder("yuOmega4")
+yuOmega4c = TensorBuilder("yuOmega4c")
+
+yqUpsilon = TensorBuilder("yqUpsilon")
+yqUpsilonc = TensorBuilder("yqUpsilonc")
+
+yquPhi = TensorBuilder("yquPhi")
+yquPhic = TensorBuilder("yquPhic")
+ydqPhi = TensorBuilder("ydqPhi")
+ydqPhic = TensorBuilder("ydqPhic")
+
+kappaSvarphi = TensorBuilder("kappaSvarphi")
+kappaSvarphic = TensorBuilder("kappaSvarphic")
+kappaSXi0 = TensorBuilder("kappaSXi0")
+kappaSXi1 = TensorBuilder("kappaSXi1")
+kappaXi03 = TensorBuilder("kappaXi03")
+kappaXi0Xi1 = TensorBuilder("kappaXi0Xi1")
+kappaXi0varphi = TensorBuilder("kappaXi0varphi")
+kappaXi0varphic = TensorBuilder("kappaXi0varphic")
+kappaXi1varphi = TensorBuilder("kappaXi1varphi")
+kappaXi1varphic = TensorBuilder("kappaXi1varphic")
+kappaXi0Theta1 = TensorBuilder("kappaXi0Theta1")
+kappaXi0Theta1c = TensorBuilder("kappaXi0Theta1c")
+kappaXi1Theta1 = TensorBuilder("kappaXi1Theta1")
+kappaXi1Theta1c = TensorBuilder("kappaXi1Theta1c")
+kappaXi1Theta3 = TensorBuilder("kappaXi1Theta3")
+kappaXi1Theta3c = TensorBuilder("kappaXi1Theta3c")
+lambdaSXi0 = TensorBuilder("lambdaSXi0")
+lambdaSXi1 = TensorBuilder("lambdaSXi1")
+lambdaSXi1c = TensorBuilder("lambdaSXi1c")
+lambdaXi1Xi0 = TensorBuilder("lambdaXi1Xi0")
+lambdaXi1Xi0c = TensorBuilder("lambdaXi1Xi0c")
+
+
+# -- Fields ------------------------------------------------------------------
+
+# Neutral singlet
 S = FieldBuilder("S", 1, boson)
+
+# Hypercharge 1 singlet
 S1 = FieldBuilder("S1", 1, boson)
 S1c = FieldBuilder("S1c", 1, boson)
+
+# Hypercharge 2 singlet
 S2 = FieldBuilder("S2", 1, boson)
 S2c = FieldBuilder("S2c", 1, boson)
+
+# Hypercharge 1/2 SU(2) doublet
 varphi = FieldBuilder("varphi", 1, boson)
 varphic = FieldBuilder("varphic", 1, boson)
+
+# Neutral SU(2) triplet
 Xi0 = FieldBuilder("Xi0", 1, boson)
+
+# Hypercharge 1 SU(2) triplet
 Xi1 = FieldBuilder("Xi1", 1, boson)
 Xi1c = FieldBuilder("Xi1c", 1, boson)
 
-# -- Lagrangian --
+# Hypercharge 1/2 SU(2) quadruplet
+Theta1 = FieldBuilder("Theta1", 1, boson)
+Theta1c = FieldBuilder("Theta1c", 1, boson)
 
-interaction_lagrangian = -OpSum(
-    # -- S --
+# Hypercharge 3/2 SU(2) quadruplet
+Theta3 = FieldBuilder("Theta3", 1, boson)
+Theta3c = FieldBuilder("Theta3c", 1, boson)
+
+# Hypercharge -1/3 SU(3) triplet
+omega1 = FieldBuilder("omega1", 1, boson)
+omega1c = FieldBuilder("omega1c", 1, boson)
+
+# Hypercharge 2/3 SU(3) triplet
+omega2 = FieldBuilder("omega2", 1, boson)
+omega2c = FieldBuilder("omega2c", 1, boson)
+
+# Hypercharge -4/3 SU(3) triplet
+omega4 = FieldBuilder("omega4", 1, boson)
+omega4c = FieldBuilder("omega4c", 1, boson)
+
+# Hypercharge 1/6 SU(3) triplet, SU(2) doublet
+Pi1 = FieldBuilder("Pi1", 1, boson)
+Pi1c = FieldBuilder("Pi1c", 1, boson)
+
+# Hypercharge 7/6 SU(3) triplet, SU(2) doublet
+Pi7 = FieldBuilder("Pi7", 1, boson)
+Pi7c = FieldBuilder("Pi7c", 1, boson)
+
+# Hypercharge -1/3 SU(3) triplet, SU(2) triplet
+zeta = FieldBuilder("zeta", 1, boson)
+zetac = FieldBuilder("zetac", 1, boson)
+
+# Hypercharge 1/3 SU(3) sextet
+Omega1 = FieldBuilder("Omega1", 1, boson)
+Omega1c = FieldBuilder("Omega1c", 1, boson)
+
+# Hypercharge -2/3 SU(3) sextet
+Omega2 = FieldBuilder("Omega2", 1, boson)
+Omega2c = FieldBuilder("Omega2c", 1, boson)
+
+# Hypercharge 4/3 SU(3) sextet
+Omega4 = FieldBuilder("Omega4", 1, boson)
+Omega4c = FieldBuilder("Omega4c", 1, boson)
+
+# Hypercharge 1/3 SU(3) sextet, SU(2) triplet
+Upsilon = FieldBuilder("Upsilon", 1, boson)
+Upsilonc = FieldBuilder("Upsilonc", 1, boson)
+
+# Hypercharge 1/2 SU(3) octet, SU(2) doublet
+Phi = FieldBuilder("Phi", 1, boson)
+Phic = FieldBuilder("Phic", 1, boson)
+
+
+# -- Lagrangian --------------------------------------------------------------
+
+scalars_interaction_lagrangian = -OpSum(
+    # S
     Op(kappaS(0), phic(1), phi(1), S(0)),
     Op(lambdaS(0, 1), S(0), S(1), phic(2), phi(2)),
     Op(kappaS3(0, 1, 2), S(0), S(1), S(2)),
     
-    # -- S1 --
+    # S1
     Op(ylS1(0, 1, 2), S1c(0), lLc(3, 4, 1), epsUpDot(3, 5),
               epsSU2(4, 6), lLc(5, 6, 2)),
     Op(ylS1c(0, 1, 2), S1(0), lL(3, 4, 1), epsUp(3, 5),
               epsSU2(4, 6), lL(5, 6, 2)),
 
-    # -- S2 --
+    # S2
     Op(yeS2(0, 1, 2), S2c(0), epsDown(3, 4), eRc(3, 1), eRc(4, 2)),
     Op(yeS2c(0, 1, 2), S2(0), epsDownDot(3, 4), eR(3, 1), eR(4, 2)),
 
-    # -- varphi --
+    # varphi
     Op(yevarphi(0, 1, 2), varphic(3, 0), eRc(4, 1), lL(4, 3, 2)),
     Op(yevarphic(0, 1, 2), varphi(3, 0), lLc(4, 3, 2), eR(4, 1)),
     Op(ydvarphi(0, 1, 2), varphic(3, 0), dRc(4, 5, 1), qL(4, 5, 3, 2)),
     Op(ydvarphic(0, 1, 2), varphi(3, 0), qLc(4, 5, 3, 2), dR(4, 5, 1)),
-    Op(yuvarphi(0, 1, 2), varphic(3, 0), epsSU2(3, 5), qLc(4, 6, 5, 1), uR(4, 6, 2)),
-    Op(yuvarphic(0, 1, 2), varphi(3, 0), epsSU2(3, 5), uRc(4, 6, 2), qL(4, 6, 5, 1)),
+    Op(yuvarphi(0, 1, 2), varphic(3, 0), epsSU2(3, 5),
+       qLc(4, 6, 5, 1), uR(4, 6, 2)),
+    Op(yuvarphic(0, 1, 2), varphi(3, 0), epsSU2(3, 5),
+       uRc(4, 6, 2), qL(4, 6, 5, 1)),
     Op(lambdavarphi(0), varphic(1, 0), phi(1), phic(2), phi(2)),
     Op(lambdavarphic(0), phic(1), varphi(1, 0), phic(2), phi(2)),
 
-    # -- Xi0 --
+    # Xi0
     Op(kappaXi0(0), Xi0(1, 0), phic(2), sigmaSU2(1, 2, 3), phi(3)),
     Op(lambdaXi0(0, 1), Xi0(2, 0), Xi0(2, 1), phic(3), phi(3)),
+    Op(kappaXi03(0, 1, 2), fSU2(3, 4, 5), Xi0(3, 0), Xi0(4, 1), Xi0(5, 2)),
 
-    # -- Xi1 --
+    # Xi1
     Op(ylXi1(0, 1, 2), Xi1c(3, 0), lLc(4, 5, 1), lLc(6, 7, 2),
               epsUpDot(4, 6), sigmaSU2(3, 5, 8), epsSU2(8, 7)),
     Op(ylXi1c(0, 1, 2), Xi1(3, 0), lL(4, 5, 1), lL(6, 7, 2),
@@ -131,11 +262,174 @@ interaction_lagrangian = -OpSum(
               sigmaSU2(1, 3, 4), phi(4)),
     Op(lambdaXi1(0, 1), Xi1c(2, 0), Xi1(2, 1), phic(3), phi(3)),
     Op(lambdaTildeXi1(0, 1), fSU2(2, 3, 4), Xi1c(2, 0), Xi1(3, 1),
-              phic(5), sigmaSU2(4, 5, 6), phi(6))
-)
-                               
+              phic(5), sigmaSU2(4, 5, 6), phi(6)),
 
-# -- Heavy fields --
+    # Theta1
+    Op(lambdaTheta1(0), phic(1), sigmaSU2(2, 1, 3), phi(3),
+       CSU2(4, 2, 5), epsSU2(5, 6), phic(6),
+       epsSU2quadruplets(4, 7), Theta1(7, 0)),
+    Op(lambdaTheta1(0), phic(1), sigmaSU2(2, 1, 3), phi(3),
+       CSU2c(4, 2, 5), epsSU2(5, 6), phi(6),
+       epsSU2quadruplets(4, 7), Theta1c(7, 0)),
+
+    # Theta3
+    Op(lambdaTheta3(0), phic(1), sigmaSU2(2, 1, 3), epsSU2(3, 4), phic(4),
+       CSU2(5, 2, 6), epsSU2(6, 7), phic(7), epsSU2quadruplets(5, 8),
+       Theta3(8, 0)),
+    Op(lambdaTheta3c(0), epsSU2(1, 3), phi(3), sigmaSU2(2, 1, 4), phi(4),
+       CSU2c(5, 2, 6), epsSU2(6, 7), phi(7), epsSU2quadruplets(5, 8),
+       Theta3c(8, 0)),
+
+    # omega1
+    Op(yqlomega1(0, 1, 2), omega1c(3, 0), qL(4, 3, 5, 1),
+       epsSU2(5, 6), epsUp(4, 7), lL(7, 6, 2)),
+    Op(yqlomega1c(0, 1, 2), omega1(3, 0), lLc(7, 6, 2),
+       epsSU2(5, 6), epsUpDot(7, 4), qLc(4, 3, 5, 1)),
+    Op(yqqomega1(0, 1, 2), omega1c(3, 0), epsSU3(3, 4, 5),
+       qLc(6, 4, 7, 1), epsSU2(7, 8), epsUpDot(6, 9), qLc(9, 5, 8, 2)),
+    Op(yqqomega1c(0, 1, 2), omega1(3, 0), epsSU3(3, 4, 5),
+       qL(9, 5, 8, 2), epsSU2(7, 8), epsUp(9, 6), qL(6, 4, 7, 1)),
+    Op(yeuomega1(0, 1, 2), omega1c(3, 0), eR(4, 1),
+       epsDownDot(4, 5), uR(5, 3, 2)),
+    Op(yeuomega1c(0, 1, 2), omega1(3, 0), uRc(5, 3, 2),
+       epsDown(5, 4), eRc(4, 1)),
+    Op(yduomega1(0, 1, 2), omega1c(3, 0), epsSU3(3, 4, 5),
+       dRc(6, 4, 1), epsDown(6, 7), uRc(7, 5, 2)),
+    Op(yduomega1c(0, 1, 2), omega1(3, 0), epsSU3(3, 4, 5),
+       uRc(7, 5, 2), epsDownDot(7, 6), dRc(6, 4, 1)),
+
+    # omega2
+    Op(ydomega2(0, 1, 2), omega2c(3, 0), epsSU3(3, 4, 5),
+       dRc(6, 4, 1), epsDown(6, 7), dRc(7, 5, 2)),
+    Op(ydomega2c(0, 1, 2), omega2(3, 0), epsSU3(3, 4, 5),
+       dRc(7, 5, 2), epsDownDot(7, 6), dRc(6, 4, 1)),
+
+    # omega4
+    Op(yedomega4(0, 1, 2), omega4c(3, 0), eR(4, 1),
+       epsDownDot(4, 5), dR(5, 3, 2)),
+    Op(yedomega4c(0, 1, 2), omega4(3, 0), dRc(5, 3, 2),
+       epsDown(5, 4), eR(4, 1)),
+    Op(yuuomega4(0, 1, 2), omega4c(3, 0), epsSU3(3, 4, 5),
+       uRc(6, 4, 1), epsDown(6, 7), uRc(7, 5, 2)),
+    Op(yuuomega4c(0, 1, 2), omega4(3, 0), epsSU3(3, 4, 5),
+       uRc(7, 5, 2), epsDownDot(7, 6), uRc(7, 4, 1)),
+
+    # Pi1
+    Op(yldPi1(0, 1, 2), Pi1c(3, 4, 0), epsSU2(4, 5),
+       lLc(6, 5, 1), dR(6, 3, 2)),
+    Op(yldPi1c(0, 1, 2), Pi1(3, 4, 0), epsSU2(4, 5),
+       dRc(6, 3, 2), lL(6, 5, 1)),
+
+    # Pi7
+    Op(yluPi7(0, 1, 2), Pi7c(3, 4, 0), epsSU2(4, 5),
+       lLc(6, 5, 1), uR(6, 3, 2)),
+    Op(yluPi7c(0, 1, 2), Pi7(3, 4, 0), epsSU2(4, 5),
+       uRc(6, 3, 2), lL(6, 5, 1)),
+    Op(yeqPi7(0, 1, 2), Pi7c(3, 4, 0), eRc(5, 1), qL(5, 3, 4, 2)),
+    Op(yeqPi7c(0, 1, 2), Pi7(3, 4, 0), qLc(5, 3, 4, 2), eR(5, 1)),
+
+    # zeta
+    Op(yqlzeta(0, 1, 2), zetac(3, 4, 0), qL(5, 3, 6, 1), epsSU2(6, 7),
+       sigmaSU2(4, 7, 8), epsUp(5, 9), lL(9, 8, 2)),
+    Op(yqlzetac(0, 1, 2), zeta(3, 4, 0), lLc(9, 8, 2), epsUpDot(9, 5),
+       sigmaSU2(4, 8, 7), epsSU2(6, 7), qLc(5, 3, 6, 1)),
+    Op(yqqzeta(0, 1, 2), zetac(3, 4, 0), epsSU3(3, 5, 6),
+       qLc(7, 5, 8, 1), sigmaSU2(4, 8, 9), epsSU2(9, 10),
+       epsUpDot(7, 11), qLc(11, 6, 10, 2)),
+    Op(yqqzetac(0, 1, 2), zeta(3, 4, 0), epsSU3(3, 5, 6),
+       qL(11, 6, 10, 2), epsUp(11, 7), epsSU2(9, 10),
+       sigmaSU2(4, 9, 8), qL(7, 5, 8, 1)),
+
+    # Omega1
+    Op(yudOmega1(0, 1, 2), Omega1c(3, 4, 0), uR(5, 3, 1),
+       epsDownDot(5, 6), dR(6, 4, 2)),
+    Op(yudOmega1c(0, 1, 2), Omega1(3, 4, 0), dRc(6, 4, 2),
+       epsDown(6, 5), uR(5, 3, 1)),
+    Op(yqqOmega1(0, 1, 2), Omega1c(3, 4, 0), qL(5, 3, 6, 1),
+       epsSU2(6, 7), epsUp(5, 8), qL(8, 4, 7, 2)),
+    Op(yqqOmega1c(0, 1, 2), Omega1(3, 4, 0), qLc(8, 4, 7, 2),
+       epsSU2(6, 7), epsUpDot(8, 5), qLc(5, 3, 6, 1)),
+
+    # Omega2
+    Op(ydOmega2(0, 1, 2), Omega2c(3, 4, 0), dR(5, 3, 1),
+       epsDownDot(5, 6), dR(6, 4, 2)),
+    Op(ydOmega2c(0, 1, 2), Omega2(3, 4, 0), dRc(6, 4, 2),
+       epsDown(6, 5), dR(5, 3, 1)),
+
+    # Omega4
+    Op(yuOmega4(0, 1, 2), Omega4c(3, 4, 0), uR(5, 3, 1),
+       epsDownDot(5, 6), uR(6, 4, 2)),
+    Op(yuOmega4c(0, 1, 2), Omega4(3, 4, 0), uRc(6, 4, 2),
+       epsDown(6, 5), uR(5, 3, 1)),
+
+    # Upsilon
+    Op(yqUpsilon(0, 1, 2), Upsilonc(3, 4, 5, 0),
+       qL(6, 3, 7, 1), epsSU2(7, 8), sigmaSU2(5, 8, 9),
+       epsUp(6, 10), qL(10, 4, 9, 2)),
+    Op(yqUpsilonc(0, 1, 2), Upsilon(3, 4, 5, 0),
+       qLc(10, 4, 9, 2), sigmaSU2(5, 9, 8), epsSU2(7, 8),
+       epsUpDot(10, 6), qLc(6, 3, 7, 1)),
+
+    # Phi
+    Op(yquPhi(0, 1, 2), Phic(3, 4, 0), qLc(5, 6, 4, 1),
+       TSU3(3, 6, 7), uR(5, 7, 2)),
+    Op(yquPhic(0, 1, 2), Phi(3, 4, 0), uRc(5, 7, 2),
+       TSU3(3, 7, 6), qL(5, 6, 4, 1)),
+
+    # S and varphi
+    Op(kappaSvarphi(0, 1), S(0), varphic(2, 1), phi(2)),
+    Op(kappaSvarphic(0, 1), S(0), phic(2), varphi(2, 1)),
+
+    # S and Xi0
+    Op(kappaSXi0(0, 1, 2), S(0), Xi0(3, 1), Xi0(3, 2)),
+    Op(lambdaSXi0(0, 1), S(0), Xi0(2, 1), phic(3), sigmaSU2(2, 3, 4), phi(4)),
+    
+    # S and Xi1
+    Op(kappaSXi1(0, 1, 2), S(0), Xi1c(3, 1), Xi1(3, 2)),
+    Op(lambdaSXi1(0, 1), S(0), Xi1c(2, 1),
+       epsSU2(3, 4), phi(4), sigmaSU2(2, 4, 5), phi(5)),
+    Op(lambdaSXi1c(0, 1), S(0), Xi1(2, 1),
+       phic(3), sigmaSU2(2, 3, 4), epsSU2(4, 5), phic(5)),
+
+    # Xi0 and Xi1
+    Op(kappaXi0Xi1(0, 1, 2), fSU2(3, 4, 5), Xi0(3, 0), Xi1c(4, 1), Xi1(5, 2)),
+    Op(lambdaXi1Xi0(0, 1), fSU2(2, 3, 4), Xi1c(2, 0), Xi0(3, 1),
+       epsSU2(5, 6), phi(6), sigmaSU2(4, 5, 7), phi(7)),
+    Op(lambdaXi1Xi0c(0, 1), fSU2(2, 3, 4), Xi1(2, 0), Xi0(3, 1),
+       phic(5), sigmaSU2(4, 5, 6), epsSU2(6, 7), phic(7)),
+
+    # Xi0 and varphi
+    Op(kappaXi0varphi(0, 1), Xi0(2, 0), varphic(3, 1),
+       sigmaSU2(2, 3, 4), phi(4)),
+    Op(kappaXi0varphic(0, 1), Xi0(2, 0), phic(4),
+       sigmaSU2(2, 4, 3), varphi(3, 1)),
+
+    # Xi1 and varphi
+    Op(kappaXi1varphi(0, 1), Xi1c(2, 0), epsSU2(3, 4), varphi(4, 1),
+       sigmaSU2(2, 3, 5), phi(5)),
+    Op(kappaXi1varphic(0, 1), Xi1(2, 0), phic(5),
+       sigmaSU2(2, 5, 3), epsSU2(3, 4), varphic(4, 1)),
+
+    # Xi0 and Theta1
+    Op(kappaXi0Theta1(0, 1), Xi0(3, 0), CSU2(4, 3, 5),
+       epsSU2(5, 6), phic(6), epsSU2quadruplets(4, 7), Theta1(7, 1)),
+    Op(kappaXi0Theta1c(0, 1), Xi0(3, 0), CSU2c(4, 3, 5),
+       epsSU2(5, 6), phi(6), epsSU2quadruplets(4, 7), Theta1c(7, 1)),
+
+    # Xi1 and Theta1
+    Op(kappaXi1Theta1(0, 1), Xi1c(3, 0), CSU2(4, 3, 5),
+       phi(5), epsSU2quadruplets(4, 7), Theta1(7, 1)),
+    Op(kappaXi1Theta1c(0, 1), Xi1(3, 0), CSU2c(4, 3, 5),
+       phic(5), epsSU2quadruplets(4, 7), Theta1c(7, 1)),
+
+    # Xi1 and Theta3
+    Op(kappaXi1Theta3(0, 1), Xi1c(3, 0), CSU2(4, 3, 5),
+       epsSU2(5, 6), phi(6), epsSU2quadruplets(4, 7), Theta3(7, 1)),
+    Op(kappaXi1Theta3c(0, 1), Xi1(3, 0), CSU2c(4, 3, 5),
+       epsSU2(5, 6), phic(6), epsSU2quadruplets(4, 7), Theta3c(7, 1)))
+
+
+# -- Heavy fields ------------------------------------------------------------
 
 heavy_S = RealScalar("S", 1)
 heavy_S1 = ComplexScalar("S1", "S1c", 1)
@@ -143,346 +437,197 @@ heavy_S2 = ComplexScalar("S2", "S2c", 1)
 heavy_varphi = ComplexScalar("varphi", "varphic", 2)
 heavy_Xi0 = RealScalar("Xi0", 2)
 heavy_Xi1 = ComplexScalar("Xi1", "Xi1c", 2)
+heavy_Theta1 = ComplexScalar("Theta1", "Theta1c", 2)
+heavy_Theta3 = ComplexScalar("Theta3", "Theta3c", 2)
+heavy_omega1 = ComplexScalar("omega1", "omega1c", 2)
+heavy_omega2 = ComplexScalar("omega2", "omega2c", 2)
+heavy_omega4 = ComplexScalar("omega4", "omega4c", 2)
+heavy_Pi1 = ComplexScalar("Pi1", "Pi1c", 3)
+heavy_Pi7 = ComplexScalar("Pi7", "Pi7c", 3)
+heavy_zeta = ComplexScalar("zeta", "zetac", 3)
+heavy_Omega1 = ComplexScalar("Omega1", "Omega1c", 3)
+heavy_Omega2 = ComplexScalar("Omega2", "Omega2c", 3)
+heavy_Omega4 = ComplexScalar("Omega4", "Omega4c", 3)
+heavy_Upsilon = ComplexScalar("Upsilon", "Upsilonc", 4)
+heavy_Phi = ComplexScalar("Phi", "Phic", 3)
+
 heavy_fields = [
-    heavy_S, heavy_S1, heavy_S2, heavy_varphi, heavy_Xi0, heavy_Xi1]
+    heavy_S, heavy_S1, heavy_S2, heavy_varphi, heavy_Xi0, heavy_Xi1,
+    heavy_Theta1, heavy_Theta3, heavy_omega1, heavy_omega2, heavy_omega4,
+    heavy_Pi1, heavy_Pi7, heavy_zeta, heavy_Omega1, heavy_Omega2, heavy_Omega4,
+    heavy_Upsilon, heavy_Phi]
+"""
+All the heavy scalar fields that couple linearly through renormalizable
+interactions to the Standard Model.
+"""
 
-# -- Integration --
+# -- Latex representation ----------------------------------------------------
 
-print "Integrating...",
-eff_lag = integrate(heavy_fields, interaction_lagrangian, max_dim=6)
-print "done."
-
-# -- Transformations --
-
-Ophi = tensor_op("Ophi")
-Ophi4 = tensor_op("Ophi4")
-OphiD = tensor_op("OphiD")
-Ophisq = tensor_op("Ophisq")
-OD2 = tensor_op("OD2")
-OD2c = tensor_op("OD2c")
-Q1 = tensor_op("Q1")
-half = number_op(0.5)
-
-def flavor_tensor_op(name):
-    def f(*indices):
-        return Op(Tensor(name, list(indices)))
-    return f
-
-O1ll = flavor_tensor_op("O1ll")
-Oee = flavor_tensor_op("Oee")
-Ole = flavor_tensor_op("Ole")
-O1qd = flavor_tensor_op("O1qd")
-O8qd = flavor_tensor_op("O8qd")
-O1qu = flavor_tensor_op("O1qu")
-O8qu = flavor_tensor_op("O8qu")
-Oledq = flavor_tensor_op("Oledq")
-Olequ = flavor_tensor_op("Olequ")
-O1qud = flavor_tensor_op("O1qud")
-Oledqc = flavor_tensor_op("Oledqc")
-Olequc = flavor_tensor_op("Olequc")
-O1qudc = flavor_tensor_op("O1qudc")
-Oephi = flavor_tensor_op("Oephi")
-Odphi = flavor_tensor_op("Odphi")
-Ouphi = flavor_tensor_op("Ouphi")
-Oephic = flavor_tensor_op("Oephic")
-Odphic = flavor_tensor_op("Odphic")
-Ouphic = flavor_tensor_op("Ouphic")
-O5 = flavor_tensor_op("O5")
-O5c = flavor_tensor_op("O5c")
-O5aux = flavor_tensor_op("O5aux")
-O5auxc = flavor_tensor_op("O5auxc")
-
-rules = [
-    # -- Higgs and derivatives --
+latex_tensors_scalars = {
+    "kappaS": r"\kappa_{{\mathcal{{S}}_{}}}",
+    "lambdaS": r"\lambda^{{{}{}}}_{{\mathcal{{S}}}}",
+    "kappaS3": r"\kappa^{{{}{}{}}}_{{\mathcal{{S}}^3}}",
     
-    # (Dphic phi) (Dphic phi) -> - (OphiD + Q1 + (DDphic phi) (phic phi))
-    (Op(D(0, phic(1)), phi(1), D(0, phic(2)), phi(2)),
-     -OpSum(OphiD, Q1, OD2c)),
-
-    # (phic Dphi) (phic Dphi) -> - (OphiD + Q1 + (phic DDphi) (phic phi))
-    (Op(phic(1), D(0, phi(1)), phic(2), D(0, phi(2))),
-     -OpSum(OphiD, Q1, OD2)),
+    "kappaXi0": r"\kappa_{{\Xi_{{0{}}}}}",
+    "lambdaXi0": r"\lambda^{{{}{}}}_{{\Xi_0}}",
+    "kappaXi03": r"\kappa^{{{}{}{}}}_{{\Xi^3_0}}",
     
-    # Q1 -> 1/2 Ophisq - 1/2 OD2 - 1/2 OD2c
-    (Q1, OpSum(half * Ophisq, -half * OD2, -half * OD2c)),
-
-    # OD2 -> (phic DDphi) (phic phi)
-    (OD2, OpSum(Op(phic(0), D(1, D(1, phi(0))), phic(2), phi(2)))),
-
-    # OD2c -> (DDphic phi) (phic phi)
-    (OD2c, OpSum(Op(D(0, D(0, phic(1))), phi(1), phic(2), phi(2)))),
-
-    # fSU2(0, 1, 2) (phic sigmaSU2(0) phi) (phi eps sigmaSU2(1) phi)
-    # (phic sigmaSU2(2) eps phic) -> 3 * sqrt(2) * Ophi
-    (Op(fSU2(0, 1, 2), phic(3), sigmaSU2(0, 3, 4), phi(4),
-               phi(5), epsSU2(6, 5), sigmaSU2(1, 6, 7), phi(7),
-               phic(8), sigmaSU2(2, 8, 9), epsSU2(9, 10), phic(10)),
-     OpSum(number_op(3) * symbol_op("sqrt(2)", 1) * Ophi)),
-    (Op(fSU2(0, 1, 2), phic(3), sigmaSU2(0, 3, 4), phi(4),
-               phi(5), epsSU2(6, 5), sigmaSU2(2, 6, 7), phi(7),
-               phic(8), sigmaSU2(1, 8, 9), epsSU2(9, 10), phic(10)),
-     OpSum(number_op(-3) * symbol_op("sqrt(2)", 1) * Ophi)),
-    (Op(fSU2(0, 1, 2), phic(3), sigmaSU2(1, 3, 4), phi(4),
-               phi(5), epsSU2(6, 5), sigmaSU2(0, 6, 7), phi(7),
-               phic(8), sigmaSU2(2, 8, 9), epsSU2(9, 10), phic(10)),
-     OpSum(number_op(-3) * symbol_op("sqrt(2)", 1) * Ophi)),
-    (Op(fSU2(0, 1, 2), phic(3), sigmaSU2(1, 3, 4), phi(4),
-               phi(5), epsSU2(6, 5), sigmaSU2(2, 6, 7), phi(7),
-               phic(8), sigmaSU2(0, 8, 9), epsSU2(9, 10), phic(10)),
-     OpSum(number_op(3) * symbol_op("sqrt(2)", 1) * Ophi)),
-    (Op(fSU2(0, 1, 2), phic(3), sigmaSU2(2, 3, 4), phi(4),
-               phi(5), epsSU2(6, 5), sigmaSU2(0, 6, 7), phi(7),
-               phic(8), sigmaSU2(1, 8, 9), epsSU2(9, 10), phic(10)),
-     OpSum(number_op(3) * symbol_op("sqrt(2)", 1) * Ophi)),
-    (Op(fSU2(0, 1, 2), phic(3), sigmaSU2(2, 3, 4), phi(4),
-               phi(5), epsSU2(6, 5), sigmaSU2(1, 6, 7), phi(7),
-               phic(8), sigmaSU2(0, 8, 9), epsSU2(9, 10), phic(10)),
-     OpSum(number_op(-3) * symbol_op("sqrt(2)", 1) * Ophi)),
-
-    # -- SU(2) --
-
-    # sigmaSU2(0, -1, -2) sigmaSU2(0, -3, -4) ->
-    # 2 kdelta(-1, -4) kdelta(-3, -2) - kdelta(-1, -2) kdelta(-3, -4)
-    (Op(sigmaSU2(0, -1, -2), sigmaSU2(0, -3, -4)),
-     OpSum(number_op(2) * Op(kdelta(-1, -4), kdelta(-3, -2)),
-           -Op(kdelta(-1, -2), kdelta(-3, -4)))),
+    "ylS1": r"\left(y^l_{{\mathcal{{S}}_{{1{}}}}}\right)_{{{}{}}}",
+    "ylS1c": r"\left(y^l_{{\mathcal{{S}}_{{1{}}}}}\right)^*_{{{}{}}}",
     
-    # epsSU2(-1, -2) epsSU2(-3, -4) ->
-    # kdelta(-1, -3) kdelta(-2, -4) - kdelta(-1, -4) kdelta(-2, -3)
-    (Op(epsSU2(-1, -2), epsSU2(-3, -4)),
-     OpSum(Op(kdelta(-1, -3), kdelta(-2, -4)),
-           -Op(kdelta(-1, -4), kdelta(-2, -3)))),
+    "yeS2": r"\left(y^e_{{\mathcal{{S}}_{{2{}}}}}\right)_{{{}{}}}",
+    "yeS2c": r"\left(y^e_{{\mathcal{{S}}_{{2{}}}}}\right)^*_{{{}{}}}",
     
-    # epsSU2(-1, 0) epsSU2(0, -2) -> -kdelta(-1, -2)
-    (Op(epsSU2(-1, 0), epsSU2(0, -2)),
-     -OpSum(Op(kdelta(-1, -2)))),
-
-    # epsSU2(0, -1) epsSU2(0, -2) -> kdelta(-1, -2)
-    (Op(epsSU2(0, -1), epsSU2(0, -2)),
-     OpSum(Op(kdelta(-1, -2)))),
+    "yevarphi": r"\left(y^e_{{\varphi_{{{}}}}}\right)_{{{}{}}}",
+    "yevarphic": r"\left(y^e_{{\varphi_{{{}}}}}\right)^*_{{{}{}}}",
+    "ydvarphi": r"\left(y^d_{{\varphi_{{{}}}}}\right)_{{{}{}}}",
+    "ydvarphic": r"\left(y^d_{{\varphi_{{{}}}}}\right)^*_{{{}{}}}",
+    "yuvarphi": r"\left(y^u_{{\varphi_{{{}}}}}\right)_{{{}{}}}",
+    "yuvarphic": r"\left(y^u_{{\varphi_{{{}}}}}\right)^*_{{{}{}}}",
+    "lambdavarphi": r"\lambda_{{\varphi_{}}}",
+    "lambdavarphic": r"\lambda^*_{{\varphi_{}}}",
     
-    # epsSU2(-1, 0) epsSU2(-2, 0) -> kdelta(-1, -2)
-    (Op(epsSU2(-1, 0), epsSU2(-2, 0)),
-     OpSum(Op(kdelta(-1, -2)))),
-
-    # epsSU2(0, 0) -> 0
-    (Op(epsSU2(0, 0)), OpSum()),
+    "ylXi1": r"\left(y^l_{{\Xi_{{1{}}}}}\right)_{{{}{}}}",
+    "ylXi1c": r"\left(y^l_{{\Xi_{{1{}}}}}\right)^*_{{{}{}}}",
+    "kappaXi1": r"\kappa_{{\Xi_{{1{}}}}}",
+    "kappaXi1c": r"\kappa^*_{{\Xi_{{1{}}}}}",
+    "lambdaXi1": r"\lambda^{{{}{}}}_{{\Xi_1}}",
+    "lambdaXi1c": r"\left(\lambda^{{{}{}}}_{{\Xi_1}}\right)^*",
+    "lambdaTildeXi1": r"\tilde{{\lambda}}^{{{}{}}}_{{\Xi_1}}",
+    "lambdaTildeXi1c": r"\left(\tilde{{\lambda}}^{{{}{}}}_{{\Xi_1}}\right)^*",
     
-    # -- Lorentz --
+    "lambdaTheta1": r"\lambda^{}_{{\Theta_1}}",
+    "lambdaTheta1c": r"\lambda^{{*{}}}_{{\Theta_1}}",
     
-    # epsUp(-1, -2) epsUpDot(-3, -4) ->
-    # -1/2 sigma4bar(0, -3, -1) sigma4bar(0, -4, -2)
-    (Op(epsUp(-1, -2), epsUpDot(-3, -4)),
-     OpSum(-half * Op(sigma4bar(0, -3, -1), sigma4bar(0, -4, -2)))),
-
-    # epsDown(-1, -2) epsDownDot(-3, -4) ->
-    # -1/2 sigma4(0, -1, -3) sigma4(0, -2, -4)
-    (Op(epsDown(-1, -2), epsDownDot(-3, -4)),
-     OpSum(-half * Op(sigma4(0, -1, -3), sigma4(0, -2, -4)))),
-
-    # -- Four-fermion Fierz reorderings --
-
-    (Op(lLc(0, 1, -1), sigma4bar(2, 0, 3), lL(3, 4, -2),
-        lLc(5, 4, -3), sigma4bar(2, 5, 6), lL(6, 1, -4)),
-     OpSum(Op(lLc(0, 1, -1), sigma4bar(2, 0, 3), lL(3, 1, -4),
-              lLc(5, 4, -3), sigma4bar(2, 5, 6), lL(6, 4, -2)))),
+    "lambdaTheta3": r"\lambda^{}_{{\Theta_3}}",
+    "lambdaTheta3c": r"\lambda^{{*{}}}_{{\Theta_3}}",
     
-    (Op(lLc(0, 1, -1), eR(0, -2), eRc(2, -3), lL(2, 1, -4)),
-     OpSum(-half * Ole(-1, -4, -3, -2))),
-
-    (Op(qLc(0, 1, 2, -1), dR(0, 1, -2), dRc(3, 4, -3), qL(3, 4, 2, -4)),
-     OpSum(-number_op(1./6) * O1qd(-1, -4, -3, -2),
-            -O8qd(-1, -4, -3, -2))),
-
-    (Op(qLc(0, 1, 2, -1), uR(0, 1, -2), uRc(3, 4, -3), qL(3, 4, 2, -4)),
-     OpSum(-number_op(1./6) * O1qu(-1, -4, -3, -2), -O8qu(-1, -4, -3, -2))),
-
-    # -- ?? --
-    (Op(lL(0, 1, -1), phi(1), epsUp(0, 2), phi(3), lL(2, 3, -2)),
-     OpSum(-O5(-1, -2), O5aux(-1, -2))),
-    (Op(lLc(0, 1, -1), phic(1), epsUpDot(0, 2), phic(3), lLc(2, 3, -2)),
-     OpSum(-O5c(-1, -2), O5auxc(-1, -2))),
-
-]
-
-SM_eoms = [
-    (Op(D(0, D(0, phic(-1)))),
-     OpSum(
-         Op(mu2phi(), phic(-1)),
-         -Op(lambdaphi(), phic(0), phi(0), phic(-1)),
-         -Op(ye(0, 1), lLc(2, -1, 0), eR(2, 1)),
-         -Op(yd(0, 1), qLc(2, 3, -1, 0), dR(2, 3, 1)),
-         -Op(V(0, 1), yuc(0, 2), uRc(3, 4, 2), qL(3, 4, 5, 1), epsSU2(5, -1)))),
-     
-     (Op(D(0, D(0, phi(-1)))),
-     OpSum(
-         Op(mu2phi(), phi(-1)),
-         -Op(lambdaphi(), phic(0), phi(0), phi(-1)),
-         -Op(yec(0, 1), eRc(2, 1), lL(2, -1, 0)),
-         -Op(ydc(0, 1), dRc(2, 3, 1), qL(2, 3, -1, 0)),
-         -Op(Vc(0, 1), yu(0, 2), qLc(3, 4, 5, 1), uR(3, 4, 2), epsSU2(5, -1))))
-]
-
-definitions = [
-    # (Dphic Dphi) (phic phi) -> Q1
-    (Op(D(0, phic(1)), D(0, phi(1)), phic(2), phi(2)),
-     OpSum(Q1)),
+    "yqlomega1": r"(y^{{ql}}_{{\omega_{{1{}}}}})_{{{}{}}}",
+    "yqlomega1c": r"(y^{{ql}}_{{\omega_{{1{}}}}})^*_{{{}{}}}",
+    "yqqomega1": r"(y^{{qq}}_{{\omega_{{1{}}}}})_{{{}{}}}",
+    "yqqomega1c": r"(y^{{qq}}_{{\omega_{{1{}}}}})^*_{{{}{}}}",
+    "yeuomega1": r"(y^{{eu}}_{{\omega_{{1{}}}}})_{{{}{}}}",
+    "yeuomega1c": r"(y^{{eu}}_{{\omega_{{1{}}}}})^*_{{{}{}}}",
+    "yduomega1": r"(y^{{du}}_{{\omega_{{1{}}}}})_{{{}{}}}",
+    "yduomega1c": r"(y^{{du}}_{{\omega_{{1{}}}}})^*_{{{}{}}}",
     
-    # (phi Dphic) (Dphic phi) -> OphiD
-    (Op(phic(0), D(1, phi(0)), D(1, phic(2)), phi(2)),
-     OpSum(OphiD)),
+    "ydomega2": r"(y^{{d}}_{{\omega_{{2{}}}}})_{{{}{}}}",
+    "ydomega2c": r"(y^{{d}}_{{\omega_{{2{}}}}})^*_{{{}{}}}",
     
-    # (phic phi)^3 -> 3 * Ophi
-    (Op(phic(0), phi(0), phic(1), phi(1), phic(2), phi(2)),
-     OpSum(number_op(3) * Ophi)),
+    "yedomega4": r"(y^{{ed}}_{{\omega_{{4{}}}}})_{{{}{}}}",
+    "yedomega4c": r"(y^{{ed}}_{{\omega_{{4{}}}}})^*_{{{}{}}}",
     
-    # (phic phi)^2 -> Ophi4
-    (Op(phic(0), phi(0), phic(1), phi(1)),
-     OpSum(Ophi4)),
+    "yuuomega4": r"(y^{{uu}}_{{\omega_{{4{}}}}})_{{{}{}}}",
+    "yuuomega4c": r"(y^{{uu}}_{{\omega_{{4{}}}}})^*_{{{}{}}}",
     
-     # (lLc sigma4bar lL) (lLc simgaUpBar lL) -> 2 * O1ll
-    (Op(lLc(0, 1, -1), sigma4bar(2, 0, 3), lL(3, 1, -2),
-        lLc(4, 5, -3), sigma4bar(2, 4, 6), lL(6, 5, -4)),
-     OpSum(number_op(2) * O1ll(-1, -2, -3, -4))),
+    "yldPi1": r"(y^{{ld}}_{{\Pi_{{1{}}}}})_{{{}{}}}",
+    "yldPi1c": r"(y^{{ld}}_{{\Pi_{{1{}}}}})^*_{{{}{}}}",
     
-    # (eRc sigma4 eR) (eRc sigma4 eR) -> 2 * Oee
-    (Op(eRc(0, -1), sigma4(1, 0, 2), eR(2, -2),
-        eRc(3, -3), sigma4(1, 3, 4), eR(4, -4)),
-     OpSum(number_op(2) * Oee(-1, -2, -3, -4))),
+    "yluPi7": r"(y^{{lu}}_{{\Pi_{{7{}}}}})_{{{}{}}}",
+    "yluPi7c": r"(y^{{lu}}_{{\Pi_{{7{}}}}})^*_{{{}{}}}",
+    "yeqPi7": r"(y^{{eq}}_{{\Pi_{{7{}}}}})_{{{}{}}}",
+    "yeqPi7c": r"(y^{{eq}}_{{\Pi_{{7{}}}}})^*_{{{}{}}}",
     
-    # (lLc sigma4bar lL) (eRc sigma4 eR) -> Ole
-    (Op(lLc(0, 1, -1), sigma4bar(2, 0, 3), lL(3, 1, -2),
-        eRc(4, -3), sigma4(2, 4, 5), eR(5, -4)),
-     OpSum(Ole(-1, -2, -3, -4))),
+    "yqlzeta": r"(y^{{ql}}_{{\zeta}})_{{{}{}}}",
+    "yqlzetac": r"(y^{{ql}}_{{\zeta}})^*_{{{}{}}}",
+    "yqqzeta": r"(y^{{qq}}_{{\zeta}})_{{{}{}}}",
+    "yqqzetac": r"(y^{{qq}}_{{\zeta}})^*_{{{}{}}}",
     
-    # (qLc sigma4bar qL) (dRc sigma4 dR) -> O1qd
-    (Op(qLc(0, 1, 2, -1), sigma4bar(3, 0, 4), qL(4, 1, 2, -2),
-        dRc(5, 6, -3), sigma4(3, 5, 7), dR(7, 6, -4)),
-     OpSum(O1qd(-1, -2, -3, -4))),
+    "yudOmega1": r"(y^{{ud}}_{{\Omega_{{1{}}}}})_{{{}{}}}",
+    "yudOmega1c": r"(y^{{ud}}_{{\Omega_{{1{}}}}})^*_{{{}{}}}",
+    "yqqOmega1": r"(y^{{qq}}_{{\Omega_{{1{}}}}})_{{{}{}}}",
+    "yqqOmega1c": r"(y^{{qq}}_{{\Omega_{{1{}}}}})^*_{{{}{}}}",
+
+    "ydOmega2": r"(y^{{d}}_{{\Omega_{{2{}}}}})_{{{}{}}}",
+    "ydOmega2c": r"(y^{{d}}_{{\Omega_{{2{}}}}})^*_{{{}{}}}",
     
-    # (qLc sigma4bar qL) (uRc sigma4 uR) -> O1qu
-    (Op(qLc(0, 1, 2, -1), sigma4bar(3, 0, 4), qL(4, 1, 2, -2),
-               uRc(5, 6, -3), sigma4(3, 5, 7), uR(7, 6, -4)),
-     OpSum(O1qu(-1, -2, -3, -4))),
+    "yuOmega4": r"(y^{{u}}_{{\Omega_{{4{}}}}})_{{{}{}}}",
+    "yuOmega4c": r"(y^{{u}}_{{\Omega_{{4{}}}}})^*_{{{}{}}}",
     
-    # (qLc sigma4bar lambdaColor qL) (dRc sigma4 lambdaColor dR) -> O1qd
-    (Op(qLc(0, 1, 2, -1), sigma4bar(3, 0, 4),
-        lambdaColor(5, 1, 6), qL(4, 6, 2, -2),
-        dRc(6, 7, -3), sigma4(3, 6, 8),
-        lambdaColor(5, 7, 9), dR(8, 9, -4)),
-     OpSum(O8qd(-1, -2, -3, -4))),
+    "yqUpsilon": r"(y^{{q}}_{{\Upsilon}})_{{{}{}}}",
+    "yqUpsilonc": r"(y^{{q}}_{{\Upsilon}})^*_{{{}{}}}",
     
-    # (qLc sigma4bar lambdaColor qL) (uRc sigma4 lambdaColor uR) -> O1qu
-    (Op(qLc(0, 1, 2, -1), sigma4bar(3, 0, 4),
-        lambdaColor(5, 1, 6), qL(4, 6, 2, -2),
-        uRc(6, 7, -3), sigma4(3, 6, 8),
-        lambdaColor(5, 7, 9), uR(8, 9, -4)),
-     OpSum(O8qu(-1, -2, -3, -4))),
+    "yquPhi": r"(y^{{qu}}_{{\Phi}})_{{{}{}}}",
+    "yquPhic": r"(y^{{qu}}_{{\Phi}})^*_{{{}{}}}",
+    "ydqPhi": r"(y^{{dq}}_{{\Phi}})_{{{}{}}}",
+    "ydqPhic": r"(y^{{dq}}_{{\Phi}})^*_{{{}{}}}",
+    
+    "kappaSvarphi": r"\kappa^{{{}{}}}_{{\mathcal{{S}}\varphi}}",
+    "kappaSvarphic":
+    r"\left(\kappa^{{{}{}}}_{{\mathcal{{S}}\varphi}}\right)^*",
+    "kappaSXi0": r"\kappa^{{{}{}{}}}_{{\mathcal{{S}}\Xi_0}}",
+    "kappaSXi1": r"\kappa^{{{}{}{}}}_{{\mathcal{{S}}\Xi_1}}",
+    "kappaXi0Xi1": r"\kappa^{{{}{}{}}}_{{\Xi_0\Xi_1}}",
+    "kappaXi0varphi": r"\kappa^{{{}{}}}_{{\Xi_0\varphi}}",
+    "kappaXi0varphic": r"\left(\kappa^{{{}{}}}_{{\Xi_0\varphi}}\right)^*",
+    "kappaXi1varphi": r"\kappa^{{{}{}}}_{{\Xi_1\varphi}}",
+    "kappaXi1varphic": r"\left(\kappa^{{{}{}}}_{{\Xi_1\varphi}}\right)^*",
+    "kappaXi0Theta1": r"\kappa^{{{}{}}}_{{\Xi_0\Theta_1}}",
+    "kappaXi0Theta1c": r"(\kappa^{{{}{}}}_{{\Xi_0\Theta_1}})^*",
+    "kappaXi1Theta1": r"\kappa^{{{}{}}}_{{\Xi_1\Theta_1}}",
+    "kappaXi1Theta1c": r"(\kappa^{{{}{}}}_{{\Xi_1\Theta_1}})^*",
+    "kappaXi1Theta3": r"\kappa^{{{}{}}}_{{\Xi_1\Theta_3}}",
+    "kappaXi1Theta3c": r"(\kappa^{{{}{}}}_{{\Xi_1\Theta_3}})^*",
+    "lambdaSXi0": r"\lambda^{{{}{}}}_{{\mathcal{{S}}\Xi_0}}",
+    "lambdaSXi1": r"\lambda^{{{}{}}}_{{\mathcal{{S}}\Xi_1}}",
+    "lambdaSXi1c": r"\left(\lambda^{{{}{}}}_{{\mathcal{{S}}\Xi_1}}\right)^*",
+    "lambdaXi1Xi0": r"\lambda^{{{}{}}}_{{\Xi_1\Xi_0}}",
+    "lambdaXi1Xi0c": r"\left(\lambda^{{{}{}}}_{{\Xi_1\Xi_0}}\right)^*",
 
-    # (lLc eR) (dRc qL) -> Oledq
-    (Op(lLc(0, 1, -1), eR(0, -2), dRc(2, 3, -3), qL(2, 3, 1, -4)),
-     OpSum(Oledq(-1, -2, -3, -4))),
+    "MS": r"M_{{\mathcal{{S}}_{}}}",
+    "MS1": r"M_{{\mathcal{{S}}_{{1{}}}}}",
+    "MS2": r"M_{{\mathcal{{S}}_{{2{}}}}}",
+    "MXi0": r"M_{{\Xi_{{0{}}}}}",
+    "MXi1": r"M_{{\Xi_{{1{}}}}}",
+    "Mvarphi": r"M_{{\varphi_{}}}",
+    "MTheta1": r"M_{{\Theta_{{1{}}}}}",
+    "MTheta3": r"M_{{\Theta_{{3{}}}}}",
+    "Momega1": r"M_{{\omega_{{1{}}}}}",
+    "Momega2": r"M_{{\omega_{{2{}}}}}",
+    "Momega4": r"M_{{\omega_{{4{}}}}}",
+    "MPi1": r"M_{{\Pi_{{1{}}}}}",
+    "MPi7": r"M_{{\Pi_{{7{}}}}}",
+    "Mzeta": r"M_{{\zeta_{{{}}}}}",
+    "MOmega1": r"M_{{\Omega_{{1{}}}}}",
+    "MOmega2": r"M_{{\Omega_{{2{}}}}}",
+    "MOmega4": r"M_{{\Omega_{{4{}}}}}",
+    "MUpsilon": r"M_{{\Upsilon_{{{}}}}}",
+    "MPhi": r"M_{{\Phi_{{{}}}}}",
 
-    # (eRc lL) (qLc dR) -> Oledqc
-    (Op(eRc(0, -2), lL(0, 1, -1), qLc(2, 3, 1, -4), dR(2, 3, -3)),
-     OpSum(Oledqc(-1, -2, -3, -4))),
+    "sqrt(2)": r"\sqrt{{2}}"}
+"""
+Latex representation for the tensors and field defined for heavy scalars.
+"""
 
-    # (lLc eR) epsSU2 (qLc uR) -> Olequ
-    (Op(lLc(0, 1, -1), eR(0, -2), epsSU2(1, 2), qLc(3, 4, 2, -4), uR(3, 4, -3)),
-     OpSum(Olequ(-1, -2, -3, -4))),
+if __name__ == "__main__":
+    
+    # -- Integration ---------------------------------------------------------
+    
+    eff_lag = integrate(heavy_fields, scalars_interaction_lagrangian, 6)
 
-    # (eRc lL) epsSU2 (uRc qL) -> Olequc
-    (Op(eRc(0, -2), lL(0, 1, -1), epsSU2(1, 2), uRc(3, 4, -3), qL(3, 4, 2, -4)),
-     OpSum(Olequc(-1, -2, -3, -4))),
+    
+    # -- Transformations -----------------------------------------------------
+    #
+    # Here's where the rules for the transformations to a basis of effective
+    # operators should be given, together with the definition of the basis.
+    # Then, the function efttools.transformations.apply_rules can be used
+    # to apply them to the effective lagrangian.
+    
+    
+    # -- Output --------------------------------------------------------------
+    
+    eff_lag_writer = Writer(eff_lag, {})
 
-    # (qLc uR) epsSU2 (qLc dR) -> O1qud
-    (Op(qLc(0, 1, 2, -1), uR(0, 1, -2), epsSU2(2, 3),
-        qLc(4, 5, 3, -3), dR(4, 5, -4)),
-     OpSum(O1qud(-1, -2, -3, -4))),
+    sys.stdout.write(str(eff_lag_writer) + "\n")
 
-    # (uRc qL) epsSU2 (dRc qL) -> O1qudc
-    (Op(uRc(0, 1, -2), qL(0, 1, 2, -1), epsSU2(2, 3),
-               dRc(4, 5, -4), qL(4, 5, 3, -3)),
-     OpSum(O1qudc(-1, -2, -3, -4))),
+    latex_tensors = {}
+    latex_tensors.update(latex_tensors_scalars)
+    latex_tensors.update(latex_SM)
+    latex_tensors.update(latex_SU2)
+    latex_tensors.update(latex_SU3)
+    latex_tensors.update(latex_Lorentz)
 
-    # (phic phi) (lLc phi eR) -> Oephi
-    (Op(phic(0), phi(0), lLc(1, 2, -1), phi(2), eR(1, -2)),
-     OpSum(Oephi(-1, -2))),
-
-    # (phic phi) (eRc phic lL) -> Oephic
-    (Op(phic(0), phi(0), eRc(1, -2), phic(2), lL(1, 2, -1)),
-     OpSum(Oephic(-1, -2))),
-
-    # (phic phi) (qLc phi dR) -> Odphi
-    (Op(phic(0), phi(0), qLc(1, 2, 3, -1), phi(3), dR(1, 2, -2)),
-     OpSum(Odphi(-1, -2))),
-
-    # (phic phi) (dRc phic qL) -> Odphic
-    (Op(phic(0), phi(0), dRc(1, 2, -2), phic(3), qL(1, 2, 3, -1)),
-     OpSum(Odphic(-1, -2))),
-
-    # (phic phi) (qLc epsSU2 phic uR) -> Ouphi
-    (Op(phic(0), phi(0), qLc(1, 2, 3, -1), epsSU2(3, 4), phic(4), uR(1, 2, -2)),
-     OpSum(Ouphi(-1, -2))),
-
-    # (phic phi) (uRc qL epsSU2 phi) -> Ouphic
-    (Op(phic(0), phi(0), uRc(1, 2, -2), qL(1, 2, 3, -1), epsSU2(3, 4), phi(4)),
-     OpSum(Ouphic(-1, -2))),
-
-    # lL(0, 1, -1) epsSU2(1, 2) phi(2) epsUp(0, 3)
-    # phi(4) epsSU2(5, 4) lL(3, 5, -2) -> O5
-    (Op(lL(0, 1, -1), epsSU2(1, 2), phi(2), epsUp(0, 3),
-        phi(4), epsSU2(5, 4), lL(3, 5, -2)),
-     OpSum(O5(-1, -2))),
-
-    # lLc(0, 1, -2) epsSU2(1, 2) phic(2) epsUp(3, 0)
-    # phic(4) epsSU2(5, 4) lLc(3, 5, -1) -> O5c
-    (Op(lLc(0, 1, -1), epsSU2(1, 2), phic(2), epsUpDot(0, 3),
-        phic(4), epsSU2(5, 4), lLc(3, 5, -2)),
-     -OpSum(O5c(-1, -2))),
-
-    # lL(0, 1, -1) epsUp(0, 2) lL(2, 1, -2) phi(3) phi(3) -> O5aux
-     (Op(lL(0, 1, -1), epsUp(0, 2), lL(2, 1, -2), phi(3), phi(3)),
-      OpSum(O5aux(-1, -2))),
-
-    # lLc(0, 1, -2) epsUpDot(0, 2) lLc(2, 1, -1) phic(3) phic(3) -> O5auxc
-     (Op(lLc(0, 1, -2), epsUpDot(0, 2), lLc(2, 1, -1), phic(3), phic(3)),
-      OpSum(O5auxc(-1, -2)))
-]
-
-change_epsSU2 = [
-    (Op(epsSU2(-1, -2)), OpSum(Op(epsSU2(-2, -1))))]
-
-all_rules = rules + SM_eoms + definitions + change_epsSU2
-
-op_names = [
-    "Ophi4", "Ophi", "OphiD", "Ophisq", "O1ll", "Oee", "Ole",
-    "O1qd", "O1qu", "O8qd", "O8qu",
-    "Oledq", "Olequ", "O1qud", "Oledqc", "Olequc", "O1qudc",
-    "Oephi", "Oephic", "Odphi", "Odphic", "Ouphi", "Ouphic",
-    "O5", "O5c", "O5aux", "O5auxc"]
-
-print "Appling rules...",
-final_lag = apply_rules_until(eff_lag, all_rules, op_names, 10)
-print "done."
-
-print "Collecting...",
-final_lag = collect_numbers_and_symbols(final_lag)
-final_lag, rest = collect_by_tensors(final_lag, op_names)
-print "done."
-
-# -- Printing --
-
-# print "-- eff_lag --"
-# for op in eff_lag.operators:
-#     print op
-
-print "-- final_lag --"
-for op_name, coef_lst in final_lag:
-    print str(op_name) + ":"
-    for op_coef, num in coef_lst:
-        print "  " + str(num) + " " + str(op_coef)
-
-print "-- rest --"
-for op in rest:
-    print op
+    eff_lag_writer.show_pdf(
+        "scalars", "open", latex_tensors, {},
+        map(chr, range(ord('a'), ord('z'))))
+                          
