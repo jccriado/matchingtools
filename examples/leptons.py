@@ -134,7 +134,7 @@ Sigma1Rc = FieldBuilder("Sigma1Rc", 1.5, fermion)
 
 # -- Lagrangian --------------------------------------------------------------
 
-leptons_interaction_lagrangian = -OpSum(
+L_leptons = -OpSum(
     # Delta1
     Op(lambdaDelta1e(0, 1), Delta1Lc(2, 3, 0), phi(3), eR(2, 1)),
     Op(lambdaDelta1ec(0, 1), eRc(2, 1), phic(3), Delta1L(2, 3, 0)),
@@ -261,7 +261,7 @@ heavy_Sigma0maj = MajoranaFermion("Sigma0maj", "Sigma0majc", 3)
 heavy_Sigma1 = VectorLikeFermion("Sigma1", "Sigma1L", "Sigma1R",
                                  "Sigma1Lc", "Sigma1Rc", 3)
 
-heavy_fields = [heavy_N, heavy_Nmaj, heavy_E, heavy_Delta1, heavy_Delta3,
+heavy_leptons = [heavy_N, heavy_Nmaj, heavy_E, heavy_Delta1, heavy_Delta3,
                 heavy_Sigma0, heavy_Sigma0maj, heavy_Sigma1]
 """
 All the heavy lepton (SU(3) singlet fermion) fields that couple linearly 
@@ -357,7 +357,7 @@ if __name__ == "__main__":
     
     # -- Integration ---------------------------------------------------------
     
-    eff_lag = integrate(heavy_fields, leptons_interaction_lagrangian, 6)
+    eff_lag = integrate(heavy_leptons, L_leptons, 6)
 
     
     # -- Transformations -----------------------------------------------------

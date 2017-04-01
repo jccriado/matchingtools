@@ -39,7 +39,7 @@ kappaS3 = TensorBuilder("kappaS3")
 ylS1  = TensorBuilder("ylS1")
 ylS1c = TensorBuilder("ylS1c")
 
-vyeS2 = TensorBuilder("yeS2")
+yeS2 = TensorBuilder("yeS2")
 yeS2c = TensorBuilder("yeS2c")
 
 yevarphi = TensorBuilder("yevarphi")
@@ -196,25 +196,25 @@ zeta = FieldBuilder("zeta", 1, boson)
 zetac = FieldBuilder("zetac", 1, boson)
 
 # Hypercharge 1/3 SU(3) sextet
-# (the sextet index is represented by two SU(3) triplet indices
+# (the sextet index is represented by two SU(3) antitriplet indices
 # for which the field is antisymmetric)
 Omega1 = FieldBuilder("Omega1", 1, boson)
 Omega1c = FieldBuilder("Omega1c", 1, boson)
 
 # Hypercharge -2/3 SU(3) sextet
-# (the sextet index is represented by two SU(3) triplet indices
+# (the sextet index is represented by two SU(3) antitriplet indices
 # for which the field is antisymmetric)
 Omega2 = FieldBuilder("Omega2", 1, boson)
 Omega2c = FieldBuilder("Omega2c", 1, boson)
 
 # Hypercharge 4/3 SU(3) sextet
-# (the sextet index is represented by two SU(3) triplet indices
+# (the sextet index is represented by two SU(3) antitriplet indices
 # for which the field is antisymmetric)
 Omega4 = FieldBuilder("Omega4", 1, boson)
 Omega4c = FieldBuilder("Omega4c", 1, boson)
 
 # Hypercharge 1/3 SU(3) sextet, SU(2) triplet
-# (the sextet index is represented by two SU(3) triplet indices
+# (the sextet index is represented by two SU(3) antitriplet indices
 # for which the field is antisymmetric)
 Upsilon = FieldBuilder("Upsilon", 1, boson)
 Upsilonc = FieldBuilder("Upsilonc", 1, boson)
@@ -226,7 +226,7 @@ Phic = FieldBuilder("Phic", 1, boson)
 
 # -- Lagrangian --------------------------------------------------------------
 
-scalars_interaction_lagrangian = -OpSum(
+L_scalars = -OpSum(
     # S
     Op(kappaS(0), phic(1), phi(1), S(0)),
     Op(lambdaS(0, 1), S(0), S(1), phic(2), phi(2)),
@@ -459,7 +459,7 @@ heavy_Omega4 = ComplexScalar("Omega4", "Omega4c", 3)
 heavy_Upsilon = ComplexScalar("Upsilon", "Upsilonc", 4)
 heavy_Phi = ComplexScalar("Phi", "Phic", 3)
 
-heavy_fields = [
+heavy_scalars = [
     heavy_S, heavy_S1, heavy_S2, heavy_varphi, heavy_Xi0, heavy_Xi1,
     heavy_Theta1, heavy_Theta3, heavy_omega1, heavy_omega2, heavy_omega4,
     heavy_Pi1, heavy_Pi7, heavy_zeta, heavy_Omega1, heavy_Omega2, heavy_Omega4,
@@ -604,14 +604,14 @@ latex_tensors_scalars = {
 
     "sqrt(2)": r"\sqrt{{2}}"}
 """
-Latex representation for the tensors and field defined for heavy scalars.
+LaTeX representation for the tensors and field defined for heavy scalars.
 """
 
 if __name__ == "__main__":
     
     # -- Integration ---------------------------------------------------------
     
-    eff_lag = integrate(heavy_fields, scalars_interaction_lagrangian, 6)
+    eff_lag = integrate(heavy_scalars, L_scalars, 6)
 
     
     # -- Transformations -----------------------------------------------------

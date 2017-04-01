@@ -12,7 +12,7 @@ coefficients of each operator in a given list.
 
 from operators import (
     Operator, OperatorSum,
-    number_op, symbol_op, kdelta, generic)
+    number_op, symbol_op, tensor_op, kdelta, generic)
 
 import sys
 
@@ -127,7 +127,7 @@ def apply_rules(op_sum, rules, max_iterations, verbose=True):
     Args:
         op_sum (:class:`efttools.operator.OperatorSum`): to which the rules
             should be applied.
-        rules (list of pairs (:class:`efttools.operators.Operator`, :class:`efttools.operators.OperatorSum`)): The first element
+        rules (list of pairs (:class:`efttools.operators.Operator`,  :class:`efttools.operators.OperatorSum`)): The first element
             of each pair represents a pattern to be subtituted in each
             operator by the second element using :func:`apply_rule`.
         max_iterations (int): maximum number of application of rules to
@@ -149,6 +149,7 @@ def apply_rules(op_sum, rules, max_iterations, verbose=True):
         sys.stdout.write("done.\n")
         
     return op_sum
+
 
 def sum_numbers(op_sum):
     """
@@ -218,6 +219,15 @@ def collect_by_tensors(op_sum, tensor_names):
             pair_collection.append((key, s))
     rest = sum_numbers(OperatorSum(rest))
     return sorted(pair_collection, key=(lambda x: x[0])), rest
+
+def sum_collection(collection):
+    op_sum = OperatorSum()
+    for (op_name, n_inds), coef in collection:
+        for op, num in coef:
+            op_sum += OperatorSum([
+                number_op(num) * tensor_op(op_name, list(range(n_inds)))
+                * op])
+    return op_sum
 
 def group_op_sum(op_sum):
     op_sum = collect_numbers_and_symbols(op_sum)

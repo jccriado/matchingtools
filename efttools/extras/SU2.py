@@ -127,12 +127,13 @@ rules_SU2_C_sigma = [
           number_op(2) * Op(kdelta(-1, -4), kdelta(-3, -2)),
           number_op(-2./3) * Op(kdelta(-1, -3), kdelta(-2, -4))))]
 r"""
-Substitute :math:`C^I_{ap}\epsilon_{pm}\sigma^a_{ij}
+Substitute 
+:math:`C^I_{ap}\epsilon_{pm}\sigma^a_{ij}
 C^{I*}_{bq}\epsilon_{qn}\sigma^b_{kl} by the equivalent
 :math:`-\frac{2}{3}\delta_{mn}\delta_{ij}\delta_{kl}
 +\frac{4}{3}\delta_{mn}\delta_{il}\delta_{kj}
 +\frac{2}{3}\delta_{ml}\delta_{in}\delta_{kj}
--\frac{2}{3}\delta_{mj}\delta_{il}\delta_{kn}
+-\frac{2}{3}\delta_{mj}\delta_{il}\delta_{kn}`.
 """
 
 rules_SU2 = ([rule_SU2_fierz, rule_SU2_free_eps, rule_SU2_eps_zero] +

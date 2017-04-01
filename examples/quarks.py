@@ -106,7 +106,7 @@ UDYRc = FieldBuilder("UDYRc", 1, boson)
 
 # -- Lagrangian --------------------------------------------------------------
 
-quarks_interaction_lagrangian = -OpSum(
+L_quarks = -OpSum(
     # U
     Op(lambdaP1(0, 1), V(1, 2), URc(3, 4, 0),
        epsSU2(5, 6), phi(6), qL(3, 4, 5, 2)),
@@ -129,7 +129,7 @@ quarks_interaction_lagrangian = -OpSum(
 
     # DY
     Op(lambdaP5(0, 1), DYLc(2, 3, 4, 0), epsSU2(4, 5), phic(5), dR(2, 3, 1)),
-    Op(lambdaP5c(0, 1), dRc(2, 3, 1), epsSU2(4, 5), phi(4), DYL(2, 3, 4, 0)),
+    Op(lambdaP5c(0, 1), dRc(2, 3, 1), epsSU2(4, 5), phi(5), DYL(2, 3, 4, 0)),
 
     # XUD
     number_op(0.5) * Op(lambdaP6(0, 1), XUDRc(2, 3, 4, 0), epsSU2(5, 6),
@@ -259,7 +259,7 @@ if __name__ == "__main__":
     
     # -- Integration ---------------------------------------------------------
     
-    eff_lag = integrate(heavy_quarks, quarks_interaction_lagrangian, 6)
+    eff_lag = integrate(heavy_quarks, L_quarks, 6)
 
     
     # -- Transformations -----------------------------------------------------

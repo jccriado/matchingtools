@@ -13,9 +13,9 @@ Creation of models
 	  number_op, symbol_op)
 	     
 The construction of a model is done in two steps: the creation of the
-tensors and fields and the definition of the interaction lagrangian.
+tensors and fields and the definition of the interaction Lagrangian.
 
-The basic building block for a lagrangian is tensor, an object of the
+The basic building block for a Lagrangian is tensor, an object of the
 class :class:`Tensor`. Direct usage of the :class:`Tensor`
 constructor obscures the code. There are two classes defined to make the
 process of creating tensors easier and cleaner,
@@ -29,7 +29,7 @@ instead of manually modifying the attributes, it's better to use
 the function :class:`D` to create covariant
 derivatives of fields.
 
-*efttools* handles lagrangians that are polynomials of the fields.
+*efttools* handles Lagrangians that are polynomials of the fields.
 They are thus a sum of terms that are products of tensors. They are
 represented as :class:`OperatorSum` objects, with only one
 attribute: a list of its terms. Each term should be an operator, that is,
@@ -90,10 +90,10 @@ and statistics is either equal to :data:`efttools.algebra.boson` or
 
 with ``ind1``, ``ind2``, ... being integers.
 
-Definition of the lagrangian
+Definition of the Lagrangian
 ----------------------------
 
-Define the interaction lagrangian as an operator sum::
+Define the interaction Lagrangian as an operator sum::
 
   int_lag = OpSum(op1, op2, ...)
 
@@ -105,7 +105,7 @@ be an operator defined as::
 The arguments of the function :func:`efttools.operators.Op` are
 tensors (and fields). Their indices are integer numbers. Negative
 integers are reserved for free indices. Free indices are not meant
-to be used in the operators appearing in the lagrangian, but later
+to be used in the operators appearing in the Lagrangian, but later
 in the definition of their transformations.
 
 Non-negative integers represent contracted indices. Contraction

@@ -98,7 +98,7 @@ The ``transformations`` module
 		  
 .. autofunction:: apply_rule
 
-.. autofunction:: apply_rules_until
+.. autofunction:: apply_rules
 
 .. autofunction:: collect_by_tensors
 
@@ -123,27 +123,46 @@ The ``output`` module
 
    .. automethod:: show_pdf
 
-The ``extras.SM`` module
-========================
+The ``extras`` package
+======================
 
-.. automodule:: efttools.extras.SM
-   :members:
+The ``efttools.extras`` package provides several modules with some
+useful definitions of tensors related to the Lorentz group and the
+groups :math:`SU(3)` and :math:`SU(2)`, as well as rules for
+transforming some combinations of these tensors into others.
+
+The definitions for the Standard Model tensors and fields, together
+with the rules derived from their equations of motion for the
+substitution of their covariant derivatives are provided. A basis
+for the Standard Model effective Lagrangian up to dimension 6
+is also given.
 
 The ``extras.SU2`` module
-=========================
+-------------------------
 
 .. automodule:: efttools.extras.SU2
    :members:
 
+The ``extras.SU3`` module
+-------------------------
+
+.. automodule:: efttools.extras.SU3
+   :members:
 
 The ``extras.Lorentz`` module
-=============================
+-----------------------------
 
 .. automodule:: efttools.extras.Lorentz
    :members:
 
+The ``extras.SM`` module
+------------------------
+
+.. automodule:: efttools.extras.SM
+   :members:
+      
 The ``extras.SM_dim_6_basis`` module
-====================================
+------------------------------------
 
 .. automodule:: efttools.extras.SM_dim_6_basis
    :members:      

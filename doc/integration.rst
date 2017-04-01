@@ -11,7 +11,7 @@ Integration
           RealScalar, ComplexScalar, RealVector, ComplexVector,
 	  VectorLikeFermion, MajoranaFermion, integrate)
 	  
-To integrate some heavy fields out of a previously constructed lagrangian
+To integrate some heavy fields out of a previously constructed Lagrangian
 the heavy fields should be specified first. The heavy fields should be objects
 of any of the following classes:
 

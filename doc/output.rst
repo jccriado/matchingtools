@@ -10,8 +10,8 @@ Output of the results
       from efttools.output import Writer
 		   
 It's usually convenient to organize the final results by presenting
-the coefficient to each operator of the effective lagrangian.
-When a set of rules has been applied to the effective lagrangian so
+the coefficient to each operator of the effective Lagrangian.
+When a set of rules has been applied to the effective Lagrangian so
 that it is written as an :class:`efttools.operators.OperatorSum` whose
 elements are :class:`efttool.operators.Operator` objects each of which
 contains one tensor representing the actual operator in the basis and
@@ -20,7 +20,7 @@ other tensors representing the coefficient the operator has.
 To output the results in this form in a human readable format, the
 :class:`Writer` is provided. If ``op_names`` is a list of the names
 of the tensors representing the operators in the basis and ``lag`` is
-the lagrangian that we want to write, we do::
+the Lagrangian that we want to write, we do::
 
   lag_writer = Writer(eff_lag, op_names)
 

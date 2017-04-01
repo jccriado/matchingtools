@@ -145,7 +145,7 @@ Y5c = FieldBuilder("Y5c", 1, boson)
 
 # -- Lagrangian --------------------------------------------------------------
 
-vectors_interaction_lagrangian = -OpSum(
+L_vectors = -OpSum(
     # B
     Op(glB(0, 1, 2), B(3, 0), lLc(4, 5, 1), sigma4bar(3, 4, 6), lL(6, 5, 2)),
     Op(gqB(0, 1, 2), B(3, 0), qLc(4, 5, 6, 1), sigma4bar(3, 4, 7),
@@ -382,7 +382,7 @@ if __name__ == "__main__":
     
     # -- Integration ---------------------------------------------------------
     
-    eff_lag = integrate(heavy_vectors, vectors_interaction_lagrangian, 6)
+    eff_lag = integrate(heavy_vectors, L_vectors, 6)
 
     
     # -- Transformations -----------------------------------------------------

@@ -33,8 +33,7 @@ from efttools.extras.SU3 import TSU3, epsSU3, rules_SU3, latex_SU3
 
 from efttools.extras.SM_dim_6_basis import (
     O1phil, O1philc, O3phil, O3philc, O1phiq, O1phiqc, O3phiq, O3phiqc,
-    Ole, O1qu, O8qu, O1qd, O8qd, OphiB, OphiW, OWB,
-    OphiBTilde, OphiWTilde, OWBTilde,
+    OphiB, OphiW, OWB, OphiBTilde, OphiWTilde, OWBTilde,
     rules_basis_definitions, latex_basis_coefs)
 
 
@@ -42,7 +41,7 @@ from efttools.extras.SM_dim_6_basis import (
 
 from vectors import (
     B, W, B1, B1c, W1, W1c,
-    vectors_interaction_lagrangian, heavy_vectors, latex_tensors_vectors)
+    L_vectors, heavy_vectors, latex_tensors_vectors)
 
 
 # -- Tensors -----------------------------------------------------------------
@@ -74,7 +73,7 @@ L1c = FieldBuilder("L1c", 1, boson)
 
 # -- Lagrangian --------------------------------------------------------------
 
-L1_plus_vectors_interaction_lagrangian =  -OpSum(
+L_L1_plus_vectors =  -OpSum(
     Op(gamma(0), L1c(1, 2, 0), D(1, phi(2))),
     Op(gammac(0), L1(1, 2, 0), D(1, phic(2))),
 
@@ -138,8 +137,7 @@ if __name__ == "__main__":
     # -- Integration ---------------------------------------------------------
     
     eff_lag = integrate(heavy_vectors_plus_L1,
-                        vectors_interaction_lagrangian
-                        + L1_plus_vectors_interaction_lagrangian, 6)
+                        L_vectors + L_L1_plus_vectors, 6)
 
 
     # -- Transformations -----------------------------------------------------
@@ -188,19 +186,7 @@ if __name__ == "__main__":
          OpSum(number_op(0.5j) * O3phiqc(-1, -2),
                number_op(0.5j) * O1phiqc(-1, -2))),
 
-        # Four-fermion Fierz reorderings
-
-        (Op(lLc(0, 1, -1), eR(0, -2), eRc(2, -3), lL(2, 1, -4)),
-         OpSum(-number_op(0.5) * Ole(-1, -4, -3, -2))),
-
-        (Op(qLc(0, 1, 2, -1), dR(0, 1, -2), dRc(3, 4, -3), qL(3, 4, 2, -4)),
-         OpSum(-number_op(1./6) * O1qd(-1, -4, -3, -2),
-               -O8qd(-1, -4, -3, -2))),
-
-        (Op(qLc(0, 1, 2, -1), uR(0, 1, -2), uRc(3, 4, -3), qL(3, 4, 2, -4)),
-         OpSum(-number_op(1./6) * O1qu(-1, -4, -3, -2),
-               -O8qu(-1, -4, -3, -2))),
-
+        
         # Involving field strengths and Higgs doublets
 
         (Op(D(0, phic(1)), D(2, phi(1)), bFS(0, 2)),
@@ -263,7 +249,9 @@ if __name__ == "__main__":
          OpSum(number_op(0.25j) * Op(gb()) * OWBTilde,
                number_op(0.25j) * Op(gw()) * OphiWTilde)),
 
+        
         # With four covariant derivatives and two Higgs doublets
+        
         (Op(D(0, D(1, phic(2))), D(0, D(1, phi(2)))),
          OpSum(-number_op(0.5) * Op(D(0, D(0, D(1, phic(2)))), D(1, phi(2))),
                -number_op(0.5) * Op(D(1, phic(2)),

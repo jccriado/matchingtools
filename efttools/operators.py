@@ -606,8 +606,10 @@ def symbol_op(symbol, exponent, indices=None):
         indices = []
     return Operator([Tensor("{{{}^{}}}".format(symbol, exponent), indices)])
 
-def tensor_op(name):
-      return Operator([Tensor(name, [])])
+def tensor_op(name, indices=None):
+    if indices is None:
+        indices = []
+    return Operator([Tensor(name, indices)])
 
 def flavor_tensor_op(name):
     """Interface for the creation of one-tensor operators with indices"""

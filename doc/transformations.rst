@@ -1,4 +1,4 @@
-Transformations of the effective lagrangian
+Transformations of the effective Lagrangian
 ===========================================
 
 .. currentmodule:: efttools.transformations
@@ -11,11 +11,11 @@ Transformations of the effective lagrangian
      from efttools.operators import number_op, flavor_op
      
      from efttools.transformations import (
-         collect_numbers_and_symbols, apply_rules_until)
+         group_op_sum, apply_rules)
 		   
-An effective lagrangian obtained from integration of heavy fields
+An effective Lagrangian obtained from integration of heavy fields
 usually contains operators that aren't independent. Several
-transformations can be applied to them to write the lagrangian
+transformations can be applied to them to write the Lagrangian
 in terms of a set of operators (a basis) that spans the space
 of effective operators.
 
@@ -23,13 +23,13 @@ These transformations are such as Fierz identities or substitutions
 of the equations of motion of the light particles. All of them consist
 of the subsitution of operators or parts of them by sums of other
 operators. The operations described in this section applied to
-effective lagrangians or to any other kind of operators sum.
+effective Lagrangians or to any other kind of operators sum.
 
-The first step to simplify an effective lagrangian is to collect and
+The first step to simplify an effective Lagrangian is to collect and
 multiply numeric coefficients and constant tensors that appear several
 times inside the same operator. To do this, use::
 
-  simplified_lag_1 = collect_numbers_and_symbols(effective_lagrangian)
+  simplified_lag_1 = group_op_sum(effective_lagrangian)
 
 Then we can define a set of rules as a list of pairs
 ``(pattern, replacement)`` where ``pattern`` is an operator
@@ -39,7 +39,7 @@ and ``replacement`` is an operator sum::
 
 ``pattern`` may contain tensors with negative indices corresponding
 to indices that are not contracted inside ``pattern``. In that
-cases, the operators in replacement should also contain the same
+case, the operators in replacement should also contain the same
 negative indices. When ``pattern`` is substituted inside an operator
 ``op``, the indices in ``op`` outside ``pattern`` that are contracted
 with indices inside pattern appear as contracted with the
@@ -72,12 +72,10 @@ and then specify how to identify them using rules::
 		  (Op(...), OpSum(Opf2(i1, i2, ...)))
 		  ...]
 
-Then we are ready to apply the rules using :func:`apply_rules_until`
-to get to the basis::
+Then we are ready to apply the rules using :func:`apply_rules`::
 
-  basis_op_names = ["Op1", "Op2", ..., "Opf1", "Opf2", ...]
   simplified_lag_2 = apply_rules_until(
-      simplified_lag_1, rules + op_def_rules, basis_op_names, max_iter)
+      simplified_lag_1, rules + op_def_rule, max_iter)
 
-where ``max_iter`` is the maximum number of applications of rules to each
-operator.
+where ``max_iter`` is the maximum number of applications of all the
+rules to each operator.

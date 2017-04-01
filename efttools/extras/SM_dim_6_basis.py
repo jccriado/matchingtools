@@ -1,3 +1,14 @@
+"""
+This module defines a basis of operators for the Standar Model
+effective lagrangian up to dimension 6. 
+
+
+The basis is the one in arXiv:1412.8480v2_.
+
+.. _arXiv:1412.8480v2: https://arxiv.org/abs/1412.8480v2.
+"""
+
+
 from efttools.operators import (
     tensor_op, flavor_tensor_op, D, Op, OpSum, number_op)
 
@@ -12,6 +23,7 @@ from efttools.extras.SU3 import epsSU3, TSU3, fSU3
 from efttools.extras.Lorentz import (
     epsUp, epsUpDot, epsDown, epsDownDot, sigma4, sigma4bar,
     eps4, sigmaTensor)
+
 
 # -- Standard Model dimension 4 operators --
 
@@ -367,7 +379,7 @@ r"""
 Four-fermion operator
 :math:`(\mathcal{O}_{lqdu})^*_{ijkl}=
 -\epsilon_{ABC}(\bar{q}^{c,B}_{Lj}i\sigma_2 q^A_{Li})
-(\bar{u}^{c,C}_{Rl} e_{Rk})
+(\bar{u}^{c,C}_{Rl} e_{Rk})`.
 """
 
 O1lqqq = flavor_tensor_op("O1lqqq")
@@ -1399,6 +1411,14 @@ latex_basis_coefs = {
     (r"\frac{{\left(\alpha^{{(8)}}_{{ud}}\right)"
      r"_{{{}{}{}{}}}}}{{\Lambda^2}}"),
 
+    "Oeu":
+    (r"\frac{{\left(\alpha_{{eu}}\right)"
+     r"_{{{}{}{}{}}}}}{{\Lambda^2}}"),
+
+    "Oeu":
+    (r"\frac{{\left(\alpha_{{ed}}\right)"
+     r"_{{{}{}{}{}}}}}{{\Lambda^2}}"),
+    
     "Oed":
     (r"\frac{{\left(\alpha_{{eu}}\right)"
      r"_{{{}{}{}{}}}}}{{\Lambda^2}}"),
