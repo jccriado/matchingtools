@@ -1,4 +1,4 @@
-*Effective* is Python library for doing calculations related
+*Effective* is a Python library for doing calculations related
 to Effective Field Theory.
 
 It provides the tools to create a lagrangian and integrate out heavy
