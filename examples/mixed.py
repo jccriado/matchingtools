@@ -1,3 +1,12 @@
+"""
+This script specifies the interacions between all the fields
+that couple linearly to the Standard Model through renormalizable
+interactions. It integrates them out and removes all contributions
+that are not mixed effects of new fields. The Lagrangian is then
+expressed in terms of the basis defined in 
+`efttools.extras.SM_dim_6_basis`.
+"""
+
 import sys
 
 import context
@@ -11,7 +20,7 @@ from efttools.operators import (
     boson, fermion, kdelta)
 
 from efttools.transformations import (
-    apply_rules, apply_rules_fast, group_op_sum)
+    apply_rules, group_op_sum)
 
 from efttools.integration import (
     integrate, RealScalar, ComplexScalar, RealVector,
@@ -724,4 +733,4 @@ if __name__ == "__main__":
 
     transf_eff_lag_writer.show_pdf(
         "mixed", "open", latex_tensors, latex_basis_coefs,
-        map(chr, range(ord('a'), ord('z'))))
+        list(map(chr, range(ord('a'), ord('z')))))

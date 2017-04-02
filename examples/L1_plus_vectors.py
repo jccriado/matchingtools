@@ -1,3 +1,12 @@
+"""
+This script defines the hypercharge 1/2 doublet vector L1
+that couples linearly through renormalizable interactions to the 
+Standard Model. Its interactions with the Standard Model and other
+vectors are specified. Their are integrated out and the contributions
+that don't contain L1 are removed. The Lagrangian is then expressed in 
+terms of the basis defined in `efttools.extras.SM_dim_6_basis`.
+"""
+
 import context
 import sys
 
@@ -324,4 +333,4 @@ if __name__ == "__main__":
 
     transf_eff_lag_writer.show_pdf(
         "L1_plus_vectors", "open", latex_tensors, latex_basis_coefs,
-        map(chr, range(ord('a'), ord('z'))))
+        list(map(chr, range(ord('a'), ord('z')))))

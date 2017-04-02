@@ -4,12 +4,28 @@ Quickstart
 Installation
 ============
 
+To install `efttools` automatically using `pip`_ do::
 
+  >> pip install efttools
+
+The source can be downloaded from the `GitHub repository`_.
+
+.. _pip: https://pypi.python.org/pypi/pip/
+
+.. _GitHub repository: https://github.com/jccriado/efttools
 
 A simple example
 ================
 
-In this section we will be creating a simple model with symmetry
+In this section we will be creating a simple model to show
+some of the features of `efttools`. This example and more,
+involving more complex cases that make use of the `extras`
+package can be found in the `examples folder`_ at the
+GitHub repository of the project.
+
+.. _examples folder: https://github.com/jccriado/efttools/tree/master/examples
+
+The model  is described as follows: symmetry
 :math:`SU(2)\times U(1)` containing a complex scalar doublet
 :math:`\phi` (the Higgs) with hypercharge :math:`1/2` and a real
 scalar triplet :math:`\Xi` with zero hypercharge that couple as:
@@ -34,7 +50,7 @@ The imports that we will need are::
 
   from efttools.operators import (
       TensorBuilder, FieldBuilder, Op, OpSum,
-      number_op, tensor_op)
+      number_op, tensor_op, boson, fermion, kdelta)
 
   from efttools.integration import RealScalar, integrate
 
@@ -51,7 +67,7 @@ coupling constants::
    lamb = TensorBuilder("lamb")
 
 We will also use three fields: the Higgs doublet, its conjugate and the
-vnew scalar::
+new scalar::
    
    phi = FieldBuilder("phi", 1, boson)
    phic = FieldBuilder("phic", 1, boson)
@@ -77,7 +93,7 @@ To integrate out the heavy :math:`\Xi` we do::
 
 Now it is ready to be integrated out::
 
-  heavy_fields = [heavy_Xi1]
+  heavy_fields = [heavy_Xi]
   max_dim = 6
   effective_lagrangian = integrate(
       heavy_fields, interaction_lagrangian, max_dim)
@@ -99,15 +115,15 @@ left-hand side of the equality into the right-hand with the code::
 
   fierz_rule = (
       Op(sigma(0, -1, -2), sigma(0, -3, -4)),
-      OpSum(number_op(2) * Op(delta(-1, -4), delta(-3, -2)),
-            -Op(delta(-1, -2), delta(-3, -4))))
+      OpSum(number_op(2) * Op(kdelta(-1, -4), kdelta(-3, -2)),
+            -Op(kdelta(-1, -2), kdelta(-3, -4))))
 	      
 Notice the use of the function ``number_op``. Observe also the
 appearance of negative indices to represent free (not contracted)
 indices and how those of the replacement match the ones in the
 pattern.
 
-We should now define the basis of operators in which we want to
+We should now define the operators in terms of which we want to
 express the effective Lagrangian::
 
   Ophi = tensor_op("Ophi")
@@ -123,7 +139,7 @@ tensors that appear in the effective Lagrangian::
        OpSum(Ophi4))]
 
 To apply the Fierz identity to every operator until we get to the
-chosen basis, we do::
+chosen operators, we do::
 
   rules = [fierz_rule] + definition_rules
   max_iterations = 2
@@ -138,23 +154,33 @@ of the operators of a Lagrangian as plain text and write it to a file::
 
   final_op_names = ["Ophi", "Ophi4"]
   eff_lag_writer = Writer(trasnf_eff_lag, final_op_names)
-  eff_lag_writer.write_text_file("Xi_example")
+  eff_lag_writer.write_text_file("simple_example")
 
 It can also to write a LaTeX file with the representation of these
 coefficients and export it to pdf to show it directly. For this to
 be done, we should define how the objects that we are using have to
 be represented in LaTeX code and the symbols we want to be used as
-indices (in this case an empty list, as no indices will appear in
-the coefficients)::
+indices::
 
-  latex_tensor_reps = {"kappa": r"\kappa", "lamb": r"\lambda"}
-  latex_op_reps = {"Ophi": r"\mathcal{O}_{\phi}",
-	           "Ophi4": r"\mathcal{O}_{\phi 4}"}
+  latex_tensor_reps = {"kappa": r"\kappa",
+                       "lamb": r"\lambda",
+                       "MXi": r"M_{{\Xi}}",
+                       "phi": r"\phi_{}",
+                       "phic": r"\phi^*_{}"}
+
+  latex_op_reps = {"Ophi": r"\frac{{\alpha_{{\phi}}}}{{\Lambda^2}}",
+                   "Ophi4": r"\mathcal{{O}}_{{\phi 4}}"}
 		   
-  latex_indices = []
-  eff_lag_writer.show_pdf(
-      "Xi_example", pdf_viewer, latex_tensor_reps, 
+  latex_indices = ["i", "j", "k", "l"]
+  
+  eff_lag_writer.write_pdf(
+      "simple_example", latex_tensor_reps, 
       latex_op_reps, latex_indices)
 
-Where ``pdf_viewer`` is the command-line name of a pdf viewer to
-show the result.
+Double curly brackets are used when one curly bracket should be
+present in the LaTeX code and simple curly brackes are used as
+placeholders for indices.
+
+The expected result is a pdf file containing the coefficients
+for the operators we defined plus some other operators with
+covariant derivatives of the Higgs.

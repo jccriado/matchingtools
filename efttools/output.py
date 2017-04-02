@@ -8,7 +8,7 @@ both formats.
 """
 
 
-from transformations import collect
+from efttools.transformations import collect
 
 import sys
 
@@ -17,12 +17,12 @@ from subprocess import call
 def display_tensor_aux(structure, indices, num_of_der):
     for _ in range(num_of_der):
         structure = "(D_{{}}{})".format(structure)
-    return structure.format(*map(str, indices))
+    return structure.format(*list(map(str, indices)))
 
 def display_tensor(tensor, structures, assigned_inds):
     base = display_tensor_aux(
         structures[name(tensor.name)],
-        map(assigned_inds.get, tensor.indices),
+        list(map(assigned_inds.get, tensor.indices)),
         tensor.num_of_der)
     exp = display_exponent(abs(exponent(tensor.name)))
     return base + exp
@@ -164,6 +164,7 @@ class Writer(object):
         out_str = "Collected operators:\n"
         for (op_name, n_inds), coef_lst in self.collection:
             out_str += r"\begin{align*}" + "\n"
+            print op_reps, op_name, op_reps[op_name]
             out_str += op_reps[op_name].format(*inds[:n_inds]) + "= & \n "
             for i, (op_coef, num) in enumerate(coef_lst):
                 out_str += display_number(num) + " "
@@ -220,6 +221,30 @@ class Writer(object):
                      r"\begin{{document}}" + "\n" + "{}" + "\n" +
                      r"\end{{document}}").format(
                          self.latex_code(structures, op_reps, inds)))
+
+    def write_pdf(self, filename, structures, op_reps, inds):
+        """
+        Directly show the pdf file with the results, obtained
+        using ``pdflatex`` on the ``.tex`` file.
+
+        Args:
+            filename (string): the name of the files without the extension
+                ``".tex"`` and ``.pdf`` in which to write.
+            pdfviewer (string): name of the program (callable from the
+                command-line) to show the pdf.
+            structures (dict): the keys are the names of all the tensors.
+                The corresponding values are the LaTeX formula
+                representation, using python`s ``str.format`` notation 
+                ``"{}"`` to specify the positions where the indices
+                should appear.
+            structures (dict): the keys are the names of all the operators
+                in the basis. The corresponding values are the LaTeX formula
+                representation.
+            inds (list of strings): the symbols to be used to represent
+                the indices, in the order in which they should appear.v
+        """
+        self.write_latex(filename, structures, op_reps, inds)
+        call(["pdflatex", filename + ".tex"])
 
     def show_pdf(self, filename, pdf_viewer, structures, op_reps, inds):
         """

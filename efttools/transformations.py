@@ -10,7 +10,7 @@ operators; and the function :func:`collect` for collecting the
 coefficients of each operator in a given list.
 """
 
-from operators import (
+from efttools.operators import (
     Operator, OperatorSum,
     number_op, symbol_op, tensor_op, kdelta, generic)
 

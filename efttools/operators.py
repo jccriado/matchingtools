@@ -16,9 +16,9 @@ Defines the Lorentz tensors :data:`epsUp`, :data:`epsUpDot`,
 :data:`sigma4bar`.
 """
 
-import permutations
+from efttools.permutations import permutations
 
-from lsttools import concat, enum_product
+from efttools.lsttools import concat, enum_product
 
 class Tensor(object):
     """
@@ -277,7 +277,7 @@ class Operator(object):
                 # Compute change of sign due to fermion permutation
                 fermion_reorder = tuple(fermions.index(pos)
                                         for pos in match if pos in fermions)
-                sign = permutations.permutations(len(fermions))[fermion_reorder]
+                sign = permutations(len(fermions))[fermion_reorder]
                 if sign == -1: candidate.append(Tensor("[-1]", []))
 
                 # Replace the matched part by a "generic" tensor
@@ -302,7 +302,7 @@ class Operator(object):
                 # equality fails
                 fermion_reorder = tuple(fermions.index(pos)
                                         for pos in match if pos in fermions)
-                sign = permutations.permutations(len(fermions))[fermion_reorder]
+                sign = permutations(len(fermions))[fermion_reorder]
                 if sign == -1: return False
 
                 # Checking that all free indices are equal

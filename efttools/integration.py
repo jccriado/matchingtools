@@ -6,7 +6,7 @@ for representing the different types of heavy fields.
 
 import sys
 
-from operators import (
+from efttools.operators import (
     Tensor, Op, OpSum,
     apply_derivatives, concat, number_op, symbol_op,
     generic, boson, fermion,

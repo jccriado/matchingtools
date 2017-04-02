@@ -8,15 +8,22 @@ simplification using equations of motion of the light fields) to the
 effective lagrangian to simplify it or write it in terms of a chosen
 effective operator basis.
 
-..
-   Installation
-   ===========
+Installation
+============
 
-   To install ``efttools`` do::
+To install `efttools` automatically using `pip`_ do::
 
-     pip install "efttools"
+  >> pip install efttools
 
+The source can be downloaded from the `github repository`_.
 
-   Documentation
-   =============
+.. _pip: https://pypi.python.org/pypi/pip/
+
+.. _github repository: https://github.com/jccriado/efttools
+  
+Documentation
+=============
+
+Read efttools's documentation at: readthedocs
+
 

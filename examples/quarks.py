@@ -1,3 +1,10 @@
+"""
+This script defines all the heavy quarks (color-triplet fermions)
+that couple linearly through renormalizable interactions to the 
+Standard Model. It specifies their interaction lagrangian and 
+integrates them out.
+"""
+
 import context
 import sys
 
@@ -284,4 +291,4 @@ if __name__ == "__main__":
 
     eff_lag_writer.show_pdf(
         "quarks", "open", latex_tensors, {},
-        map(chr, range(ord('a'), ord('z'))))
+        list(map(chr, range(ord('a'), ord('z')))))
