@@ -4,7 +4,7 @@ Quickstart
 Installation
 ============
 
-To install `effective` automatically using `pip`_ do::
+To install Effective automatically using `pip`_ do::
 
   pip install effective
 
@@ -18,7 +18,7 @@ A simple example
 ================
 
 In this section we will be creating a simple model to show
-some of the features of `effective`. This example and more,
+some of the features of Effective. This example and more,
 involving more complex cases that make use of the `extras`
 package can be found in the `examples folder`_ at the
 GitHub repository of the project.

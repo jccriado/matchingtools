@@ -29,7 +29,7 @@ instead of manually modifying the attributes, it's better to use
 the function :class:`D` to create covariant
 derivatives of fields.
 
-*effective* handles Lagrangians that are polynomials of the fields.
+Effective handles Lagrangians that are polynomials of the fields.
 They are thus a sum of terms that are products of tensors. They are
 represented as :class:`OperatorSum` objects, with only one
 attribute: a list of its terms. Each term should be an operator, that is,
@@ -47,7 +47,7 @@ is defined for operators too (as the
 concatenation of the tensors they contain,
 see :meth:`Operator.__mul__`).
 
-*effective* treats in a special way tensors whose name starts and
+Effective treats in a special way tensors whose name starts and
 ends with square or curly brakets. A tensor name enclosed in square
 brakets is understood as a (complex) number to be read from the name
 using ``float(name[1:-1])``. The function :func:`number_op`

@@ -1,4 +1,4 @@
-*effective* is Python library for doing calculations related
+*Effective* is Python library for doing calculations related
 to Effective Field Theory.
 
 It provides the tools to create a lagrangian and integrate out heavy
@@ -11,19 +11,19 @@ effective operator basis.
 Installation
 ============
 
-To install `effective` automatically using `pip`_ do::
+To install Effective automatically using `pip`_ do::
 
   pip install effective
 
-The source can be downloaded from the `github repository`_.
+The source can be downloaded from the `GitHub repository`_.
 
 .. _pip: https://pypi.python.org/pypi/pip/
 
-.. _github repository: https://github.com/jccriado/effective
+.. _GitHub repository: https://github.com/jccriado/effective
   
 Documentation
 =============
 
-Read effective's documentation at: readthedocs
+Read the documentation at: readthedocs
 
 
