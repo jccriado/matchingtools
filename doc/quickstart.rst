@@ -6,7 +6,7 @@ Installation
 
 To install `efttools` automatically using `pip`_ do::
 
-  >> pip install efttools
+  pip install efttools
 
 The source can be downloaded from the `GitHub repository`_.
 
