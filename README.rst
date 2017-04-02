@@ -1,4 +1,4 @@
-*efttools* is Python library for doing calculations related
+*effective* is Python library for doing calculations related
 to Effective Field Theory.
 
 It provides the tools to create a lagrangian and integrate out heavy
@@ -11,19 +11,19 @@ effective operator basis.
 Installation
 ============
 
-To install `efttools` automatically using `pip`_ do::
+To install `effective` automatically using `pip`_ do::
 
-  pip install efttools
+  pip install effective
 
 The source can be downloaded from the `github repository`_.
 
 .. _pip: https://pypi.python.org/pypi/pip/
 
-.. _github repository: https://github.com/jccriado/efttools
+.. _github repository: https://github.com/jccriado/effective
   
 Documentation
 =============
 
-Read efttools's documentation at: readthedocs
+Read effective's documentation at: readthedocs
 
 

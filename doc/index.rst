@@ -1,10 +1,10 @@
-.. efttools documentation master file, created by
+.. effective documentation master file, created by
    sphinx-quickstart on Thu Mar 16 15:26:44 2017.
 
-Welcome to efttools's documentation!
-====================================
+Welcome to effective's documentation!
+=====================================
 
-*efttools* is Python library for doing calculations related
+*effective* is Python library for doing calculations related
 to Effective Field Theory.
 
 It provides the tools to create a Lagrangian and integrate out heavy

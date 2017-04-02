@@ -11,19 +11,19 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='efttools',
+    name='effective',
 
     version='1.5.4',
 
     description='A library for Effective Field Theory calculations',
     long_description=long_description,
 
-    url='https://github.com/jccriado/efttools',
+    url='https://github.com/jccriado/effective',
 
     author='Juan Carlos Criado Alamo',
     author_email='jccriadoalamo@ugr.es',
 
     keywords=['effective field theory tree level integration'],
 
-    packages=['efttools', 'efttools.extras']
+    packages=['effective', 'effective.extras']
 )

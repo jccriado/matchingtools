@@ -4,26 +4,26 @@ Quickstart
 Installation
 ============
 
-To install `efttools` automatically using `pip`_ do::
+To install `effective` automatically using `pip`_ do::
 
-  pip install efttools
+  pip install effective
 
 The source can be downloaded from the `GitHub repository`_.
 
 .. _pip: https://pypi.python.org/pypi/pip/
 
-.. _GitHub repository: https://github.com/jccriado/efttools
+.. _GitHub repository: https://github.com/jccriado/effective
 
 A simple example
 ================
 
 In this section we will be creating a simple model to show
-some of the features of `efttools`. This example and more,
+some of the features of `effective`. This example and more,
 involving more complex cases that make use of the `extras`
 package can be found in the `examples folder`_ at the
 GitHub repository of the project.
 
-.. _examples folder: https://github.com/jccriado/efttools/tree/master/examples
+.. _examples folder: https://github.com/jccriado/effective/tree/master/examples
 
 The model  is described as follows: symmetry
 :math:`SU(2)\times U(1)` containing a complex scalar doublet
@@ -48,15 +48,15 @@ Creation of the model
 
 The imports that we will need are::
 
-  from efttools.operators import (
+  from effective.operators import (
       TensorBuilder, FieldBuilder, Op, OpSum,
       number_op, tensor_op, boson, fermion, kdelta)
 
-  from efttools.integration import RealScalar, integrate
+  from effective.integration import RealScalar, integrate
 
-  from efttools.transformations import apply_rules
+  from effective.transformations import apply_rules
 
-  from efttools.output import Writer
+  from effective.output import Writer
 
 The basic building blocks of our model are **tensors** and **fields**.
 For our example, we will need three tensors, the Pauli matrices and the

@@ -4,7 +4,7 @@ that couples linearly through renormalizable interactions to the
 Standard Model. Its interactions with the Standard Model and other
 vectors are specified. Their are integrated out and the contributions
 that don't contain L1 are removed. The Lagrangian is then expressed in 
-terms of the basis defined in `efttools.extras.SM_dim_6_basis`.
+terms of the basis defined in `effective.extras.SM_dim_6_basis`.
 """
 
 import context
@@ -13,34 +13,34 @@ import sys
 
 # -- Core tools --------------------------------------------------------------
 
-from efttools.operators import (
+from effective.operators import (
     TensorBuilder, FieldBuilder, D, Op, OpSum,
     number_op, symbol_op, tensor_op, flavor_tensor_op,
     boson, fermion, kdelta)
 
-from efttools.integration import integrate, ComplexVector
+from effective.integration import integrate, ComplexVector
 
-from efttools.transformations import apply_rules, group_op_sum
+from effective.transformations import apply_rules, group_op_sum
 
-from efttools.output import Writer
+from effective.output import Writer
 
 
 # -- Predefined tensors and rules --------------------------------------------
 
-from efttools.extras.SM import (
+from effective.extras.SM import (
     mu2phi, lambdaphi, ye, yec, yd, ydc, yu, yuc, V, Vc, gb, gw,
     phi, phic, lL, lLc, qL, qLc, eR, eRc, dR, dRc, uR, uRc,
     bFS, wFS, gFS, eoms_SM, latex_SM)
 
-from efttools.extras.Lorentz import (
+from effective.extras.Lorentz import (
     sigma4, sigma4bar, epsUp, epsUpDot, epsDown, epsDownDot, eps4,
     rules_Lorentz, latex_Lorentz)
 
-from efttools.extras.SU2 import epsSU2, sigmaSU2, rules_SU2, latex_SU2
+from effective.extras.SU2 import epsSU2, sigmaSU2, rules_SU2, latex_SU2
 
-from efttools.extras.SU3 import TSU3, epsSU3, rules_SU3, latex_SU3
+from effective.extras.SU3 import TSU3, epsSU3, rules_SU3, latex_SU3
 
-from efttools.extras.SM_dim_6_basis import (
+from effective.extras.SM_dim_6_basis import (
     O1phil, O1philc, O3phil, O3philc, O1phiq, O1phiqc, O3phiq, O3phiqc,
     OphiB, OphiW, OWB, OphiBTilde, OphiWTilde, OWBTilde,
     rules_basis_definitions, latex_basis_coefs)

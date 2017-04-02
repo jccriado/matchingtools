@@ -1,16 +1,16 @@
 Transformations of the effective Lagrangian
 ===========================================
 
-.. currentmodule:: efttools.transformations
+.. currentmodule:: effective.transformations
 
 .. note:: This section assumes that the functions
-   from :mod:`efttools.transformations` and
-   :mod:`efttools.transformations` that it uses are in the namespace.
+   from :mod:`effective.transformations` and
+   :mod:`effective.transformations` that it uses are in the namespace.
    To import all the functions that appear here do::
 
-     from efttools.operators import number_op, flavor_op
+     from effective.operators import number_op, flavor_op
      
-     from efttools.transformations import (
+     from effective.transformations import (
          group_op_sum, apply_rules)
 		   
 An effective Lagrangian obtained from integration of heavy fields
@@ -51,8 +51,8 @@ write the rule::
 
 The operators of the basis should be represented by tensor with a name
 identifing the operator. They can be defined using
-:func:`efttools.operators.tensor_op` when they don't have
-free indices and :func:`efttools.operators.flavor_tensor_op`
+:func:`effective.operators.tensor_op` when they don't have
+free indices and :func:`effective.operators.flavor_tensor_op`
 when they do. So we usually define::
 
   Op1 = tensor_op("Op1")

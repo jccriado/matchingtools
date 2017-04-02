@@ -11,29 +11,29 @@ import sys
 
 # -- Core tools --------------------------------------------------------------
 
-from efttools.operators import (
+from effective.operators import (
     TensorBuilder, FieldBuilder, D, Op, OpSum,
     number_op, symbol_op, tensor_op, flavor_tensor_op,
     boson, fermion, kdelta)
 
-from efttools.integration import integrate, RealScalar, ComplexScalar
+from effective.integration import integrate, RealScalar, ComplexScalar
 
-from efttools.output import Writer
+from effective.output import Writer
 
 
 # -- Predefined tensors and rules --------------------------------------------
 
-from efttools.extras.SM import (
+from effective.extras.SM import (
     mu2phi, lambdaphi, ye, yec, yd, ydc, yu, yuc, V, Vc,
     phi, phic, lL, lLc, qL, qLc, eR, eRc, dR, dRc, uR, uRc,
     bFS, wFS, gFS, latex_SM)
 
-from efttools.extras.Lorentz import (
+from effective.extras.Lorentz import (
     sigma4, sigma4bar, epsUp, epsUpDot, epsDown, epsDownDot, latex_Lorentz)
 
-from efttools.extras.SU3 import TSU3, epsSU3, latex_SU3
+from effective.extras.SU3 import TSU3, epsSU3, latex_SU3
 
-from efttools.extras.SU2 import (
+from effective.extras.SU2 import (
     epsSU2, sigmaSU2, CSU2, CSU2c, epsSU2quadruplets, fSU2, latex_SU2)
 
 
@@ -625,7 +625,7 @@ if __name__ == "__main__":
     #
     # Here's where the rules for the transformations to a basis of effective
     # operators should be given, together with the definition of the basis.
-    # Then, the function efttools.transformations.apply_rules can be used
+    # Then, the function effective.transformations.apply_rules can be used
     # to apply them to the effective lagrangian.
     
     

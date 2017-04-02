@@ -1,18 +1,18 @@
 Output of the results
 =====================
 
-.. currentmodule:: efttools.output
+.. currentmodule:: effective.output
 
 .. note:: This section assumes that the class
-   :mod:`efttools.output.Writer` that it uses is in the namespace.
+   :mod:`effective.output.Writer` that it uses is in the namespace.
    To import it, do::
 
-      from efttools.output import Writer
+      from effective.output import Writer
 		   
 It's usually convenient to organize the final results by presenting
 the coefficient to each operator of the effective Lagrangian.
 When a set of rules has been applied to the effective Lagrangian so
-that it is written as an :class:`efttools.operators.OperatorSum` whose
+that it is written as an :class:`effective.operators.OperatorSum` whose
 elements are :class:`efttool.operators.Operator` objects each of which
 contains one tensor representing the actual operator in the basis and
 other tensors representing the coefficient the operator has.
