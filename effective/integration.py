@@ -335,29 +335,29 @@ class VectorLikeFermion(object):
     def L_der(self):
         n = self.num_of_inds
         factor = OpSum(number_op(1j) * Op(sigma4bar(n, -1, 0)))
-        f = Op(Tensor(self.L_name, [0] + list(range(-2, -n - 1, -1)), is_field=True,
-                      dimension=1.5, statistics=fermion))
+        f = Op(Tensor(self.L_name, [0] + list(range(-2, -n - 1, -1)),
+                      is_field=True, dimension=1.5, statistics=fermion))
         return factor * f.derivative(n + 1)
 
     def R_der(self):
         n = self.num_of_inds
         factor = OpSum(number_op(1j) * Op(sigma4(n, -1, 0)))
-        f = Op(Tensor(self.R_name, [0] + list(range(-2, -n - 1, -1)), is_field=True,
-                      dimension=1.5, statistics=fermion))
+        f = Op(Tensor(self.R_name, [0] + list(range(-2, -n - 1, -1)),
+                      is_field=True, dimension=1.5, statistics=fermion))
         return factor * f.derivative(n)
 
     def Lc_der(self):
         n = self.num_of_inds
         factor = OpSum(number_op(-1j) * Op(sigma4bar(n, 0, -1)))
-        f = Op(Tensor(self.Lc_name, [0] + list(range(-2, -n - 1, -1)), is_field=True,
-                      dimension=1.5, statistics=fermion))
+        f = Op(Tensor(self.Lc_name, [0] + list(range(-2, -n - 1, -1)),
+                      is_field=True, dimension=1.5, statistics=fermion))
         return factor * f.derivative(n)
 
     def Rc_der(self):
         n = self.num_of_inds
         factor = OpSum(number_op(-1j) * Op(sigma4(n, 0, -1)))
-        f = Op(Tensor(self.Rc_name, [0] + list(range(-2, -n - 1, -1)), is_field=True,
-                      dimension=1.5, statistics=fermion))
+        f = Op(Tensor(self.Rc_name, [0] + list(range(-2, -n - 1, -1)),
+                      is_field=True, dimension=1.5, statistics=fermion))
         return factor * f.derivative(n)
 
     def equations_of_motion(self, interaction_lagrangian):
@@ -381,8 +381,9 @@ class VectorLikeFermion(object):
         - i (D FRc) FR - (FLc FR + FRc FL)
         """
         n = self.num_of_inds
-        fL, fR, fLc, fRc = map(self._create_op_field, [self.L_name, self.R_name,
-                                                       self.Lc_name, self.Rc_name])
+        fL, fR, fLc, fRc = map(self._create_op_field,
+                               [self.L_name, self.R_name,
+                                self.Lc_name, self.Rc_name])
         half = OpSum(number_op(0.5))
         kinL = (fLc * fL).replace_first(self.L_name, self.L_der())
         kinR = (fRc * fR).replace_first(self.R_name, self.R_der())

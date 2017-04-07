@@ -13,9 +13,9 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 setup(
     name='effective',
 
-    version='1.5.4',
+    version='0.1',
 
-    description='A library for Effective Field Theory calculations',
+    description='A library for symbolic Effective Field Theory calculations',
     long_description=long_description,
 
     url='https://github.com/jccriado/effective',
@@ -23,7 +23,7 @@ setup(
     author='Juan Carlos Criado Alamo',
     author_email='jccriadoalamo@ugr.es',
 
-    keywords=['effective field theory tree level integration'],
+    keywords=['effective field theory symbolic tree level integration'],
 
     packages=['effective', 'effective.extras']
 )

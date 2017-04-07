@@ -46,18 +46,18 @@ by
 """
 
 rules_Lorentz_eps_cancel = [
-    (Op(epsUp(0, -1), epsDown(0, -2)), OpSum(Op(kdelta(-1, -2)))),
-    (Op(epsDown(-1, 0), epsUp(0, -2)), OpSum(-Op(kdelta(-1, -2)))),
-    (Op(epsUp(-1, 0), epsDown(-2, 0)), OpSum(Op(kdelta(-1, -2))))]
+    (Op(epsUp(0, -1), epsDown(0, -2)), -OpSum(Op(kdelta(-1, -2)))),
+    (Op(epsDown(-1, 0), epsUp(0, -2)), -OpSum(-Op(kdelta(-1, -2)))),
+    (Op(epsUp(-1, 0), epsDown(-2, 0)), -OpSum(Op(kdelta(-1, -2))))]
 r"""
 Substitute contracted :math:`\epsilon` tensors with undotted indices
 by the corresponding Kronecker delta.
 """
 
 rules_Lorentz_epsDot_cancel = [
-    (Op(epsUpDot(-1, 0), epsDownDot(0, -2)), OpSum(-Op(kdelta(-1, -2)))),
-    (Op(epsUpDot(-1, 0), epsDownDot(-2, 0)), OpSum(Op(kdelta(-1, -2)))),
-    (Op(epsDownDot(-1, 0), epsUpDot(0, -2)), OpSum(-Op(kdelta(-1, -2))))]
+    (Op(epsUpDot(-1, 0), epsDownDot(0, -2)), -OpSum(-Op(kdelta(-1, -2)))),
+    (Op(epsUpDot(-1, 0), epsDownDot(-2, 0)), -OpSum(Op(kdelta(-1, -2)))),
+    (Op(epsDownDot(-1, 0), epsUpDot(0, -2)), -OpSum(-Op(kdelta(-1, -2))))]
 r"""
 Substitute contracted :math:`\epsilon` tensors with dotted indices
 by the corresponding Kronecker delta.

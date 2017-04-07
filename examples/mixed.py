@@ -426,7 +426,7 @@ latex_tensors_mixed = {
     "zNL": r"z^{{N_L}}_{{{}{}{}}}",
     "zNLc": r"z^{{N_L*}}_{{{}{}{}}}",
     "zNR": r"z^{{N_R}}_{{{}{}{}}}",
-    "zNRc": r"z^{{N_L*}}_{{{}{}{}}}",
+    "zNRc": r"z^{{N_R*}}_{{{}{}{}}}",
     "zNmaj": r"z^{{N^{{maj}}}}_{{{}{}{}}}",
     "zNmajc": r"z^{{N^{{(maj)}}*}}_{{{}{}{}}}",
     "zE": r"z^E_{{{}{}{}}}",
@@ -710,8 +710,8 @@ if __name__ == "__main__":
                  + eoms_SM + rules_basis_definitions + transpose_epsSU2)
 
     transf_eff_lag = apply_rules(mixed_eff_lag, all_rules, 4)
-                                      # latex_basis_coefs.keys(), 2)
 
+    
     # -- Output --------------------------------------------------------------
     
     transf_eff_lag_writer = Writer(transf_eff_lag,

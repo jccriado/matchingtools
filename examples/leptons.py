@@ -173,7 +173,8 @@ L_leptons = -OpSum(
 
     # Sigma0
     number_op(0.5) * Op(lambdaSigma0Rl(0, 1), Sigma0Rc(2, 3, 0),
-                        epsSU2(4, 5), phi(5), sigmaSU2(3, 4, 6), lL(2, 6, 1)),
+                        epsSU2(4, 5), phi(5), sigmaSU2(3, 4, 6),
+                        lL(2, 6, 1)),
     number_op(0.5) * Op(lambdaSigma0Rlc(0, 1), lLc(2, 6, 1),
                         sigmaSU2(3, 6, 4), epsSU2(4, 5), phic(5),
                         Sigma0R(2, 3, 0)),
