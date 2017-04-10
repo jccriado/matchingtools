@@ -164,7 +164,6 @@ class Writer(object):
         out_str = "Collected operators:\n"
         for (op_name, n_inds), coef_lst in self.collection:
             out_str += r"\begin{align*}" + "\n"
-            print op_reps, op_name, op_reps[op_name]
             out_str += op_reps[op_name].format(*inds[:n_inds]) + "= & \n "
             for i, (op_coef, num) in enumerate(coef_lst):
                 out_str += display_number(num) + " "
