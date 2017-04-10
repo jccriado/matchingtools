@@ -108,9 +108,6 @@ def apply_rules_aux(op_sum, rules):
     for pattern, replacement in rules:
         new_op_sum = OperatorSum()
         for operator in op_sum.operators:
-            if all(operator.contains(name) for name in
-                   ["lambdaSigma0Ll", "weSigma0RXi1", "kappaXi1c"]):
-                print "asdf{}".format(str(operator))
             operator = remove_kdeltas(operator)
             new_ops = apply_rule(operator, pattern, replacement)
             if new_ops is not None:

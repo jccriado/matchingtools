@@ -16,7 +16,8 @@ from effective.operators import (
     number_op, symbol_op, tensor_op, flavor_tensor_op,
     boson, fermion, kdelta)
 
-from effective.integration import integrate, VectorLikeFermion, MajoranaFermion
+from effective.integration import (
+    integrate, VectorLikeFermion, MajoranaFermion)
 
 from effective.output import Writer
 
