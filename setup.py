@@ -13,7 +13,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 setup(
     name='effective',
 
-    version='0.1',
+    version='0.1.1',
 
     description='A library for symbolic Effective Field Theory calculations',
     long_description=long_description,

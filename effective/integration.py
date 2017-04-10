@@ -361,13 +361,13 @@ class VectorLikeFermion(object):
         return factor * f.derivative(n)
 
     def equations_of_motion(self, interaction_lagrangian):
-        L_variation = -interaction_lagrangian.variation(self.L_name, fermion)
-        R_variation = -interaction_lagrangian.variation(self.R_name, fermion)
+        L_variation = interaction_lagrangian.variation(self.L_name, fermion)
+        R_variation = interaction_lagrangian.variation(self.R_name, fermion)
         Lc_variation = interaction_lagrangian.variation(self.Lc_name, fermion)
         Rc_variation = interaction_lagrangian.variation(self.Rc_name, fermion)
         op_sum_inv_mass = OpSum(self.free_inv_mass)
-        return [(self.L_name, op_sum_inv_mass * (self.R_der() + Rc_variation)),
-                (self.R_name, op_sum_inv_mass * (self.L_der() + Lc_variation)),
+        return [(self.L_name, -op_sum_inv_mass * (self.R_der() + Rc_variation)),
+                (self.R_name, -op_sum_inv_mass * (self.L_der() + Lc_variation)),
                 (self.Lc_name, op_sum_inv_mass * (self.Rc_der() + R_variation)),
                 (self.Rc_name, op_sum_inv_mass * (self.Lc_der() + L_variation))]
 
