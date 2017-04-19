@@ -10,11 +10,11 @@ operators; and the function :func:`collect` for collecting the
 coefficients of each operator in a given list.
 """
 
+import sys
+
 from effective.operators import (
     Operator, OperatorSum,
     number_op, symbol_op, tensor_op, kdelta, generic)
-
-import sys
 
 def collect_numbers(operator):
     """
@@ -229,7 +229,7 @@ def sum_collection(collection):
                 * op])
     return op_sum
 
-def group_op_sum(op_sum):
+def simplify(op_sum):
     op_sum = collect_numbers_and_symbols(op_sum)
     return OperatorSum([number_op(n) * op
                         for op, n in sum_numbers(op_sum)])

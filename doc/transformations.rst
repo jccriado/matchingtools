@@ -11,7 +11,7 @@ Transformations of the effective Lagrangian
      from effective.operators import tensor_op, flavor_tensor_op
      
      from effective.transformations import (
-         group_op_sum, apply_rules)
+         simplify, apply_rules)
 		   
 An effective Lagrangian obtained from integration of heavy fields
 usually contains operators that aren't independent. Several
@@ -29,7 +29,7 @@ The first step to simplify an effective Lagrangian is to collect and
 multiply numeric coefficients and constant tensors that appear several
 times inside the same operator. To do this, use::
 
-  simplified_lag_1 = group_op_sum(effective_lagrangian)
+  simplified_lag_1 = simplify(effective_lagrangian)
 
 Then we can define a set of rules as a list of pairs
 ``(pattern, replacement)`` where ``pattern`` is an operator
