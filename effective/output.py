@@ -10,8 +10,6 @@ both formats.
 
 from effective.transformations import collect
 
-import sys
-
 from subprocess import call
 
 def display_tensor_aux(structure, indices, num_of_der):
