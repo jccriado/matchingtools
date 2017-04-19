@@ -7,8 +7,7 @@ expressed in terms of the basis defined in
 `effective.extras.SM_dim_6_basis`.
 """
 
-import sys
-
+from __future__ import print_function
 import context
 
 
@@ -20,7 +19,7 @@ from effective.operators import (
     boson, fermion, kdelta)
 
 from effective.transformations import (
-    apply_rules, group_op_sum)
+    apply_rules, simplify)
 
 from effective.integration import (
     integrate, RealScalar, ComplexScalar, RealVector,
@@ -521,7 +520,7 @@ if __name__ == "__main__":
 
     quark_masses = ["MU", "MD", "MXU", "MUD", "MDY", "MXUD", "MUDY"]
 
-    mixed_eff_lag = group_op_sum(OpSum(*[
+    mixed_eff_lag = simplify(OpSum(*[
         op for op in eff_lag.operators
         if ((any(op.contains_symbol(vmass) for vmass in vector_masses) and
              any(op.contains_symbol(smass) for smass in scalar_masses)) or
@@ -717,7 +716,7 @@ if __name__ == "__main__":
     transf_eff_lag_writer = Writer(transf_eff_lag,
                                    latex_basis_coefs.keys())
 
-    sys.stdout.write(str(transf_eff_lag_writer) + "\n")
+    print(transf_eff_lag_writer)
 
     latex_tensors = {}
     latex_tensors.update(latex_tensors_mixed)
@@ -731,6 +730,6 @@ if __name__ == "__main__":
     latex_tensors.update(latex_SU3)
     latex_tensors.update(latex_Lorentz)
 
-    transf_eff_lag_writer.show_pdf(
-        "mixed", "open", latex_tensors, latex_basis_coefs,
+    transf_eff_lag_writer.write_latex(
+        "mixed", latex_tensors, latex_basis_coefs,
         list(map(chr, range(ord('a'), ord('z')))))

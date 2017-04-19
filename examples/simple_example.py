@@ -3,13 +3,13 @@ Simple example to illustrate some of the features of `effective`
 The model has a :math:`SU(2)\times U(1)` simmetry and contains
 a complex scalar doublet :math:`\phi` (the Higgs) with hypercharge
 :math:`1/2` and a real scalar triplet :math:`\Xi` with zero
- hypercharge that couple as:
+hypercharge that couple as:
 
 .. math::
    \mathcal{L}_{int} = - \kappa\Xi^a\phi^\dagger\sigma^a\phi
    - \lamb \Xi^a \Xi^a \phi^\dagger\phi,
 
-where :math:`\kappa` and :math:`\lamb` are a coupling constants
+where :math:`\kappa` and :math:`\lambda` are a coupling constants
 and :math:`\sigma^a` are the Pauli matrices. We will then integrate
 out the heavy scalar :math:`\Xi` to obtain an effective Lagrangian
 which we will finally write in terms of the operators.
@@ -90,6 +90,6 @@ latex_op_reps = {"Ophi": r"\mathcal{{O}}_{{\phi}}",
 	         "Ophi4": r"\mathcal{{O}}_{{\phi 4}}"}
 		   
 latex_indices = ["i", "j", "k", "l"]
-eff_lag_writer.write_pdf(
+eff_lag_writer.write_latex(
     "simple_example", latex_tensor_reps, 
     latex_op_reps, latex_indices)

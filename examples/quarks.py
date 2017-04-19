@@ -5,9 +5,8 @@ Standard Model. It specifies their interaction lagrangian and
 integrates them out.
 """
 
+from __future__ import print_function
 import context
-import sys
-
 
 # -- Core tools --------------------------------------------------------------
 
@@ -281,7 +280,7 @@ if __name__ == "__main__":
     
     eff_lag_writer = Writer(eff_lag, {})
 
-    sys.stdout.write(str(eff_lag_writer) + "\n")
+    print(eff_lag_writer)
 
     latex_tensors = {}
     latex_tensors.update(latex_tensors_quarks)
@@ -289,6 +288,6 @@ if __name__ == "__main__":
     latex_tensors.update(latex_SU2)
     latex_tensors.update(latex_Lorentz)
 
-    eff_lag_writer.show_pdf(
-        "quarks", "open", latex_tensors, {},
+    eff_lag_writer.write_latex(
+        "quarks", latex_tensors, {},
         list(map(chr, range(ord('a'), ord('z')))))

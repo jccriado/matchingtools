@@ -7,8 +7,8 @@ that don't contain L1 are removed. The Lagrangian is then expressed in
 terms of the basis defined in `effective.extras.SM_dim_6_basis`.
 """
 
+from __future__ import print_function
 import context
-import sys
 
 
 # -- Core tools --------------------------------------------------------------
@@ -20,7 +20,7 @@ from effective.operators import (
 
 from effective.integration import integrate, ComplexVector
 
-from effective.transformations import apply_rules, group_op_sum
+from effective.transformations import apply_rules, simplify
 
 from effective.output import Writer
 
@@ -153,7 +153,7 @@ if __name__ == "__main__":
     
     # Remove operators without ML1
     
-    L1_eff_lag = group_op_sum(OpSum(*[op for op in eff_lag.operators
+    L1_eff_lag = simplify(OpSum(*[op for op in eff_lag.operators
                                   if op.contains_symbol("ML1")]))
 
     # Define specific rules for this case
@@ -321,7 +321,7 @@ if __name__ == "__main__":
     transf_eff_lag_writer = Writer(transf_eff_lag,
                                    latex_basis_coefs.keys())
 
-    sys.stdout.write(str(transf_eff_lag_writer) + "\n")
+    print(transf_eff_lag_writer)
 
     latex_tensors = {}
     latex_tensors.update(latex_tensors_L1)
@@ -331,6 +331,6 @@ if __name__ == "__main__":
     latex_tensors.update(latex_SU3)
     latex_tensors.update(latex_Lorentz)
 
-    transf_eff_lag_writer.show_pdf(
-        "L1_plus_vectors", "open", latex_tensors, latex_basis_coefs,
+    transf_eff_lag_writer.write_pdf(
+        "L1_plus_vectors", latex_tensors, latex_basis_coefs,
         list(map(chr, range(ord('a'), ord('z')))))

@@ -5,8 +5,8 @@ Standard Model (except for the hypercharge 1/2 doublet).
 It specifies their interaction lagrangian and integrates them out.
 """
 
+from __future__ import print_function
 import context
-import sys
 
 
 # -- Core tools --------------------------------------------------------------
@@ -404,7 +404,7 @@ if __name__ == "__main__":
     
     eff_lag_writer = Writer(eff_lag, {})
 
-    sys.stdout.write(str(eff_lag_writer) + "\n")
+    print(eff_lag_writer)
 
     latex_tensors = {}
     latex_tensors.update(latex_tensors_vectors)
@@ -413,7 +413,7 @@ if __name__ == "__main__":
     latex_tensors.update(latex_SU3)
     latex_tensors.update(latex_Lorentz)
 
-    eff_lag_writer.show_pdf(
-        "vectors", "open", latex_tensors, {},
+    eff_lag_writer.write_latex(
+        "vectors", latex_tensors, {},
         list(map(chr, range(ord('a'), ord('z')))))
                           
