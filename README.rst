@@ -24,8 +24,6 @@ The source can be downloaded from the `GitHub repository`_.
 Documentation
 =============
 
-Read the documentation at:
-
-
+Read the documentation at: http://effective.readthedocs.io/en/latest/.
 
 
