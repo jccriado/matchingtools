@@ -8,7 +8,7 @@ Transformations of the effective Lagrangian
    :mod:`effective.transformations` that it uses are in the namespace.
    To import all the functions that appear here do::
 
-     from effective.operators import number_op, flavor_op
+     from effective.operators import tensor_op, flavor_tensor_op
      
      from effective.transformations import (
          group_op_sum, apply_rules)

@@ -155,7 +155,7 @@ L_leptons = -OpSum(
 
     # N
     Op(lambdaNLl(0, 1), NL(2, 0), epsSU2(3, 4), phi(4),
-       epsUp(2, 5), lL(5, 3, 1)),
+       epsUp(5, 2), lL(5, 3, 1)),
     Op(lambdaNLlc(0, 1), lLc(2, 3, 1), epsSU2(3, 4), phic(4),
        epsUpDot(2, 5), NLc(5, 0)),
     Op(lambdaNRl(0, 1), NRc(2, 0), epsSU2(3, 4), phi(4), lL(2, 3, 1)),
@@ -164,7 +164,7 @@ L_leptons = -OpSum(
 
     #Nmaj
     Op(lambdaNmajl(0, 1), Nmaj(2, 0), epsSU2(3, 4), phi(4),
-       epsUp(2, 5), lL(5, 3, 1)),
+       epsUp(5, 2), lL(5, 3, 1)),
     Op(lambdaNmajlc(0, 1), lLc(2, 3, 1), epsSU2(3, 4), phic(4),
        epsUpDot(2, 5), Nmajc(5, 0)),
 
@@ -181,7 +181,7 @@ L_leptons = -OpSum(
                         Sigma0R(2, 3, 0)),
     number_op(0.5) * Op(lambdaSigma0Ll(0, 1), Sigma0L(2, 3, 0),
                         epsSU2(4, 5), phi(5), sigmaSU2(3, 4, 6),
-                        epsUp(2, 7), lL(7, 6, 1)),
+                        epsUp(7, 2), lL(7, 6, 1)),
     number_op(0.5) * Op(lambdaSigma0Llc(0, 1), lLc(7, 6, 1),
                         sigmaSU2(3, 6, 4), epsSU2(4, 5), phic(5),
                         epsUpDot(7, 2), Sigma0Lc(2, 3, 0)),
@@ -189,7 +189,7 @@ L_leptons = -OpSum(
     # Sigma0maj
     number_op(0.5) * Op(lambdaSigma0majl(0, 1), Sigma0maj(2, 3, 0),
                         epsSU2(4, 5), phi(5), sigmaSU2(3, 4, 6),
-                        epsUp(2, 7), lL(7, 6, 1)),
+                        epsUp(7, 2), lL(7, 6, 1)),
     number_op(0.5) * Op(lambdaSigma0majlc(0, 1), lLc(7, 6, 1),
                         sigmaSU2(3, 6, 4), epsSU2(4, 5), phic(5),
                         epsUpDot(7, 2), Sigma0majc(2, 3, 0)),
@@ -208,7 +208,7 @@ L_leptons = -OpSum(
     Op(lambdaDelta1NR(0, 1), Delta1Rc(2, 3, 0),
        epsSU2(3, 4), phic(4), epsDown(2, 5), NRc(5, 1)),
     Op(lambdaDelta1NRc(0, 1), NR(2, 1), epsSU2(3, 4), phi(4),
-       epsDownDot(2, 5), Delta1R(5, 3, 0)),
+       epsDownDot(5, 2), Delta1R(5, 3, 0)),
 
     # Delta1 and Nmaj
     Op(lambdaDelta1Nmaj(0, 1), Delta1Rc(2, 3, 0),
@@ -234,7 +234,7 @@ L_leptons = -OpSum(
     Op(lambdaDelta1Sigma0R(0, 1), Delta1Rc(2, 3, 0), sigmaSU2(4, 3, 5),
        epsSU2(5, 6), phic(6), epsDown(2, 7), Sigma0Rc(7, 4, 1)),
     Op(lambdaDelta1Sigma0Rc(0, 1), Sigma0R(2, 4, 1), epsSU2(5, 6), phi(6),
-       sigmaSU2(4, 5, 3), epsDownDot(2, 7), Delta1R(7, 3, 0)),
+       sigmaSU2(4, 5, 3), epsDownDot(7, 2), Delta1R(7, 3, 0)),
 
     # Delta1 and Sigma0maj
     Op(lambdaDelta1Sigma0maj(0, 1), Delta1Rc(2, 3, 0), sigmaSU2(4, 3, 5),

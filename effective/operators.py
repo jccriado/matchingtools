@@ -173,7 +173,8 @@ class Operator(object):
                 # derivatives that act on the field and the number of
                 # fermions before it in the fermionic case
                 minus_sign = len(der_inds) % 2 == 1
-                if statistics:
+
+                if statistics == fermion:
                     number_of_fermions = len([1 for t in self.tensors[:pos]
                                               if not t.statistics])
                     minus_sign = minus_sign != (number_of_fermions % 2 == 1)
@@ -269,7 +270,7 @@ class Operator(object):
                 change if needed); None otherwise
         """
         fermions = tuple(pos for pos, tensor in enumerate(self.tensors)
-                         if not tensor.statistics)
+                         if tensor.statistics == fermion)
         for match in match_tensor_lists(self.tensors, pattern.tensors):
             candidate = [self.tensors[pos] for pos in match]
             matches, free_indices = match_indices(candidate, pattern.tensors)
@@ -293,7 +294,7 @@ class Operator(object):
         if len(self.tensors) != len(other.tensors):
             return False
         fermions = tuple(pos for pos, tensor in enumerate(self.tensors)
-                         if not tensor.statistics)
+                         if tensor.statistics == fermion)
         for match in match_tensor_lists(self.tensors, other.tensors):
             candidate = [self.tensors[pos] for pos in match]
             matches, free_indices = match_indices(candidate, other.tensors)

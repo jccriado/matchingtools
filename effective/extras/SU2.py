@@ -129,7 +129,7 @@ rules_SU2_C_sigma = [
 r"""
 Substitute 
 :math:`C^I_{ap}\epsilon_{pm}\sigma^a_{ij}
-C^{I*}_{bq}\epsilon_{qn}\sigma^b_{kl} by the equivalent
+C^{I*}_{bq}\epsilon_{qn}\sigma^b_{kl}` by the equivalent
 :math:`-\frac{2}{3}\delta_{mn}\delta_{ij}\delta_{kl}
 +\frac{4}{3}\delta_{mn}\delta_{il}\delta_{kj}
 +\frac{2}{3}\delta_{ml}\delta_{in}\delta_{kj}

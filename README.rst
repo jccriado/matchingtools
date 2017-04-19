@@ -1,5 +1,5 @@
 *Effective* is a Python library for doing symbolic calculations in
-Effective Field Theory.
+effective field theory.
 
 It provides the tools to create a Lagrangian and integrate out heavy
 fields at the tree level. It also includes functions for applying
@@ -11,7 +11,7 @@ effective operator basis.
 Installation
 ============
 
-To install Effective automatically using `pip`_ do::
+To install Effective using `pip`_ do::
 
   pip install effective
 
@@ -24,6 +24,8 @@ The source can be downloaded from the `GitHub repository`_.
 Documentation
 =============
 
-Read the documentation at: readthedocs
+Read the documentation at:
+
+
 
 

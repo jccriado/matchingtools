@@ -207,7 +207,7 @@ L_vectors = -OpSum(
 
     # L3
     Op(gelL3(0, 1, 2), L3c(3, 4, 0), eR(5, 1),
-       epsDownDot(5, 6), sigma4(3, 6, 7), lL(7, 4, 2)),
+       epsDownDot(6, 5), sigma4(3, 6, 7), lL(7, 4, 2)),
     Op(gelL3c(0, 1, 2), L3(3, 4, 0), lLc(7, 4, 2),
        sigma4(3, 7, 6), epsDown(6, 5), eRc(5, 1)),
 
@@ -224,7 +224,7 @@ L_vectors = -OpSum(
     Op(geuU5c(0, 1, 2), U5(3, 4, 0), uRc(6, 4, 2), sigma4(3, 6, 5), eR(5, 1)),
 
     # Q1
-    Op(gulQ1(0, 1, 2), Q1c(3, 4, 5, 0), uR(6, 4, 1), epsDownDot(6, 7),
+    Op(gulQ1(0, 1, 2), Q1c(3, 4, 5, 0), uR(6, 4, 1), epsDownDot(7, 6),
        sigma4bar(3, 7, 8), lL(8, 5, 2)),
     Op(gulQ1c(0, 1, 2), Q1(3, 4, 5, 0), lLc(8, 5, 2),
        sigma4bar(3, 8, 7), epsDown(7, 6), uRc(6, 4, 1)),
@@ -232,15 +232,15 @@ L_vectors = -OpSum(
        dRc(8, 6, 1), sigma4(3, 8, 9),
        epsSU2(5, 10), epsUpDot(9, 11), qLc(11, 7, 10, 2)),
     Op(gdqQ1c(0, 1, 2), Q1(3, 4, 5, 0), epsSU3(4, 6, 7),
-       qL(11, 7, 10, 2), epsUp(11, 9), epsSU2(5, 10),
+       qL(11, 7, 10, 2), epsUp(9, 11), epsSU2(5, 10),
        sigma4(3, 9, 8), dR(8, 6, 1)),
 
     # Q5
-    Op(gdlQ5(0, 1, 2), Q5c(3, 4, 5, 0), dR(6, 4, 1), epsDownDot(6, 7),
+    Op(gdlQ5(0, 1, 2), Q5c(3, 4, 5, 0), dR(6, 4, 1), epsDownDot(7, 6),
        sigma4bar(3, 7, 8), lL(8, 5, 2)),
     Op(gdlQ5c(0, 1, 2), Q5(3, 4, 5, 0), lLc(8, 5, 2),
        sigma4bar(3, 8, 7), epsDown(7, 6), dRc(6, 4, 1)),
-    Op(geqQ5(0, 1, 2), Q5c(3, 4, 5, 0), eR(6, 1), epsDownDot(6, 7),
+    Op(geqQ5(0, 1, 2), Q5c(3, 4, 5, 0), eR(6, 1), epsDownDot(7, 6),
        sigma4bar(3, 7, 8), qL(8, 4, 5, 2)),
     Op(geqQ5c(0, 1, 2), Q5(3, 4, 5, 0), qLc(8, 4, 5, 2),
        sigma4bar(3, 8, 7), epsDown(7, 6), eRc(6, 1)),
@@ -248,7 +248,7 @@ L_vectors = -OpSum(
        uRc(8, 6, 1), sigma4(3, 8, 9),
        epsSU2(5, 10), epsUpDot(9, 11), qLc(11, 7, 10, 2)),
     Op(guqQ5c(0, 1, 2), Q5(3, 4, 5, 0), epsSU3(4, 6, 7),
-       qL(11, 7, 10, 2), epsUp(11, 9), epsSU2(5, 10),
+       qL(11, 7, 10, 2), epsUp(9, 11), epsSU2(5, 10),
        sigma4(3, 9, 8), uR(8, 6, 1)),
 
     # X
@@ -262,13 +262,13 @@ L_vectors = -OpSum(
     Op(gdqY1(0, 1, 2), Y1c(3, 4, 5, 6, 0), dRc(7, 4, 1), sigma4(3, 7, 8),
        epsSU2(6, 9), epsUpDot(8, 10), qLc(10, 5, 9, 2)),
     Op(gdqY1c(0, 1, 2), Y1(3, 4, 5, 6, 0), epsSU2(6, 9), qL(10, 5, 9, 2),
-       epsUp(10, 8), sigma4(3, 8, 7), dR(7, 4, 1)),
+       epsUp(8, 10), sigma4(3, 8, 7), dR(7, 4, 1)),
 
     # Y5
     Op(guqY5(0, 1, 2), Y1c(3, 4, 5, 6, 0), uRc(7, 4, 1), sigma4(3, 7, 8),
        epsSU2(6, 9), epsUpDot(8, 10), qLc(10, 5, 9, 2)),
     Op(guqY5c(0, 1, 2), Y1(3, 4, 5, 6, 0), epsSU2(6, 9),
-       epsUp(10, 8), sigma4(3, 8, 7), uR(7, 4, 1)),
+       epsUp(0, 10), sigma4(3, 8, 7), uR(7, 4, 1)),
 )
 
 # -- Heavy fields ------------------------------------------------------------

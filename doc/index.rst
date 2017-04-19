@@ -5,7 +5,7 @@ Welcome to Effective's documentation!
 =====================================
 
 *Effective* is a Python library for doing symbolic calculations in
-Effective Field Theory.
+effective field theory.
 
 It provides the tools to create a Lagrangian and integrate out heavy
 fields at the tree level. It also includes functions for applying

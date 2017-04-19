@@ -4,7 +4,7 @@ Quickstart
 Installation
 ============
 
-To install Effective automatically using `pip`_ do::
+To install Effective using `pip`_ do::
 
   pip install effective
 
@@ -25,16 +25,16 @@ GitHub repository of the project.
 
 .. _examples folder: https://github.com/jccriado/effective/tree/master/examples
 
-The model  is described as follows: symmetry
+The model is described as follows: it has symmetry
 :math:`SU(2)\times U(1)` containing a complex scalar doublet
 :math:`\phi` (the Higgs) with hypercharge :math:`1/2` and a real
 scalar triplet :math:`\Xi` with zero hypercharge that couple as:
 
 .. math::
    \mathcal{L}_{int} = - \kappa\Xi^a\phi^\dagger\sigma^a\phi
-   - \lamb \Xi^a \Xi^a \phi^\dagger\phi,
+   - \lambda \Xi^a \Xi^a \phi^\dagger\phi,
 
-where :math:`\kappa` and :math:`\lamb` are a coupling constants
+where :math:`\kappa` and :math:`\lambda` are a coupling constants
 and :math:`\sigma^a` are the Pauli matrices. We will then integrate
 out the heavy scalar :math:`\Xi` to obtain an effective Lagrangian
 which we will finally write in terms of the operators.

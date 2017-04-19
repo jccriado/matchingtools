@@ -361,13 +361,13 @@ class VectorLikeFermion(object):
         return factor * f.derivative(n)
 
     def equations_of_motion(self, interaction_lagrangian):
-        L_variation = interaction_lagrangian.variation(self.L_name, fermion)
-        R_variation = interaction_lagrangian.variation(self.R_name, fermion)
+        L_variation = -interaction_lagrangian.variation(self.L_name, fermion)
+        R_variation = -interaction_lagrangian.variation(self.R_name, fermion)
         Lc_variation = interaction_lagrangian.variation(self.Lc_name, fermion)
         Rc_variation = interaction_lagrangian.variation(self.Rc_name, fermion)
         op_sum_inv_mass = OpSum(self.free_inv_mass)
-        return [(self.L_name, -op_sum_inv_mass * (self.R_der() + Rc_variation)),
-                (self.R_name, -op_sum_inv_mass * (self.L_der() + Lc_variation)),
+        return [(self.L_name, op_sum_inv_mass * (self.R_der() + Rc_variation)),
+                (self.R_name, op_sum_inv_mass * (self.L_der() + Lc_variation)),
                 (self.Lc_name, op_sum_inv_mass * (self.Rc_der() + R_variation)),
                 (self.Rc_name, op_sum_inv_mass * (self.Lc_der() + L_variation))]
 
@@ -377,8 +377,8 @@ class VectorLikeFermion(object):
 
     def quadratic_terms(self):
         """
-        Construct the terms i FLc (D FL) - i (D FLc) FL + i FRc D FR
-        - i (D FRc) FR - (FLc FR + FRc FL)
+        Construct the terms (1/2) [i FLc (D FL) - i (D FLc) FL + i FRc D FR
+        - i (D FRc) FR] - M (FLc FR + FRc FL)
         """
         n = self.num_of_inds
         fL, fR, fLc, fRc = map(self._create_op_field,
@@ -451,7 +451,7 @@ class MajoranaFermion(object):
         variation = interaction_lagrangian.variation(self.name, fermion)
         c_variation = interaction_lagrangian.variation(self.c_name, fermion)
         inv_mass = OpSum(self.free_inv_mass)
-        return [(self.c_name, inv_mass * self.pre_eps(self.der() + c_variation)),
+        return [(self.c_name, -inv_mass * self.pre_eps(self.der() + c_variation)),
                 (self.name, inv_mass * self.app_eps(self.c_der() + variation))]
 
     def quadratic_terms(self):
@@ -472,7 +472,7 @@ class MajoranaFermion(object):
         kinc = -(c_f * f).replace_first(self.c_name, self.c_der())
         mass1 = self.mass * Op(epsUp(0, n)) * f * f1
         mass2 = self.mass * c_f * c_f1 * Op(epsUpDot(0, n))
-        return half * (kin + kinc + OpSum(-mass1, -mass2))
+        return half * (kin + kinc + OpSum(mass1, -mass2))
 
 def integrate(heavy_fields, interaction_lagrangian, max_dim=6, verbose=True):
     """

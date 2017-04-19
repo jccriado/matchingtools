@@ -242,12 +242,12 @@ L_scalars = -OpSum(
     # S1
     Op(ylS1(0, 1, 2), S1c(0), lLc(3, 4, 1), epsUpDot(3, 5),
               epsSU2(4, 6), lLc(5, 6, 2)),
-    Op(ylS1c(0, 1, 2), S1(0), lL(3, 4, 1), epsUp(3, 5),
+    Op(ylS1c(0, 1, 2), S1(0), lL(3, 4, 1), epsUp(5, 3),
               epsSU2(4, 6), lL(5, 6, 2)),
 
     # S2
     Op(yeS2(0, 1, 2), S2c(0), epsDown(3, 4), eRc(3, 1), eRc(4, 2)),
-    Op(yeS2c(0, 1, 2), S2(0), epsDownDot(3, 4), eR(3, 1), eR(4, 2)),
+    Op(yeS2c(0, 1, 2), S2(0), epsDownDot(4, 3), eR(3, 1), eR(4, 2)),
 
     # varphi
     Op(yevarphi(0, 1, 2), varphic(3, 0), eRc(4, 1), lL(4, 3, 2)),
@@ -269,7 +269,7 @@ L_scalars = -OpSum(
     # Xi1
     Op(ylXi1(0, 1, 2), Xi1c(3, 0), lLc(4, 5, 1), lLc(6, 7, 2),
        epsUpDot(4, 6), sigmaSU2(3, 5, 8), epsSU2(8, 7)),
-    Op(ylXi1c(0, 1, 2), Xi1(3, 0), lL(4, 5, 1), lL(6, 7, 2),
+    Op(ylXi1c(0, 1, 2), Xi1(3, 0), lL(6, 7, 2), lL(4, 5, 1),
        epsUp(4, 6), sigmaSU2(3, 8, 5), epsSU2(8, 7)),
     Op(kappaXi1(0), Xi1c(1, 0), epsSU2(2, 3), phi(3),
        sigmaSU2(1, 2, 4), phi(4)),
@@ -297,37 +297,37 @@ L_scalars = -OpSum(
 
     # omega1
     Op(yqlomega1(0, 1, 2), omega1c(3, 0), qL(4, 3, 5, 1),
-       epsSU2(5, 6), epsUp(4, 7), lL(7, 6, 2)),
+       epsSU2(5, 6), epsUp(7, 4), lL(7, 6, 2)),
     Op(yqlomega1c(0, 1, 2), omega1(3, 0), lLc(7, 6, 2),
        epsSU2(5, 6), epsUpDot(7, 4), qLc(4, 3, 5, 1)),
     Op(yqqomega1(0, 1, 2), omega1c(3, 0), epsSU3(3, 4, 5),
        qLc(6, 4, 7, 1), epsSU2(7, 8), epsUpDot(6, 9), qLc(9, 5, 8, 2)),
     Op(yqqomega1c(0, 1, 2), omega1(3, 0), epsSU3(3, 4, 5),
-       qL(9, 5, 8, 2), epsSU2(7, 8), epsUp(9, 6), qL(6, 4, 7, 1)),
+       qL(9, 5, 8, 2), epsSU2(7, 8), epsUp(6, 9), qL(6, 4, 7, 1)),
     Op(yeuomega1(0, 1, 2), omega1c(3, 0), eR(4, 1),
-       epsDownDot(4, 5), uR(5, 3, 2)),
+       epsDownDot(5, 4), uR(5, 3, 2)),
     Op(yeuomega1c(0, 1, 2), omega1(3, 0), uRc(5, 3, 2),
        epsDown(5, 4), eRc(4, 1)),
     Op(yduomega1(0, 1, 2), omega1c(3, 0), epsSU3(3, 4, 5),
        dRc(6, 4, 1), epsDown(6, 7), uRc(7, 5, 2)),
     Op(yduomega1c(0, 1, 2), omega1(3, 0), epsSU3(3, 4, 5),
-       uRc(7, 5, 2), epsDownDot(7, 6), dRc(6, 4, 1)),
+       uRc(7, 5, 2), epsDownDot(6, 7), dRc(6, 4, 1)),
 
     # omega2
     Op(ydomega2(0, 1, 2), omega2c(3, 0), epsSU3(3, 4, 5),
        dRc(6, 4, 1), epsDown(6, 7), dRc(7, 5, 2)),
     Op(ydomega2c(0, 1, 2), omega2(3, 0), epsSU3(3, 4, 5),
-       dRc(7, 5, 2), epsDownDot(7, 6), dRc(6, 4, 1)),
+       dRc(7, 5, 2), epsDownDot(6, 7), dRc(6, 4, 1)),
 
     # omega4
     Op(yedomega4(0, 1, 2), omega4c(3, 0), eR(4, 1),
-       epsDownDot(4, 5), dR(5, 3, 2)),
+       epsDownDot(5, 4), dR(5, 3, 2)),
     Op(yedomega4c(0, 1, 2), omega4(3, 0), dRc(5, 3, 2),
        epsDown(5, 4), eR(4, 1)),
     Op(yuuomega4(0, 1, 2), omega4c(3, 0), epsSU3(3, 4, 5),
        uRc(6, 4, 1), epsDown(6, 7), uRc(7, 5, 2)),
     Op(yuuomega4c(0, 1, 2), omega4(3, 0), epsSU3(3, 4, 5),
-       uRc(7, 5, 2), epsDownDot(7, 6), uRc(7, 4, 1)),
+       uRc(7, 5, 2), epsDownDot(6, 7), uRc(7, 4, 1)),
 
     # Pi1
     Op(yldPi1(0, 1, 2), Pi1c(3, 4, 0), epsSU2(4, 5),
@@ -345,42 +345,42 @@ L_scalars = -OpSum(
 
     # zeta
     Op(yqlzeta(0, 1, 2), zetac(3, 4, 0), qL(5, 3, 6, 1), epsSU2(6, 7),
-       sigmaSU2(4, 7, 8), epsUp(5, 9), lL(9, 8, 2)),
+       sigmaSU2(4, 7, 8), epsUp(9, 5), lL(9, 8, 2)),
     Op(yqlzetac(0, 1, 2), zeta(3, 4, 0), lLc(9, 8, 2), epsUpDot(9, 5),
        sigmaSU2(4, 8, 7), epsSU2(6, 7), qLc(5, 3, 6, 1)),
     Op(yqqzeta(0, 1, 2), zetac(3, 4, 0), epsSU3(3, 5, 6),
        qLc(7, 5, 8, 1), sigmaSU2(4, 8, 9), epsSU2(9, 10),
        epsUpDot(7, 11), qLc(11, 6, 10, 2)),
     Op(yqqzetac(0, 1, 2), zeta(3, 4, 0), epsSU3(3, 5, 6),
-       qL(11, 6, 10, 2), epsUp(11, 7), epsSU2(9, 10),
+       qL(11, 6, 10, 2), epsUp(7, 11), epsSU2(9, 10),
        sigmaSU2(4, 9, 8), qL(7, 5, 8, 1)),
 
     # Omega1
     Op(yudOmega1(0, 1, 2), Omega1c(3, 4, 0), uR(5, 3, 1),
-       epsDownDot(5, 6), dR(6, 4, 2)),
+       epsDownDot(6, 5), dR(6, 4, 2)),
     Op(yudOmega1c(0, 1, 2), Omega1(3, 4, 0), dRc(6, 4, 2),
        epsDown(6, 5), uR(5, 3, 1)),
     Op(yqqOmega1(0, 1, 2), Omega1c(3, 4, 0), qL(5, 3, 6, 1),
-       epsSU2(6, 7), epsUp(5, 8), qL(8, 4, 7, 2)),
+       epsSU2(6, 7), epsUp(8, 5), qL(8, 4, 7, 2)),
     Op(yqqOmega1c(0, 1, 2), Omega1(3, 4, 0), qLc(8, 4, 7, 2),
        epsSU2(6, 7), epsUpDot(8, 5), qLc(5, 3, 6, 1)),
 
     # Omega2
     Op(ydOmega2(0, 1, 2), Omega2c(3, 4, 0), dR(5, 3, 1),
-       epsDownDot(5, 6), dR(6, 4, 2)),
+       epsDownDot(6, 5), dR(6, 4, 2)),
     Op(ydOmega2c(0, 1, 2), Omega2(3, 4, 0), dRc(6, 4, 2),
        epsDown(6, 5), dR(5, 3, 1)),
 
     # Omega4
     Op(yuOmega4(0, 1, 2), Omega4c(3, 4, 0), uR(5, 3, 1),
-       epsDownDot(5, 6), uR(6, 4, 2)),
+       epsDownDot(6, 5), uR(6, 4, 2)),
     Op(yuOmega4c(0, 1, 2), Omega4(3, 4, 0), uRc(6, 4, 2),
        epsDown(6, 5), uR(5, 3, 1)),
 
     # Upsilon
     Op(yqUpsilon(0, 1, 2), Upsilonc(3, 4, 5, 0),
        qL(6, 3, 7, 1), epsSU2(7, 8), sigmaSU2(5, 8, 9),
-       epsUp(6, 10), qL(10, 4, 9, 2)),
+       epsUp(10, 6), qL(10, 4, 9, 2)),
     Op(yqUpsilonc(0, 1, 2), Upsilon(3, 4, 5, 0),
        qLc(10, 4, 9, 2), sigmaSU2(5, 9, 8), epsSU2(7, 8),
        epsUpDot(10, 6), qLc(6, 3, 7, 1)),

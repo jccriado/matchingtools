@@ -9,6 +9,8 @@ from effective.operators import (
 
 from effective.extras.SU2 import sigmaSU2, epsSU2
 
+from effective.extras.Lorentz import eps4
+
 # Coupling constants
 gb = TensorBuilder("gb")
 r""":math:`U(1)` coupling constant :math:`g'`"""
@@ -37,17 +39,6 @@ r"""Conjugate of the CKM matrix"""
 
 deltaFlavor = TensorBuilder("deltaFlavor")
 r"""Kronecker delta for flavor indices"""
-
-lambdaColor = TensorBuilder("lambdaColor")
-r"""
-Gell-Mann matrices :math:`(\lambda^A)_{BC}`.
-"""
-
-eps4 = TensorBuilder("eps4")
-r"""
-Totally antisymmetric tensor with four Lorentz vector indices
-:math:`\epsilon_{\mu\nu\rho\sigma}` with :math:`\epsilon_{0123}=1`
-"""
 
 # Field. Indices appear in this order when needed:
 # Lorentz, SU(3), SU(2), U(1), flavor 
