@@ -3,7 +3,7 @@ This module defines tensors and rules related to the
 group :math:`SU(2)`.
 """
 
-from effective.operators import Op, OpSum, TensorBuilder, number_op, kdelta
+from effective.core import Op, OpSum, TensorBuilder, number_op, kdelta
 
 epsSU2 = TensorBuilder("epsSU2")
 r"""

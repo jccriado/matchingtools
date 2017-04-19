@@ -2,7 +2,7 @@
 This module defines rules related to the Lorentz group.
 """
 
-from effective.operators import (
+from effective.core import (
     TensorBuilder, Op, OpSum, number_op, kdelta,
     epsUp, epsUpDot, epsDown, epsDownDot, sigma4, sigma4bar)
 

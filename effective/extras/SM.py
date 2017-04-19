@@ -3,7 +3,7 @@ This module defines the Standard Model tensors and fields and the rules
 for substituting their equations of motion.
 """
 
-from effective.operators import (
+from effective.core import (
     Op, OpSum, TensorBuilder, FieldBuilder, D,
     number_op, sigma4, sigma4bar, boson, fermion)
 

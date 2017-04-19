@@ -9,7 +9,7 @@ The basis is the one in arXiv:1412.8480v2_.
 """
 
 
-from effective.operators import (
+from effective.core import (
     tensor_op, flavor_tensor_op, D, Op, OpSum, number_op)
 
 from effective.extras.SM import (

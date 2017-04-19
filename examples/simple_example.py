@@ -19,7 +19,7 @@ which we will finally write in terms of the operators.
    \mathcal{O}_{\phi 4}=(\phi^\dagger\phi)^2
 """
 
-from effective.operators import (
+from effective.core import (
     TensorBuilder, FieldBuilder, Op, OpSum,
     number_op, tensor_op, boson, fermion, kdelta)
 

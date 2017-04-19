@@ -13,7 +13,7 @@ import context
 
 # -- Core tools --------------------------------------------------------------
 
-from effective.operators import (
+from effective.core import (
     Op, OpSum, TensorBuilder, FieldBuilder, D,
     number_op, symbol_op, tensor_op, flavor_tensor_op,
     boson, fermion, kdelta)

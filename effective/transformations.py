@@ -12,7 +12,7 @@ coefficients of each operator in a given list.
 
 import sys
 
-from effective.operators import (
+from effective.core import (
     Operator, OperatorSum,
     number_op, symbol_op, tensor_op, kdelta, generic)
 
