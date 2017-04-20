@@ -16,11 +16,10 @@ To install Effective using `pip`_ do::
   pip install effective
 
 The source can be downloaded from the `GitHub repository`_.
-To install Effective from a local copy of the project do::
+To install Effective from a local copy of the project open a terminal
+in the top directory and type::
 
   python setup.py install
-
-in the top directory.
 
 .. _pip: https://pypi.python.org/pypi/pip/
 
@@ -59,6 +58,7 @@ following content::
 
   Rest:
 
+  
 
 File list
 =========
