@@ -1,0 +1,89 @@
+effective (directory) -- Contains the code of library itself:
+|
+|-- __init__.py         Empty. Turns the directory into a python
+|                       package.
+|
+|-- core.py             Contains basic classes and functions of the
+|                       library. Tensors, operators and operator sums
+|	              	are defined. The algorithms for matching and
+|		        replacing are implemented.
+|
+|-- integration.py      Defines classes of heavy fields, with their
+|                       quadratic terms and solutions to the equations
+|                       of motion. Implements the tree level
+|			integration algorithm.
+|
+|-- transformations.py  Implements the functions for the
+|                       simplification of the effective Lagrangian and
+|                       its transformation using replacement rules.
+|
+|-- output.py           Defines the class Writer for the output of the
+|                       calculations.
+|
+|-- extras (subdirectory) -- Modules for the application to physics
+    |	                     beyond the Standard Model:
+    |
+    |-- __init__.py        Empty. Turns the directory into a python
+    |                      package.
+    |
+    |-- SU2.py             SU(2) group tensors and rules for
+    |                      simplification.
+    |
+    |-- SU3.py             SU(3) group tensors and rules for
+    |                      simplification.
+    |
+    |-- Lorentz.py         Lorentz group tensors and rules for
+    |                      simplification.
+    |
+    |-- SM.py              Standard Model coupling constants and
+    |                      fields and rules for substituting their
+    |                      equations of motion.
+    |
+    |-- SM_dim_6_basis.py  Definition of a basis of operators for the
+                           Standard Model effective Lagrangian up to
+                           dimension six.
+
+examples (directory) -- Examples of use:
+|
+|-- simple_example.py   Small example to demonstrate the main features
+|                       of the library. It also serves as a test case.
+|
+|-- leptons.py          Definition and integration of the heavy
+|                       color-singlet fermions that couple linearly to
+|                       the Standard Model.
+|                       
+|-- quarks.py           Definition and integration of the heavy
+|                       color-triplet fermions that couple linearly to
+|                       the Standard Model.
+|
+|-- scalars.py          Definition and integration of the heavy
+|                       scalars that couple linearly to the Standard
+|                       Model.
+|
+|-- vectors.py          Definition and integration of the heavy
+|                       vectors (except the hypercharge one half
+|                       SU(2) doublet) that couple linearly to the
+|                       Standard Model.
+|
+|-- L1_plus_vectors.py  Definition of the hypercharge one half SU(2)
+|                       doublet that couples linearly to the Standard
+|                       Model and its integration together with the
+|                       other particles.
+|
+|-- mixed.py            Integration of all the heavy fields that
+                        that couple linearly to the Standard Model
+			together.
+
+
+doc (directory) -- Contains the documentation.
+
+setup.py      Script for packaging and distributing the library
+
+setup.cfg     Configuration file for setup.py.
+
+README.rst    Basic information.
+
+LICENSE       The MIT license definition.
+
+file_map.txt  This file. Contains a list of all the files with a short
+              description of each of them.

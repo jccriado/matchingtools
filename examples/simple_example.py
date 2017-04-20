@@ -6,8 +6,8 @@ a complex scalar doublet :math:`\phi` (the Higgs) with hypercharge
 hypercharge that couple as:
 
 .. math::
-   \mathcal{L}_{int} = - \kappa\Xi^a\phi^\dagger\sigma^a\phi
-   - \lamb \Xi^a \Xi^a \phi^\dagger\phi,
+    \mathcal{L}_{int} = - \kappa\Xi^a\phi^\dagger\sigma^a\phi
+    - \lamb \Xi^a \Xi^a \phi^\dagger\phi,
 
 where :math:`\kappa` and :math:`\lambda` are a coupling constants
 and :math:`\sigma^a` are the Pauli matrices. We will then integrate
@@ -15,12 +15,23 @@ out the heavy scalar :math:`\Xi` to obtain an effective Lagrangian
 which we will finally write in terms of the operators.
 
 .. math::
-   \mathcal{O}_\phi=(\phi^\dagger\phi)^3,\;
-   \mathcal{O}_{\phi 4}=(\phi^\dagger\phi)^2
+    \mathcal{O}_{\phi 6}=(\phi^\dagger\phi)^3, \\
+    \mathcal{O}_{\phi 4}=(\phi^\dagger\phi)^2, \\
+    \mathcal{O}^{(1)}_{\phi}= \phi^\dagger\phi
+                              (D_\mu \phi)^\dagger D^\mu \phi, \\
+    \mathcal{O}^{(3)}_{\phi}= (\phi^\dagger D_\mu \phi)
+                              (D^\mu \phi)^\dagger \phi, \\
+    \mathcal{O}_{D \phi} = \phi^\dagger(D_\mu \phi) 
+                           \phi^\daggerD^\mu\phi, \\
+    \mathcal{O}^*_{D \phi} = (D_\mu\phi)^\dagger\phi 
+                             (D^\mu\phi)^\dagger\phi
+
 """
 
+import context
+
 from effective.core import (
-    TensorBuilder, FieldBuilder, Op, OpSum,
+    TensorBuilder, FieldBuilder, Op, OpSum, D,
     number_op, tensor_op, boson, fermion, kdelta)
 
 from effective.integration import RealScalar, integrate
@@ -59,14 +70,26 @@ fierz_rule = (
     OpSum(number_op(2) * Op(kdelta(-1, -4), kdelta(-3, -2)),
           -Op(kdelta(-1, -2), kdelta(-3, -4))))
 	      
-Ophi = tensor_op("Ophi")
+Ophi6 = tensor_op("Ophi6")
 Ophi4 = tensor_op("Ophi4")
+O1phi = tensor_op("O1phi")
+O3phi = tensor_op("O3phi")
+ODphi = tensor_op("ODphi")
+ODphic = tensor_op("ODphic")
 
 definition_rules = [
     (Op(phic(0), phi(0), phic(1), phi(1), phic(2), phi(2)),
-     OpSum(Ophi)),
+     OpSum(Ophi6)),
     (Op(phic(0), phi(0), phic(1), phi(1)),
-     OpSum(Ophi4))]
+     OpSum(Ophi4)),
+    (Op(D(2, phic(0)), D(2, phi(0)), phic(1), phi(1)),
+     OpSum(O1phi)),
+    (Op(phic(0), D(2, phi(0)), D(2, phic(1)), phi(1)),
+     OpSum(O3phi)),
+    (Op(phic(0), D(2, phi(0)), phic(1), D(2, phi(1))),
+     OpSum(ODphi)),
+    (Op(D(2, phic(0)), phi(0), D(2, phic(1)), phi(1)),
+     OpSum(ODphic))]
 
 rules = [fierz_rule] + definition_rules
 max_iterations = 2
@@ -75,21 +98,28 @@ transf_eff_lag = apply_rules(
 
 # Output
 
-final_op_names = ["Ophi", "Ophi4"]
+final_op_names = [
+    "Ophi6", "Ophi4", "O1phi", "O3phi", "ODphi", "ODphic"]
 eff_lag_writer = Writer(transf_eff_lag, final_op_names)
 eff_lag_writer.write_text_file("simple_example")
 
 
-latex_tensor_reps = {"kappa": r"\kappa",
-                     "lamb": r"\lambda",
-                     "MXi": r"M_{{\Xi}}",
-                     "phi": r"\phi_{}",
-                     "phic": r"\phi^*_{}"}
+# -- LaTeX output (uncomment to produce it) --------------------------
+# latex_tensor_reps = {"kappa": r"\kappa",
+#                      "lamb": r"\lambda",
+#                      "MXi": r"M_{{\Xi}}",
+#                      "phi": r"\phi_{}",
+#                      "phic": r"\phi^*_{}"}
 
-latex_op_reps = {"Ophi": r"\mathcal{{O}}_{{\phi}}",
-	         "Ophi4": r"\mathcal{{O}}_{{\phi 4}}"}
+# latex_coef_reps = {
+#     "Ophi6": r"\frac{{\alpha_{{\phi 6}}}}{{\Lambda^2}}",
+#     "Ophi4": r"\alpha_{{\phi 4}}",
+#     "O1phi": r"\frac{{\alpha^{{(1)}}_{{\phi}}}}{{\Lambda^2}}",
+#     "O3phi": r"\frac{{\alpha^{{(3)}}_{{\phi}}}}{{\Lambda^2}}",
+#     "ODphi": r"\frac{{\alpha_{{D\phi}}}}{{\Lambda^2}}",
+#     "ODphic": r"\frac{{\alpha^*_{{D\phi}}}}{{\Lambda^2}}"}
 		   
-latex_indices = ["i", "j", "k", "l"]
-eff_lag_writer.write_latex(
-    "simple_example", latex_tensor_reps, 
-    latex_op_reps, latex_indices)
+# latex_indices = ["i", "j", "k", "l"]
+# eff_lag_writer.write_latex(
+#     "simple_example", latex_tensor_reps, 
+#     latex_coef_reps, latex_indices)
