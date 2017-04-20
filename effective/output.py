@@ -138,7 +138,7 @@ class Writer(object):
             coll = "\n".join(op_form.format(
                 name = op_name.format(*list(range(-1, -n_inds-1, -1))),
                 coef = "\n".join(coef_term_form.format(num, op_coef)
-                                  for num, op_coef in coef_lst))
+                                  for op_coef, num in coef_lst))
                              for (op_name, n_inds), coef_lst in
                              self.collection),
             rest = "\n".join(str(num) + str(op) for num, op in self.rest))
