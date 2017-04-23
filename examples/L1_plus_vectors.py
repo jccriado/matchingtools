@@ -8,7 +8,6 @@ terms of the basis defined in `effective.extras.SM_dim_6_basis`.
 """
 
 from __future__ import print_function
-import context
 
 
 # -- Core tools --------------------------------------------------------------

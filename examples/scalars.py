@@ -6,7 +6,7 @@ integrates them out.
 """
 
 from __future__ import print_function
-import context
+
 
 # -- Core tools --------------------------------------------------------------
 

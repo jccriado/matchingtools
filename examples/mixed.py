@@ -8,7 +8,6 @@ expressed in terms of the basis defined in
 """
 
 from __future__ import print_function
-import context
 
 
 # -- Core tools --------------------------------------------------------------

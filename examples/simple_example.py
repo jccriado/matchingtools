@@ -28,8 +28,6 @@ which we will finally write in terms of the operators.
 
 """
 
-import context
-
 from effective.core import (
     TensorBuilder, FieldBuilder, Op, OpSum, D,
     number_op, tensor_op, boson, fermion, kdelta)
