@@ -22,7 +22,7 @@ which we will finally write in terms of the operators.
     \mathcal{O}^{(3)}_{\phi}= (\phi^\dagger D_\mu \phi)
                               (D^\mu \phi)^\dagger \phi, \\
     \mathcal{O}_{D \phi} = \phi^\dagger(D_\mu \phi) 
-                           \phi^\daggerD^\mu\phi, \\
+                           \phi^\dagger D^\mu\phi, \\
     \mathcal{O}^*_{D \phi} = (D_\mu\phi)^\dagger\phi 
                              (D^\mu\phi)^\dagger\phi
 

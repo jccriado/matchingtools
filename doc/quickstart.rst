@@ -37,11 +37,20 @@ scalar triplet :math:`\Xi` with zero hypercharge that couple as:
 where :math:`\kappa` and :math:`\lambda` are a coupling constants
 and :math:`\sigma^a` are the Pauli matrices. We will then integrate
 out the heavy scalar :math:`\Xi` to obtain an effective Lagrangian
-which we will finally write in terms of the operators.
+which we will finally write in terms of the operators
 
 .. math::
-   \mathcal{O}_\phi=(\phi^\dagger\phi)^3,\;
-   \mathcal{O}_{\phi 4}=(\phi^\dagger\phi)^2
+    \mathcal{O}_{\phi 6}=(\phi^\dagger\phi)^3, \qquad &
+    \mathcal{O}_{\phi 4}=(\phi^\dagger\phi)^2, \\
+    \mathcal{O}^{(1)}_{\phi}= \phi^\dagger\phi 
+    (D_\mu \phi)^\dagger D^\mu \phi, \qquad &
+    \mathcal{O}^{(3)}_{\phi}= (\phi^\dagger D_\mu \phi)
+    (D^\mu \phi)^\dagger \phi, \\
+    \mathcal{O}_{D \phi} = \phi^\dagger(D_\mu \phi) 
+    \phi^\dagger D^\mu\phi, \qquad &
+    \mathcal{O}^*_{D \phi} = (D_\mu\phi)^\dagger\phi 
+    (D^\mu\phi)^\dagger\phi
+
 
 Creation of the model
 ---------------------
@@ -126,17 +135,29 @@ pattern.
 We should now define the operators in terms of which we want to
 express the effective Lagrangian::
 
-  Ophi = tensor_op("Ophi")
+  Ophi6 = tensor_op("Ophi6")
   Ophi4 = tensor_op("Ophi4")
+  O1phi = tensor_op("O1phi")
+  O3phi = tensor_op("O3phi")
+  ODphi = tensor_op("ODphi")
+  ODphic = tensor_op("ODphic")
 
 and then use some rules to express them in terms of the fields and
 tensors that appear in the effective Lagrangian::
 
   definition_rules = [
-      (Op(phic(0), phi(0), phic(1), phi(1), phic(2), phi(2)),
-       OpSum(Ophi)),
-      (Op(phic(0), phi(0), phic(1), phi(1)),
-       OpSum(Ophi4))]
+    (Op(phic(0), phi(0), phic(1), phi(1), phic(2), phi(2)),
+     OpSum(Ophi6)),
+    (Op(phic(0), phi(0), phic(1), phi(1)),
+     OpSum(Ophi4)),
+    (Op(D(2, phic(0)), D(2, phi(0)), phic(1), phi(1)),
+     OpSum(O1phi)),
+    (Op(phic(0), D(2, phi(0)), D(2, phic(1)), phi(1)),
+     OpSum(O3phi)),
+    (Op(phic(0), D(2, phi(0)), phic(1), D(2, phi(1))),
+     OpSum(ODphi)),
+    (Op(D(2, phic(0)), phi(0), D(2, phic(1)), phi(1)),
+     OpSum(ODphic))]
 
 To apply the Fierz identity to every operator until we get to the
 chosen operators, we do::
@@ -152,7 +173,8 @@ Output
 The class ``Writer`` can be used to represent the coefficients
 of the operators of a Lagrangian as plain text and write it to a file::
 
-  final_op_names = ["Ophi", "Ophi4"]
+  final_op_names = [
+    "Ophi6", "Ophi4", "O1phi", "O3phi", "ODphi", "ODphic"]
   eff_lag_writer = Writer(trasnf_eff_lag, final_op_names)
   eff_lag_writer.write_text_file("simple_example")
 
@@ -168,14 +190,19 @@ indices::
                        "phi": r"\phi_{}",
                        "phic": r"\phi^*_{}"}
 
-  latex_op_reps = {"Ophi": r"\frac{{\alpha_{{\phi}}}}{{\Lambda^2}}",
-                   "Ophi4": r"\mathcal{{O}}_{{\phi 4}}"}
+  latex_coef_reps = {
+    "Ophi6": r"\frac{{\alpha_{{\phi 6}}}}{{\Lambda^2}}",
+    "Ophi4": r"\alpha_{{\phi 4}}",
+    "O1phi": r"\frac{{\alpha^{{(1)}}_{{\phi}}}}{{\Lambda^2}}",
+    "O3phi": r"\frac{{\alpha^{{(3)}}_{{\phi}}}}{{\Lambda^2}}",
+    "ODphi": r"\frac{{\alpha_{{D\phi}}}}{{\Lambda^2}}",
+    "ODphic": r"\frac{{\alpha^*_{{D\phi}}}}{{\Lambda^2}}"}
 		   
   latex_indices = ["i", "j", "k", "l"]
   
   eff_lag_writer.write_pdf(
       "simple_example", latex_tensor_reps, 
-      latex_op_reps, latex_indices)
+      latex_coef_reps, latex_indices)
 
 Double curly brackets are used when one curly bracket should be
 present in the LaTeX code and simple curly brackes are used as
