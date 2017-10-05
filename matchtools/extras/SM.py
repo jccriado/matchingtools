@@ -3,13 +3,13 @@ This module defines the Standard Model tensors and fields and the rules
 for substituting their equations of motion.
 """
 
-from effective.core import (
+from matchtools.core import (
     Op, OpSum, TensorBuilder, FieldBuilder, D,
     number_op, sigma4, sigma4bar, boson, fermion)
 
-from effective.extras.SU2 import sigmaSU2, epsSU2
+from matchtools.extras.SU2 import sigmaSU2, epsSU2
 
-from effective.extras.Lorentz import eps4
+from matchtools.extras.Lorentz import eps4
 
 # Coupling constants
 gb = TensorBuilder("gb")
@@ -143,10 +143,10 @@ the hypercharges.
 
 eom_wFS = (
     Op(D(0, wFS(0, -1, -2))),
-    -OpSum(number_op(-0.5) * Op(gw(), deltaFlavor(0, 1), lLc(3, 4, 0),
+    -OpSum(number_op(0.5) * Op(gw(), deltaFlavor(0, 1), lLc(3, 4, 0),
                                 sigma4bar(-1, 3, 5), sigmaSU2(-2, 4, 6),
                                 lL(5, 6, 1)),
-           number_op(-0.5) * Op(gw(), deltaFlavor(0, 1), qLc(3, 4, 5, 0),
+           number_op(0.5) * Op(gw(), deltaFlavor(0, 1), qLc(3, 4, 5, 0),
                                 sigma4bar(-1, 3, 6), sigmaSU2(-2, 5, 7),
                                 qL(6, 4, 7, 1)),
            number_op(0.5j) * Op(gw(), phic(0), sigmaSU2(-2, 0, 1), D(-1, phi(1))),

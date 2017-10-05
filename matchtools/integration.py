@@ -6,7 +6,7 @@ for representing the different types of heavy fields.
 
 import sys
 
-from effective.core import (
+from matchtools.core import (
     Tensor, Op, OpSum,
     apply_derivatives, concat, number_op, symbol_op,
     generic, boson, fermion,
@@ -337,7 +337,7 @@ class VectorLikeFermion(object):
         factor = OpSum(number_op(1j) * Op(sigma4bar(n, -1, 0)))
         f = Op(Tensor(self.L_name, [0] + list(range(-2, -n - 1, -1)),
                       is_field=True, dimension=1.5, statistics=fermion))
-        return factor * f.derivative(n + 1)
+        return factor * f.derivative(n) # + 1)
 
     def R_der(self):
         n = self.num_of_inds
@@ -483,7 +483,7 @@ def integrate(heavy_fields, interaction_lagrangian, max_dim=6, verbose=True):
 
     Args:
         heavy_fields (list of heavy fields): to be integrated out
-        interaction_lagrangian (``effective.operators.OperatorSum``):
+        interaction_lagrangian (``matchtools.operators.OperatorSum``):
             from which to integrate out the heavy fields
         max_dim (int): maximum dimension of the operators in the effective
             lagrangian

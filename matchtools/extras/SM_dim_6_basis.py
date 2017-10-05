@@ -9,18 +9,18 @@ The basis is the one in arXiv:1412.8480v2_.
 """
 
 
-from effective.core import (
+from matchtools.core import (
     tensor_op, flavor_tensor_op, D, Op, OpSum, number_op)
 
-from effective.extras.SM import (
+from matchtools.extras.SM import (
     phi, phic, lL, lLc, eR, eRc, qL, qLc, uR, uRc, dR, dRc, bFS, wFS, gFS,
     ye, yec, yd, ydc, yu, yuc, V, Vc, mu2phi, lambdaphi)
 
-from effective.extras.SU2 import epsSU2, sigmaSU2, epsSU2triplets
+from matchtools.extras.SU2 import epsSU2, sigmaSU2, epsSU2triplets
 
-from effective.extras.SU3 import epsSU3, TSU3, fSU3
+from matchtools.extras.SU3 import epsSU3, TSU3, fSU3
 
-from effective.extras.Lorentz import (
+from matchtools.extras.Lorentz import (
     epsUp, epsUpDot, epsDown, epsDownDot, sigma4, sigma4bar,
     eps4, sigmaTensor)
 
@@ -1263,7 +1263,7 @@ rules_four_fermions = [
      OpSum(number_op(2) * O1ll(-1, -2, -3, -4))),
     
     (Op(lLc(0, 1, -1), eR(0, -2), eRc(2, -3), lL(2, 1, -4)),
-     OpSum(number_op(-0.5) * Ole(-1, -2, -3, -4))),
+     OpSum(number_op(-0.5) * Ole(-1, -4, -3, -2))),
 
     (Op(qLc(0, 1, 2, -1), dR(0, 1, -2), dRc(3, 4, -3), qL(3, 4, 2, -4)),
      OpSum(number_op(-1./6) * O1qd(-1, -4, -3, -2),

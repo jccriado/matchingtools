@@ -16,9 +16,9 @@ Defines the Lorentz tensors :data:`epsUp`, :data:`epsUpDot`,
 :data:`sigma4bar`.
 """
 
-from effective.permutations import permutations
+from matchtools.permutations import permutations
 
-from effective.lsttools import concat, enum_product
+from matchtools.lsttools import concat, enum_product
 
 class Tensor(object):
     """

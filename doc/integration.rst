@@ -1,13 +1,13 @@
 Integration
 ===========
 
-.. currentmodule:: effective.integration
+.. currentmodule:: matchtools.integration
 
 .. note:: This section assumes that the classes and functions
-   from :mod:`effective.integration` that it uses are in the namespace.
+   from :mod:`matchtools.integration` that it uses are in the namespace.
    To import all the classes and functions that appear here do::
 
-      from effective.integration import (
+      from matchtools.integration import (
           RealScalar, ComplexScalar, RealVector, ComplexVector,
 	  VectorLikeFermion, MajoranaFermion, integrate)
 	  

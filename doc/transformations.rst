@@ -1,16 +1,16 @@
 Transformations of the effective Lagrangian
 ===========================================
 
-.. currentmodule:: effective.transformations
+.. currentmodule:: matchtools.transformations
 
 .. note:: This section assumes that the functions
-   from :mod:`effective.transformations` and
-   :mod:`effective.transformations` that it uses are in the namespace.
+   from :mod:`matchtools.transformations` and
+   :mod:`matchtools.transformations` that it uses are in the namespace.
    To import all the functions that appear here do::
 
-     from effective.operators import tensor_op, flavor_tensor_op
+     from matchtools.operators import tensor_op, flavor_tensor_op
      
-     from effective.transformations import (
+     from matchtools.transformations import (
          simplify, apply_rules)
 		   
 An effective Lagrangian obtained from integration of heavy fields
@@ -51,8 +51,8 @@ write the rule::
 
 The operators of the basis should be represented by tensor with a name
 identifing the operator. They can be defined using
-:func:`effective.operators.tensor_op` when they don't have
-free indices and :func:`effective.operators.flavor_tensor_op`
+:func:`matchtools.operators.tensor_op` when they don't have
+free indices and :func:`matchtools.operators.flavor_tensor_op`
 when they do. So we usually define::
 
   Op1 = tensor_op("Op1")

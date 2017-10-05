@@ -1,0 +1,7 @@
+*.py~
+*~
+*.pyc
+doc/_build
+*.pyc
+*~
+doc/_build

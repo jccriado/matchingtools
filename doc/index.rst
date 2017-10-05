@@ -1,10 +1,10 @@
-.. effective documentation master file, created by
+.. matchtools documentation master file, created by
    sphinx-quickstart on Thu Mar 16 15:26:44 2017.
 
-Welcome to Effective's documentation!
+Welcome to MatchTools' documentation!
 =====================================
 
-*Effective* is a Python library for doing symbolic calculations in
+*MatchTools* is a Python library for doing symbolic calculations in
 effective field theory.
 
 It provides the tools to create a Lagrangian and integrate out heavy

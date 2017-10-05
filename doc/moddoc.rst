@@ -4,7 +4,7 @@ Modules documentation
 The ``operators`` module
 ========================
 
-.. automodule:: effective.operators
+.. automodule:: matchtools.core
 
 .. autoclass:: Tensor
 
@@ -69,7 +69,7 @@ The ``operators`` module
 The ``integration`` module
 ==========================
 
-.. automodule:: effective.integration
+.. automodule:: matchtools.integration
 
 .. autoclass:: RealScalar
 
@@ -88,7 +88,7 @@ The ``integration`` module
 The ``transformations`` module
 ==============================
 
-.. automodule:: effective.transformations
+.. automodule:: matchtools.transformations
 
 .. autofunction:: collect_numbers
 
@@ -107,7 +107,7 @@ The ``transformations`` module
 The ``output`` module
 =====================
 
-.. automodule:: effective.output
+.. automodule:: matchtools.output
 
 .. autoclass:: Writer
 
@@ -126,7 +126,7 @@ The ``output`` module
 The ``extras`` package
 ======================
 
-The ``effective.extras`` package provides several modules with some
+The ``matchtools.extras`` package provides several modules with some
 useful definitions of tensors related to the Lorentz group and the
 groups :math:`SU(3)` and :math:`SU(2)`, as well as rules for
 transforming some combinations of these tensors into others.
@@ -140,30 +140,30 @@ is also given.
 The ``extras.SU2`` module
 -------------------------
 
-.. automodule:: effective.extras.SU2
+.. automodule:: matchtools.extras.SU2
    :members:
 
 The ``extras.SU3`` module
 -------------------------
 
-.. automodule:: effective.extras.SU3
+.. automodule:: matchtools.extras.SU3
    :members:
 
 The ``extras.Lorentz`` module
 -----------------------------
 
-.. automodule:: effective.extras.Lorentz
+.. automodule:: matchtools.extras.Lorentz
    :members:
 
 The ``extras.SM`` module
 ------------------------
 
-.. automodule:: effective.extras.SM
+.. automodule:: matchtools.extras.SM
    :members:
       
 The ``extras.SM_dim_6_basis`` module
 ------------------------------------
 
-.. automodule:: effective.extras.SM_dim_6_basis
+.. automodule:: matchtools.extras.SM_dim_6_basis
    :members:      
 

@@ -12,7 +12,7 @@ coefficients of each operator in a given list.
 
 import sys
 
-from effective.core import (
+from matchtools.core import (
     Operator, OperatorSum,
     number_op, symbol_op, tensor_op, kdelta, generic)
 
@@ -125,9 +125,9 @@ def apply_rules(op_sum, rules, max_iterations, verbose=True):
     an effective lagrangian in a specific basis of operators
 
     Args:
-        op_sum (:class:`effective.operator.OperatorSum`): to which the rules
+        op_sum (:class:`matchtools.operator.OperatorSum`): to which the rules
             should be applied.
-        rules (list of pairs (:class:`effective.operators.Operator`,  :class:`effective.operators.OperatorSum`)): The first element
+        rules (list of pairs (:class:`matchtools.operators.Operator`,  :class:`matchtools.operators.OperatorSum`)): The first element
             of each pair represents a pattern to be subtituted in each
             operator by the second element using :func:`apply_rule`.
         max_iterations (int): maximum number of application of rules to

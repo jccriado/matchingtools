@@ -1,18 +1,18 @@
 Output of the results
 =====================
 
-.. currentmodule:: effective.output
+.. currentmodule:: matchtools.output
 
 .. note:: This section assumes that the class
-   :mod:`effective.output.Writer` that it uses is in the namespace.
+   :mod:`matchtools.output.Writer` that it uses is in the namespace.
    To import it, do::
 
-      from effective.output import Writer
+      from matchtools.output import Writer
 		   
 It's usually convenient to organize the final results by presenting
 the coefficient to each operator of the effective Lagrangian.
 When a set of rules has been applied to the effective Lagrangian so
-that it is written as an :class:`effective.operators.OperatorSum` whose
+that it is written as an :class:`matchtools.operators.OperatorSum` whose
 elements are :class:`efttool.operators.Operator` objects each of which
 contains one tensor representing the actual operator in the basis and
 other tensors representing the coefficient the operator has.

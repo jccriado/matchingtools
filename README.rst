@@ -1,4 +1,4 @@
-Effective is a Python library for doing symbolic calculations in
+Matchtools is a Python library for doing symbolic calculations in
 effective field theory.
 
 It provides the tools to create a Lagrangian and integrate out heavy
@@ -11,21 +11,21 @@ effective operator basis.
 Installation
 ============
 
-To install Effective using `pip`_ do::
+To install Matchtools using `pip`_ do::
 
-  pip install effective
+  pip install matchtools
 
 The source can be downloaded from the `GitHub repository`_.
-To install Effective from a local copy of the project open a terminal
+To install Matchtools from a local copy of the project open a terminal
 in the top level directory and type::
 
   python setup.py install
 
 .. _pip: https://pypi.python.org/pypi/pip/
 
-.. _GitHub repository: https://github.com/jccriado/effective
+.. _GitHub repository: https://github.com/jccriado/matchtools
   
 Documentation
 =============
 
-Read the documentation at: http://effective.readthedocs.io/en/latest/.
+Read the documentation at: http://matchtools.readthedocs.io/en/latest/.

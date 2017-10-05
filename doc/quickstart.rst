@@ -4,15 +4,15 @@ Quickstart
 Installation
 ============
 
-To install Effective using `pip`_ do::
+To install MatchTools using `pip`_ do::
 
-  pip install effective
+  pip install matchtools
 
 The source can be downloaded from the `GitHub repository`_.
 
 .. _pip: https://pypi.python.org/pypi/pip/
 
-.. _GitHub repository: https://github.com/jccriado/effective
+.. _GitHub repository: https://github.com/jccriado/matchtools
 
 A simple example
 ================
@@ -57,15 +57,15 @@ Creation of the model
 
 The imports that we will need are::
 
-  from effective.operators import (
+  from matchtools.operators import (
       TensorBuilder, FieldBuilder, Op, OpSum,
       number_op, tensor_op, boson, fermion, kdelta)
 
-  from effective.integration import RealScalar, integrate
+  from matchtools.integration import RealScalar, integrate
 
-  from effective.transformations import apply_rules
+  from matchtools.transformations import apply_rules
 
-  from effective.output import Writer
+  from matchtools.output import Writer
 
 The basic building blocks of our model are **tensors** and **fields**.
 For our example, we will need three tensors, the Pauli matrices and the
@@ -173,9 +173,9 @@ Output
 The class ``Writer`` can be used to represent the coefficients
 of the operators of a Lagrangian as plain text and write it to a file::
 
-  final_op_names = [
+  final_coef_names = [
     "Ophi6", "Ophi4", "O1phi", "O3phi", "ODphi", "ODphic"]
-  eff_lag_writer = Writer(trasnf_eff_lag, final_op_names)
+  eff_lag_writer = Writer(trasnf_eff_lag, final_coef_names)
   eff_lag_writer.write_text_file("simple_example")
 
 It can also to write a LaTeX file with the representation of these

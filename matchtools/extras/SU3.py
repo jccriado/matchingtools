@@ -3,7 +3,7 @@ This module defines tensors related to the
 group :math:`SU(3)`.
 """
 
-from effective.core import TensorBuilder, Op, OpSum, kdelta
+from matchtools.core import TensorBuilder, Op, OpSum, kdelta
 
 epsSU3 = TensorBuilder("epsSU3")
 r"""

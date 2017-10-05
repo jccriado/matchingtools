@@ -3,7 +3,7 @@ This module defines tensors and rules related to the
 group :math:`SU(2)`.
 """
 
-from effective.core import Op, OpSum, TensorBuilder, number_op, kdelta
+from matchtools.core import Op, OpSum, TensorBuilder, number_op, kdelta
 
 epsSU2 = TensorBuilder("epsSU2")
 r"""
@@ -140,7 +140,7 @@ rules_SU2 = ([rule_SU2_fierz, rule_SU2_free_eps, rule_SU2_eps_zero] +
               rules_SU2_epsquadruplets_cancel +
               rules_SU2_C_sigma +
               rules_SU2_eps_cancel)
-"""All the rules defined in :mod:`effective.extras.SU2` together"""
+"""All the rules defined in :mod:`matchtools.extras.SU2` together"""
 
 latex_SU2 = {
     "epsSU2": r"i(\sigma_2)_{{{}{}}}",

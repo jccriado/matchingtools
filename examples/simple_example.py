@@ -1,5 +1,5 @@
 """
-Simple example to illustrate some of the features of `effective`
+Simple example to illustrate some of the features of `matchtools`.
 The model has a :math:`SU(2)\times U(1)` simmetry and contains
 a complex scalar doublet :math:`\phi` (the Higgs) with hypercharge
 :math:`1/2` and a real scalar triplet :math:`\Xi` with zero
@@ -7,7 +7,7 @@ hypercharge that couple as:
 
 .. math::
     \mathcal{L}_{int} = - \kappa\Xi^a\phi^\dagger\sigma^a\phi
-    - \lamb \Xi^a \Xi^a \phi^\dagger\phi,
+    - \lambda \Xi^a \Xi^a \phi^\dagger\phi,
 
 where :math:`\kappa` and :math:`\lambda` are a coupling constants
 and :math:`\sigma^a` are the Pauli matrices. We will then integrate
@@ -28,15 +28,17 @@ which we will finally write in terms of the operators.
 
 """
 
-from effective.core import (
+import context
+
+from matchtools.core import (
     TensorBuilder, FieldBuilder, Op, OpSum, D,
     number_op, tensor_op, boson, fermion, kdelta)
 
-from effective.integration import RealScalar, integrate
+from matchtools.integration import RealScalar, integrate
 
-from effective.transformations import apply_rules
+from matchtools.transformations import apply_rules
 
-from effective.output import Writer
+from matchtools.output import Writer
 
 # Creation of the model
 
@@ -99,7 +101,7 @@ transf_eff_lag = apply_rules(
 final_op_names = [
     "Ophi6", "Ophi4", "O1phi", "O3phi", "ODphi", "ODphic"]
 eff_lag_writer = Writer(transf_eff_lag, final_op_names)
-eff_lag_writer.write_text_file("simple_example")
+eff_lag_writer.write_text_file("simple_example_results.txt")
 
 
 # -- LaTeX output (uncomment to produce it) --------------------------
@@ -108,7 +110,7 @@ eff_lag_writer.write_text_file("simple_example")
 #                      "MXi": r"M_{{\Xi}}",
 #                      "phi": r"\phi_{}",
 #                      "phic": r"\phi^*_{}"}
-
+#
 # latex_coef_reps = {
 #     "Ophi6": r"\frac{{\alpha_{{\phi 6}}}}{{\Lambda^2}}",
 #     "Ophi4": r"\alpha_{{\phi 4}}",
@@ -116,7 +118,7 @@ eff_lag_writer.write_text_file("simple_example")
 #     "O3phi": r"\frac{{\alpha^{{(3)}}_{{\phi}}}}{{\Lambda^2}}",
 #     "ODphi": r"\frac{{\alpha_{{D\phi}}}}{{\Lambda^2}}",
 #     "ODphic": r"\frac{{\alpha^*_{{D\phi}}}}{{\Lambda^2}}"}
-		   
+#		   
 # latex_indices = ["i", "j", "k", "l"]
 # eff_lag_writer.write_latex(
 #     "simple_example", latex_tensor_reps, 

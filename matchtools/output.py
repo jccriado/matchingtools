@@ -7,8 +7,7 @@ the coefficients of some given operators in
 both formats.
 """
 
-
-from effective.transformations import collect
+from matchtools.transformations import collect
 
 from subprocess import call
 
@@ -141,7 +140,7 @@ class Writer(object):
                                   for op_coef, num in coef_lst))
                              for (op_name, n_inds), coef_lst in
                              self.collection),
-            rest = "\n".join(str(num) + str(op) for num, op in self.rest))
+            rest = "\n".join(str(num) + str(op) for op, num in self.rest))
 
     def latex_code(self, structures, op_reps, inds):
         """
