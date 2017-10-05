@@ -1,4 +1,4 @@
-Matchtools is a Python library for doing symbolic calculations in
+MatchTools is a Python library for doing symbolic calculations in
 effective field theory.
 
 It provides the tools to create a Lagrangian and integrate out heavy
@@ -11,7 +11,7 @@ effective operator basis.
 Installation
 ============
 
-To install Matchtools using `pip`_ do::
+To install MatchTools using `pip`_ do::
 
   pip install matchtools
 
