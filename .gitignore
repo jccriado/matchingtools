@@ -5,3 +5,4 @@ doc/_build
 *.pyc
 *~
 doc/_build
+/examples/simple_example_results.txt
