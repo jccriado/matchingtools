@@ -1,10 +1,10 @@
-.. matchtools documentation master file, created by
+.. matchingtools documentation master file, created by
    sphinx-quickstart on Thu Mar 16 15:26:44 2017.
 
-Welcome to MatchTools' documentation!
+Welcome to MatchingTools' documentation!
 =====================================
 
-*MatchTools* is a Python library for doing symbolic calculations in
+*MatchingTools* is a Python library for doing symbolic calculations in
 effective field theory.
 
 It provides the tools to create a Lagrangian and integrate out heavy

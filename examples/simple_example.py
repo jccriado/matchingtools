@@ -1,5 +1,5 @@
 """
-Simple example to illustrate some of the features of `matchtools`.
+Simple example to illustrate some of the features of `matchingtools`.
 The model has a :math:`SU(2)\times U(1)` simmetry and contains
 a complex scalar doublet :math:`\phi` (the Higgs) with hypercharge
 :math:`1/2` and a real scalar triplet :math:`\Xi` with zero
@@ -11,7 +11,7 @@ hypercharge that couple as:
 
 where :math:`\kappa` and :math:`\lambda` are a coupling constants
 and :math:`\sigma^a` are the Pauli matrices. We will then integrate
-out the heavy scalar :math:`\Xi` to obtain an effective Lagrangian
+out the heavy scalar :math:`\Xi` to obtain an effective Lgrangian
 which we will finally write in terms of the operators.
 
 .. math::
@@ -30,15 +30,15 @@ which we will finally write in terms of the operators.
 
 import context
 
-from matchtools.core import (
+from matchingtools.core import (
     TensorBuilder, FieldBuilder, Op, OpSum, D,
     number_op, tensor_op, boson, fermion, kdelta)
 
-from matchtools.integration import RealScalar, integrate
+from matchingtools.integration import RealScalar, integrate
 
-from matchtools.transformations import apply_rules
+from matchingtools.transformations import apply_rules
 
-from matchtools.output import Writer
+from matchingtools.output import Writer
 
 # Creation of the model
 
@@ -63,7 +63,7 @@ max_dim = 6
 effective_lagrangian = integrate(
     heavy_fields, interaction_lagrangian, max_dim)
 
-# Transformations of the effective Lagrangian
+# Transformations of the effective Lgrangian
 
 fierz_rule = (
     Op(sigma(0, -1, -2), sigma(0, -3, -4)),

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# matchtools documentation build configuration file, created by
+# matchingtools documentation build configuration file, created by
 # sphinx-quickstart on Thu Mar 16 15:26:44 2017.
 #
 # This file is execfile()d with the current directory set to its
@@ -57,7 +57,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'matchtools'
+project = u'matchingtools'
 copyright = u'2017, Juan Carlos Criado Alamo'
 author = u'Juan Carlos Criado Alamo'
 
@@ -111,7 +111,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'matchtoolsdoc'
+htmlhelp_basename = 'matchingtoolsdoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -138,7 +138,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'matchtools.tex', u'matchtools Documentation',
+    (master_doc, 'matchingtools.tex', u'matchingtools Documentation',
      u'Juan Carlos Criado Alamo', 'manual'),
 ]
 
@@ -148,7 +148,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'matchtools', u'matchtools Documentation',
+    (master_doc, 'matchingtools', u'matchingtools Documentation',
      [author], 1)
 ]
 
@@ -159,8 +159,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'matchtools', u'matchtools Documentation',
-     author, 'matchtools', 'One line description of project.',
+    (master_doc, 'matchingtools', u'matchingtools Documentation',
+     author, 'matchingtools', 'One line description of project.',
      'Miscellaneous'),
 ]
 

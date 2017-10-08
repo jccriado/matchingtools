@@ -11,14 +11,14 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='matchtools',
+    name='matchingtools',
 
     version='0.1.3',
 
     description='A library for symbolic Effective Field Theory calculations',
     long_description=long_description,
 
-    url='https://github.com/jccriado/matchtools',
+    url='https://github.com/jccriado/matchingtools',
 
     author='Juan Carlos Criado Alamo',
     author_email='jccriadoalamo@ugr.es',
@@ -36,5 +36,5 @@ setup(
 
     keywords=['effective field theory symbolic tree matching integration'],
 
-    packages=['matchtools', 'matchtools.extras']
+    packages=['matchingtools', 'matchingtools.extras']
 )

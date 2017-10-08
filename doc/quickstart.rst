@@ -4,15 +4,15 @@ Quickstart
 Installation
 ============
 
-To install MatchTools using `pip`_ do::
+To install MatchingTools using `pip`_ do::
 
-  pip install matchtools
+  pip install matchingtools
 
 The source can be downloaded from the `GitHub repository`_.
 
 .. _pip: https://pypi.python.org/pypi/pip/
 
-.. _GitHub repository: https://github.com/jccriado/matchtools
+.. _GitHub repository: https://github.com/jccriado/matchingtools
 
 A simple example
 ================
@@ -57,15 +57,15 @@ Creation of the model
 
 The imports that we will need are::
 
-  from matchtools.operators import (
+  from matchingtools.operators import (
       TensorBuilder, FieldBuilder, Op, OpSum,
       number_op, tensor_op, boson, fermion, kdelta)
 
-  from matchtools.integration import RealScalar, integrate
+  from matchingtools.integration import RealScalar, integrate
 
-  from matchtools.transformations import apply_rules
+  from matchingtools.transformations import apply_rules
 
-  from matchtools.output import Writer
+  from matchingtools.output import Writer
 
 The basic building blocks of our model are **tensors** and **fields**.
 For our example, we will need three tensors, the Pauli matrices and the

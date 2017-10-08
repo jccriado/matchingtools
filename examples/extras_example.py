@@ -1,5 +1,5 @@
 """
-Simple example to illustrate some of the features of `matchtools`.
+Simple example to illustrate some of the features of `matchingtools`.
 We consider the Standard Model with two families of heavy quarks
 added: SU(2) singlets :math:`D_i` with hypercharge :math:`-1/3`
 and doublets :math:`(DY)_j` with hypercharge :math:`-5/6`
@@ -33,23 +33,23 @@ in the operator basis:
 
 import context
 
-from matchtools.core import (
+from matchingtools.core import (
     TensorBuilder, FieldBuilder, D, Op, OpSum,
     number_op, flavor_tensor_op, boson, fermion, kdelta,
     sigma4, sigma4bar)
 
-from matchtools.integration import (VectorLikeFermion, integrate)
+from matchingtools.integration import (VectorLikeFermion, integrate)
 
-from matchtools.transformations import apply_rules
+from matchingtools.transformations import apply_rules
 
-from matchtools.output import Writer
+from matchingtools.output import Writer
 
-from matchtools.extras.SM import (
+from matchingtools.extras.SM import (
     phi, phic, qL, qLc, uR, uRc, dR, dRc, eoms_SM)
 
-from matchtools.extras.SU2 import (epsSU2, rules_SU2)
+from matchingtools.extras.SU2 import (epsSU2, rules_SU2)
 
-import matchtools.extras.SM_dim_6_basis as basis
+import matchingtools.extras.SM_dim_6_basis as basis
 
 # Model
 
@@ -92,7 +92,7 @@ heavy_fields = [heavy_D, heavy_DY]
 effective_lagrangian = integrate(
     heavy_fields, interaction_lagrangian, 6)
 
-# Transformations of the effective Lagrangian
+# Transformations of the effective Lgrangian
 
 extra_SU2_identities = [
     (Op(phi(0), epsSU2(0, 1), phi(1)),

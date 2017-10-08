@@ -1,13 +1,13 @@
 Creation of models
 ==================
 
-.. currentmodule:: matchtools.operators
+.. currentmodule:: matchingtools.operators
 
 .. note:: This section assumes that the classes and functions
-   from :mod:`matchtools.operators` that it uses are in the namespace.
+   from :mod:`matchingtools.operators` that it uses are in the namespace.
    To import all the classes and functions that appear here do::
 
-      from matchtools.operators import (
+      from matchingtools.operators import (
 	  Tensor, Operator, OperatorSum
           TensorBuilder, FieldBuilder, D, Op, OpSum,
 	  number_op, symbol_op)
@@ -29,7 +29,7 @@ instead of manually modifying the attributes, it's better to use
 the function :class:`D` to create covariant
 derivatives of fields.
 
-MatchTools handles Lagrangians that are polynomials of the fields.
+MatchingTools handles Lagrangians that are polynomials of the fields.
 They are thus a sum of terms that are products of tensors. They are
 represented as :class:`OperatorSum` objects, with only one
 attribute: a list of its terms. Each term should be an operator, that is,
@@ -47,7 +47,7 @@ is defined for operators too (as the
 concatenation of the tensors they contain,
 see :meth:`Operator.__mul__`).
 
-MatchTools treats in a special way tensors whose name starts and
+MatchingTools treats in a special way tensors whose name starts and
 ends with square or curly brakets. A tensor name enclosed in square
 brakets is understood as a (complex) number to be read from the name
 using ``float(name[1:-1])``. The function :func:`number_op`
@@ -83,8 +83,8 @@ Create a field as::
   my_field = FieldBuilder("my_field", dimension, statistics)
 
 where dimension (float) represents the energy dimensions of the field
-and statistics is either equal to :data:`matchtools.algebra.boson` or
-:data:`matchtools.algebra.fermion`. Then use it inside an operator::
+and statistics is either equal to :data:`matchingtools.algebra.boson` or
+:data:`matchingtools.algebra.fermion`. Then use it inside an operator::
 
   Op(..., my_field(ind1, ind2, ...), ...)
 
@@ -97,12 +97,12 @@ Define the interaction Lagrangian as an operator sum::
 
   int_lag = OpSum(op1, op2, ...)
 
-Each argument to the function :func:`matchtools.operators.OpSum` should
+Each argument to the function :func:`matchingtools.operators.OpSum` should
 be an operator defined as::
 
   op1 = Op(tens1(ind1, ind2, ...), field1(ind3, ind4, ...), ...)
 
-The arguments of the function :func:`matchtools.operators.Op` are
+The arguments of the function :func:`matchingtools.operators.Op` are
 tensors (and fields). Their indices are integer numbers. Negative
 integers are reserved for free indices. Free indices are not meant
 to be used in the operators appearing in the Lagrangian, but later
@@ -113,7 +113,7 @@ is expressed by repetition of indices.
 
 To introduce the covariant derivative with index ``ind`` of a tensor
 ``tens`` inside an operator, use the function
-:func:`matchtools.operators.D` in the following way::
+:func:`matchingtools.operators.D` in the following way::
 
   D(ind, tens(ind1, ind2, ...))
 
