@@ -67,14 +67,20 @@ class Tensor(object):
         if self.name == "$i":
             return "i"
         
-        if self.exponent != 1:
+        if self.exponent > 1:
+            name = "({}^{})".format(self.name, self.exponent)
+        elif self.exponent < 1:
             name = "({}^({}))".format(self.name, self.exponent)
         else:
             name = self.name
             
         der_str = ("D({})" * self.num_of_der).format(*self.der_indices)
-        ten_str = "{}({})".format(
-            name, ",".join(map(str, self.non_der_indices)))
+        if len(self.indices) > 0:
+            ten_str = "{}({})".format(
+                name, ",".join(map(str, self.non_der_indices)))
+        else:
+            ten_str = name
+            
         return der_str + ten_str
 
     # __repr__ = __str__
@@ -125,7 +131,7 @@ class Operator(object):
         self.tensors = tensors
 
     def __str__(self):
-        return "".join(map(str, self.tensors))
+        return " ".join(map(str, self.tensors))
 
     # __repr__ = __str__
 

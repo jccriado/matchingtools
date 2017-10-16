@@ -116,6 +116,7 @@ transf_eff_lag = apply_rules(effective_lagrangian, rules, 2)
 
 # Output
 
-eff_lag_writer = Writer(transf_eff_lag, basis.latex_basis_coefs.keys())
-eff_lag_writer.write_text_file("extras_example_results.txt")
+if __name__ == "__main__":
+    eff_lag_writer = Writer(transf_eff_lag, basis.latex_basis_coefs.keys())
+    eff_lag_writer.write_text_file("extras_example_results.txt")
 

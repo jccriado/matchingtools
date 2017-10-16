@@ -54,7 +54,7 @@ interaction_lagrangian = -OpSum(
 
 # Integration
 
-heavy_Xi = RealScalar("Xi", 1)
+heavy_Xi = RealScalar("Xi", 1, has_flavor=False)
 
 heavy_fields = [heavy_Xi]
 max_dim = 6
@@ -91,12 +91,11 @@ definition_rules = [
 
 rules = [fierz_rule] + definition_rules
 max_iterations = 2
-transf_eff_lag = apply_rules(
-    effective_lagrangian, rules, max_iterations)
+transf_eff_lag = apply_rules(effective_lagrangian, rules, max_iterations)
 
 # Output
 
-if __name__ = "__main__":
+if __name__ == "__main__":
     final_op_names = [
         "Ophi6", "Ophi4", "O1phi", "O3phi", "ODphi", "ODphic"]
     eff_lag_writer = Writer(transf_eff_lag, final_op_names)

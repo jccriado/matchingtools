@@ -147,6 +147,9 @@ def display_exponent(number):
         return "^{{{:.3}}}".format(number)
 
 def collect_conjugates(coef, conjugates):
+    if conjugates == None:
+        return coef
+    
     ctensors = [t for t in conjugates if conjugates[t] != t]
     new_op_sum = OpSum()
     

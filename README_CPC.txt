@@ -37,60 +37,57 @@ examples/simple_example.py. It should produce a text file named
 
   Collected:
     O1phi:
-      (2+0j) {MXi^-4.0}(24)kappa()kappa()
-
+      2 (MXi^(-4)) (kappa^2)
+  
     O3phi:
-      (-1+0j) {MXi^-4.0}(24)kappa()kappa()
-
-    OD2phi:
-      (0.5+0j) {MXi^-4.0}(24)kappa()kappa()
-
-    OD2phic:
-      (0.5+0j) {MXi^-4.0}(24)kappa()kappa()
-
+      -1 (MXi^(-4)) (kappa^2)
+  
+    ODphi:
+      1/2 (kappa^2) (MXi^(-4))
+  
+    ODphic:
+      1/2 (MXi^(-4)) (kappa^2)
+  
     Ophi4:
-      (0.5+0j) {MXi^-2.0}(10)kappa()kappa()
-
+      1/2 (MXi^(-2)) (kappa^2)
+  
     Ophi6:
-      (-1+0j) {MXi^-4.0}(21)lamb()kappa()kappa()
-
-  Rest:
-
+      -1 lamb (kappa^2) (MXi^(-4))
+  
+  Rest:  
 
 Similarly, the script "extras_example.py" should produce the
 following output:
 
   Collected:
     O1phid:
-      (-0.5+0j) {MDY^-2.0}(14)lambdaDYd(14,-2)lambdaDYdc(14,-1)
+      -1/2 lambdaDYdc(14,-1) lambdaDYd(14,-2) (MDY^(-2))(14)
   
     O1phidc:
-      (-0.5+0j) {MDY^-2.0}(14)lambdaDYdc(14,-2)lambdaDYd(14,-1)
+      -1/2 lambdaDYd(14,-1) lambdaDYdc(14,-2) (MDY^(-2))(14)
   
     O1phiq:
-      (-0.25+0j) {MD^-2.0}(0)lambdaDq(0,-2)lambdaDqc(0,-1)
+      (-0.25+0j) (MD^(-2))(0) lambdaDqc(0,-1) lambdaDq(0,-2)
   
     O1phiqc:
-      (-0.25+0j) {MD^-2.0}(0)lambdaDqc(0,-2)lambdaDq(0,-1)
+      (-0.25+0j) lambdaDq(0,-1) (MD^(-2))(0) lambdaDqc(0,-2)
   
     O3phiq:
-      (-0.25+0j) {MD^-2.0}(0)lambdaDq(0,-2)lambdaDqc(0,-1)
+      (-0.25+0j) lambdaDq(0,-2) lambdaDqc(0,-1) (MD^(-2))(0)
   
     O3phiqc:
-      (-0.25+0j) {MD^-2.0}(0)lambdaDqc(0,-2)lambdaDq(0,-1)
+      (-0.25+0j) lambdaDq(0,-1) (MD^(-2))(0) lambdaDqc(0,-2)
   
     Odphi:
-      (0.5+0j) {MD^-2.0}(0)yd(10,-2)lambdaDqc(0,-1)lambdaDq(0,10)
-      (-1+0j) {MD^-1.0}(15){MDY^-1.0}(14)lambdaDYDc(14,15)lambdaDqc(15,-1)
-          lambdaDYd(14,-2)
-      (0.5+0j) {MDY^-2.0}(14)yd(-1,26)lambdaDYd(14,-2)lambdaDYdc(14,26)
+      1/2 lambdaDq(0,10) (MD^(-2))(0) lambdaDqc(0,-1) yd(10,-2)
+      -1 lambdaDYd(14,-2) (MDY^(-1))(14) lambdaDqc(15,-1) (MD^(-1))(15) lambdaDYDc(14,15)
+      1/2 lambdaDYdc(14,26) (MDY^(-2))(14) yd(-1,26) lambdaDYd(14,-2)
   
     Odphic:
-      (0.5+0j) {MD^-2.0}(0)ydc(10,-2)lambdaDq(0,-1)lambdaDqc(0,10)
-      (-1+0j) {MDY^-1.0}(18){MD^-1.0}(19)lambdaDYD(18,19)lambdaDYdc(18,-2)
-          lambdaDq(19,-1)
-      (0.5+0j) {MDY^-2.0}(14)ydc(-1,26)lambdaDYdc(14,-2)lambdaDYd(14,26)
-
+      1/2 lambdaDq(0,-1) lambdaDqc(0,10) (MD^(-2))(0) ydc(10,-2)
+      -1 lambdaDq(19,-1) lambdaDYD(18,19) (MDY^(-1))(18) lambdaDYdc(18,-2) (MD^(-1))(19)
+      1/2 lambdaDYd(14,26) ydc(-1,26) lambdaDYdc(14,-2) (MDY^(-2))(14)
+  
   Rest:
 
 
