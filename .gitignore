@@ -1,13 +1,10 @@
-*.py~
 *~
 *.pyc
 doc/_build
 *.pyc
-*~
-doc/_build
-/examples/simple_example_results.txt
 *.aux
 *.log
 *.pdf
 *.pdf
 *.tex
+*.txt
