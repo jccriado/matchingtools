@@ -3,7 +3,9 @@ This module defines tensors related to the
 group :math:`SU(3)`.
 """
 
-from matchingtools.core import TensorBuilder, Op, OpSum, kdelta
+from fractions import Fraction
+
+from matchingtools.core import TensorBuilder, Op, OpSum, kdelta, number_op
 
 epsSU3 = TensorBuilder("epsSU3")
 r"""
@@ -26,7 +28,12 @@ rule_SU3_eps = (
     OpSum(-Op(kdelta(-1, -4), kdelta(-3, -2)),
           Op(kdelta(-1, -3), kdelta(-2, -4))))
 
-rules_SU3 = [rule_SU3_eps]
+rule_fierz_SU3 = (
+    Op(TSU3(0, -1, -2), TSU3(0, -3, -4)),
+    OpSum(number_op(Fraction(1, 2)) * Op(kdelta(-1, -4), kdelta(-3, -2)),
+          number_op(Fraction(1, 6)) * Op(kdelta(-1, -2), kdelta(-3, -4))))
+
+rules_SU3 = [rule_SU3_eps, rule_fierz_SU3]
 
 latex_SU3 = {
     "epsSU3": r"\epsilon_{{{}{}{}}}",

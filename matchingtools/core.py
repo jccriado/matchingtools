@@ -16,6 +16,8 @@ Defines the Lorentz tensors :data:`epsUp`, :data:`epsUpDot`,
 :data:`sigma4bar`.
 """
 
+from fractions import Fraction
+
 from matchingtools.permutations import permutations
 
 from matchingtools.lsttools import concat, enum_product
@@ -36,17 +38,23 @@ class Tensor(object):
         num_of_der (int): number of derivatives acting
         dimension (int): energy dimensions
         statistics (bool): True for bosons and False for fermions
+        content: to be used internally to carry associated data
+        exponent: to be used internally to simplify repetitions of a tensor
     """
     
-    def __init__(self, name, indices, is_field=False,
-                 num_of_der=0, dimension=0, statistics=True):
+    def __init__(self, name, indices, is_field=False, num_of_der=0,
+                 dimension=0, statistics=True, content=None, exponent=1):
         self.name = name
         self.indices = indices
         self.is_field = is_field
         self.num_of_der = num_of_der
         self.dimension = dimension
         self.statistics = statistics
-   
+        self.content = content
+        self.exponent = exponent
+        if self.name == "$number" and self.content is None:
+            raise Exception()
+        
     def __str__(self):
         """
         Returns a string of the form:
@@ -54,9 +62,19 @@ class Tensor(object):
         for a Tensor with indices i[0], i[1], ..., i[n-1] and 
         num_of_der equal to m
         """
+        if self.name == "$number":
+            return str(self.number)
+        if self.name == "$i":
+            return "i"
+        
+        if self.exponent != 1:
+            name = "({}^({}))".format(self.name, self.exponent)
+        else:
+            name = self.name
+            
         der_str = ("D({})" * self.num_of_der).format(*self.der_indices)
-        ten_str = "{}({})".format(self.name,
-                                  ",".join(map(str, self.non_der_indices)))
+        ten_str = "{}({})".format(
+            name, ",".join(map(str, self.non_der_indices)))
         return der_str + ten_str
 
     # __repr__ = __str__
@@ -67,7 +85,9 @@ class Tensor(object):
                 self.is_field == other.is_field and
                 self.num_of_der == other.num_of_der and
                 self.dimension == other.dimension and
-                self.statistics == other.statistics)
+                self.statistics == other.statistics and
+                self.content == other.content and
+                self.exponent == other.exponent)
 
     @property
     def der_indices(self):
@@ -82,7 +102,9 @@ class Tensor(object):
                       is_field=self.is_field,
                       num_of_der=self.num_of_der,
                       dimension=self.dimension,
-                      statistics=self.statistics)
+                      statistics=self.statistics,
+                      content=self.content,
+                      exponent=self.exponent)
 
 class Operator(object):
     """
@@ -128,13 +150,6 @@ class Operator(object):
     def contains(self, name):
         return any(tensor.name == name for tensor in self.tensors)
 
-    def contains_symbol(self, name):
-        for tensor in self.tensors:
-            if tensor.name[0] == "{" and tensor.name[-1] == "}":
-                if tensor.name[1:tensor.name.index("^")] == name:
-                    return True
-        return False
-    
     def derivative(self, index):
         return leibniz_rule(index, self)
                 
@@ -179,7 +194,7 @@ class Operator(object):
                                               if not t.statistics])
                     minus_sign = minus_sign != (number_of_fermions % 2 == 1)
                 if minus_sign:
-                    inside_op *= Operator([Tensor("[-1]", [])])
+                    inside_op *= number_op(-1)
 
                 # Apply the derivatives with the correponding indices
                 inside_ops = OperatorSum([inside_op])
@@ -279,7 +294,7 @@ class Operator(object):
                 fermion_reorder = tuple(fermions.index(pos)
                                         for pos in match if pos in fermions)
                 sign = permutations(len(fermions))[fermion_reorder]
-                if sign == -1: candidate.append(Tensor("[-1]", []))
+                if sign == -1: candidate.append(number_op(-1).tensors[0])
 
                 # Replace the matched part by a "generic" tensor
                 return Operator([generic(*free_indices)] +
@@ -468,7 +483,9 @@ def match_tensor_lists_aux(lst, pattern):
     results = []
     for i, (pos, tensor) in enumerate(lst):
         if (tensor.name == pattern[0].name and
-            tensor.num_of_der == pattern[0].num_of_der):
+            tensor.num_of_der == pattern[0].num_of_der and
+            tensor.content == pattern[0].content and
+            tensor.exponent == pattern[0].exponent):
             match_rest = match_tensor_lists_aux(rest(lst, i), pattern[1:])
             results += [(pos,) + prev for prev in match_rest]
     return results
@@ -488,6 +505,9 @@ def match_tensor_lists(lst, pattern):
         of the positions of the tensors in lst that matches the names of
         the pattern in its first elements.
     """
+    if (len(pattern) > len(lst) or
+        not all(t1.name in [t2.name for t2 in lst] for t1 in pattern)):
+        return []
     return match_tensor_lists_aux(list(enumerate(lst)), pattern)
 
 def match_indices(lst, pattern):
@@ -589,23 +609,19 @@ def OpSum(*operators):
 def number_op(number):
     """
     Create an operator correponding to a number.
-
-    Square brackets around the name of a tensor mean that it should be 
-    treated as a (complex) number.
     """
-    return Operator([Tensor("[{}]".format(number), [])])
+    return Op(Tensor("$number", [], content=number))
 
-def symbol_op(symbol, exponent, indices=None):
+i_op = Op(Tensor("$i", []))
+"""Operator representing the imaginary unit."""
+
+def power_op(name, exponent, indices=None):
     """
     Create an operator corresponding to a tensor exponentiated to some power.
-
-    Curly braces around the name of a tensor mean that what's inside is of
-    the form "base^exponent" and that it may be collected together with 
-    others with the same base and indices, adding the exponents.
     """
     if indices is None:
         indices = []
-    return Operator([Tensor("{{{}^{}}}".format(symbol, exponent), indices)])
+    return Operator([Tensor(name, indices, exponent=exponent)])
 
 def tensor_op(name, indices=None):
     if indices is None:

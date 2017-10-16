@@ -28,8 +28,6 @@ which we will finally write in terms of the operators.
 
 """
 
-import context
-
 from matchingtools.core import (
     TensorBuilder, FieldBuilder, Op, OpSum, D,
     number_op, tensor_op, boson, fermion, kdelta)
@@ -98,10 +96,11 @@ transf_eff_lag = apply_rules(
 
 # Output
 
-final_op_names = [
-    "Ophi6", "Ophi4", "O1phi", "O3phi", "ODphi", "ODphic"]
-eff_lag_writer = Writer(transf_eff_lag, final_op_names)
-eff_lag_writer.write_text_file("simple_example_results.txt")
+if __name__ = "__main__":
+    final_op_names = [
+        "Ophi6", "Ophi4", "O1phi", "O3phi", "ODphi", "ODphic"]
+    eff_lag_writer = Writer(transf_eff_lag, final_op_names)
+    eff_lag_writer.write_text_file("simple_example_results.txt")
 
 
 # -- LaTeX output (uncomment to produce it) --------------------------

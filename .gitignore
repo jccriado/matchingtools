@@ -6,3 +6,8 @@ doc/_build
 *~
 doc/_build
 /examples/simple_example_results.txt
+*.aux
+*.log
+*.pdf
+*.pdf
+*.tex

@@ -31,8 +31,6 @@ in the operator basis:
 
 """
 
-import context
-
 from matchingtools.core import (
     TensorBuilder, FieldBuilder, D, Op, OpSum,
     number_op, flavor_tensor_op, boson, fermion, kdelta,

@@ -5,10 +5,11 @@ for representing the different types of heavy fields.
 """
 
 import sys
+from fractions import Fraction
 
 from matchingtools.core import (
     Tensor, Op, OpSum,
-    apply_derivatives, concat, number_op, symbol_op,
+    apply_derivatives, concat, i_op, number_op, power_op,
     generic, boson, fermion,
     sigma4, sigma4bar, epsUp, epsUpDot, epsDown, epsDownDot)
 
@@ -115,9 +116,9 @@ class RealBoson(object):
         self.num_of_inds = num_of_inds
         mass = "M" + self.name
         free_mass_inds = [-num_of_inds] if has_flavor else None
-        self.free_inv_mass_sq = symbol_op(mass, -2, indices=free_mass_inds)
+        self.free_inv_mass_sq = power_op(mass, -2, indices=free_mass_inds)
         mass_inds = [num_of_inds-1] if has_flavor else None
-        self.mass_sq = symbol_op(mass, 2, indices=mass_inds)
+        self.mass_sq = power_op(mass, 2, indices=mass_inds)
         self.order = order
     
     def equations_of_motion(self, interaction_lagrangian,
@@ -165,9 +166,9 @@ class ComplexBoson(object):
         self.num_of_inds = num_of_inds
         mass = "M" + self.name
         free_mass_inds = [-num_of_inds] if has_flavor else None
-        self.free_inv_mass_sq = symbol_op(mass, -2, indices=free_mass_inds)
+        self.free_inv_mass_sq = power_op(mass, -2, indices=free_mass_inds)
         mass_inds = [num_of_inds-1] if has_flavor else None
-        self.mass_sq = symbol_op(mass, 2, indices=mass_inds)
+        self.mass_sq = power_op(mass, 2, indices=mass_inds)
         self.order = order
 
     def equations_of_motion(self, interaction_lagrangian):
@@ -209,9 +210,9 @@ class RealScalar(RealBoson, Scalar):
         f = Tensor(self.name, list(range(n)), is_field=True,
                    dimension=1, statistics=boson)
         f_op = Op(f)
-        kinetic_term = (OpSum(number_op(0.5)) * Op(f).derivative(n + 1) *
+        kinetic_term = (OpSum(number_op(Fraction(1, 2))) * Op(f).derivative(n + 1) *
                         Op(f).derivative(n + 1))
-        mass_term = number_op(-0.5) * self.mass_sq * f_op * f_op
+        mass_term = number_op(-Fraction(1, 2)) * self.mass_sq * f_op * f_op
         return kinetic_term + OpSum(mass_term)
 
 class ComplexScalar(ComplexBoson, Scalar):
@@ -260,7 +261,7 @@ class RealVector(RealBoson, Vector):
                        dimension=1, statistics=boson))
         f2 = Op(Tensor(self.name, [n] + list(range(1, n)),
                        is_field=True, dimension=1, statistics=boson))
-        half = OpSum(number_op(0.5))
+        half = OpSum(number_op(Fraction(1, 2)))
         kin1 = -half * f1.derivative(n) * f1.derivative(n)
         kin2 = half * f2.derivative(0) * f1.derivative(n)
         mass_term = half * OpSum(self.mass_sq * f1 * f1)
@@ -328,34 +329,34 @@ class VectorLikeFermion(object):
         self.num_of_inds = num_of_inds
         mass = "M" + self.name
         free_mass_inds = [-num_of_inds] if has_flavor else None
-        self.free_inv_mass = symbol_op(mass, -1, indices=free_mass_inds)
+        self.free_inv_mass = power_op(mass, -1, indices=free_mass_inds)
         mass_inds = [num_of_inds - 1] if has_flavor else None
-        self.mass = symbol_op(mass, 1, indices=mass_inds)
+        self.mass = power_op(mass, 1, indices=mass_inds)
         
     def L_der(self):
         n = self.num_of_inds
-        factor = OpSum(number_op(1j) * Op(sigma4bar(n, -1, 0)))
+        factor = OpSum(i_op * Op(sigma4bar(n, -1, 0)))
         f = Op(Tensor(self.L_name, [0] + list(range(-2, -n - 1, -1)),
                       is_field=True, dimension=1.5, statistics=fermion))
         return factor * f.derivative(n) # + 1)
 
     def R_der(self):
         n = self.num_of_inds
-        factor = OpSum(number_op(1j) * Op(sigma4(n, -1, 0)))
+        factor = OpSum(i_op * Op(sigma4(n, -1, 0)))
         f = Op(Tensor(self.R_name, [0] + list(range(-2, -n - 1, -1)),
                       is_field=True, dimension=1.5, statistics=fermion))
         return factor * f.derivative(n)
 
     def Lc_der(self):
         n = self.num_of_inds
-        factor = OpSum(number_op(-1j) * Op(sigma4bar(n, 0, -1)))
+        factor = OpSum(- i_op * Op(sigma4bar(n, 0, -1)))
         f = Op(Tensor(self.Lc_name, [0] + list(range(-2, -n - 1, -1)),
                       is_field=True, dimension=1.5, statistics=fermion))
         return factor * f.derivative(n)
 
     def Rc_der(self):
         n = self.num_of_inds
-        factor = OpSum(number_op(-1j) * Op(sigma4(n, 0, -1)))
+        factor = OpSum(- i_op * Op(sigma4(n, 0, -1)))
         f = Op(Tensor(self.Rc_name, [0] + list(range(-2, -n - 1, -1)),
                       is_field=True, dimension=1.5, statistics=fermion))
         return factor * f.derivative(n)
@@ -384,7 +385,7 @@ class VectorLikeFermion(object):
         fL, fR, fLc, fRc = map(self._create_op_field,
                                [self.L_name, self.R_name,
                                 self.Lc_name, self.Rc_name])
-        half = OpSum(number_op(0.5))
+        half = OpSum(number_op(Fraction(1, 2)))
         kinL = (fLc * fL).replace_first(self.L_name, self.L_der())
         kinR = (fRc * fR).replace_first(self.R_name, self.R_der())
         kinLc = (fLc * fL).replace_first(self.Lc_name, self.Lc_der())
@@ -418,20 +419,20 @@ class MajoranaFermion(object):
         self.num_of_inds = num_of_inds
         mass = "M" + self.name
         free_mass_inds = [-num_of_inds] if has_flavor else None
-        self.free_inv_mass = symbol_op(mass, -1, indices=free_mass_inds)
+        self.free_inv_mass = power_op(mass, -1, indices=free_mass_inds)
         mass_inds = [num_of_inds - 1] if has_flavor else None
-        self.mass = symbol_op(mass, 1, indices=mass_inds)
+        self.mass = power_op(mass, 1, indices=mass_inds)
 
     def der(self):
         n = self.num_of_inds
-        factor = OpSum(number_op(1j) * Op(sigma4bar(n + 1, -1, 0)))
+        factor = OpSum(i_op * Op(sigma4bar(n + 1, -1, 0)))
         f = Op(Tensor(self.name, [0] + list(range(-2, -n - 1, -1)),
                       is_field=True, dimension=1.5, statistics=fermion))
         return factor * f.derivative(n + 1)
 
     def c_der(self):
         n = self.num_of_inds
-        factor = OpSum(number_op(1j) * Op(sigma4bar(n + 1, 0, -1)))
+        factor = OpSum(i_op * Op(sigma4bar(n + 1, 0, -1)))
         f = Op(Tensor(self.c_name, [0] + list(range(-2, -n - 1, -1)),
                       is_field=True, dimension=1.5, statistics=fermion))
         return factor * f.derivative(n + 1)
@@ -467,7 +468,7 @@ class MajoranaFermion(object):
                          dimension=1.5, statistics=fermion))
         c_f1 = Op(Tensor(self.c_name, [n] + list(range(1, n)), is_field=True,
                       dimension=1.5, statistics=fermion))
-        half = OpSum(number_op(0.5))
+        half = OpSum(number_op(Fraction(1, 2)))
         kin = (c_f * f).replace_first(self.name, self.der())
         kinc = -(c_f * f).replace_first(self.c_name, self.c_der())
         mass1 = self.mass * Op(epsUp(0, n)) * f * f1

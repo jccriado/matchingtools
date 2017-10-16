@@ -2,8 +2,10 @@
 This module defines rules related to the Lorentz group.
 """
 
+from fractions import Fraction
+
 from matchingtools.core import (
-    TensorBuilder, Op, OpSum, number_op, kdelta,
+    TensorBuilder, Op, OpSum, i_op, number_op, kdelta,
     epsUp, epsUpDot, epsDown, epsDownDot, sigma4, sigma4bar)
 
 eps4 = TensorBuilder("eps4")
@@ -23,7 +25,8 @@ Lorentz tensor
 
 rule_Lorentz_free_epsUp = (
     Op(epsUp(-1, -2), epsUpDot(-3, -4)),
-    OpSum(number_op(0.5) * Op(sigma4bar(0, -3, -1), sigma4bar(0, -4, -2))))
+    OpSum(-number_op(Fraction(1, 2)) * Op(
+        sigma4bar(0, -3, -1), sigma4bar(0, -4, -2))))
 r"""
 Substitute :math:`\epsilon^{\alpha\beta}\epsilon^{\dot{\alpha}\dot{\beta}}`
 by
@@ -35,7 +38,8 @@ by
 
 rule_Lorentz_free_epsDown = (
     Op(epsDown(-1, -2), epsDownDot(-3, -4)),
-    OpSum(number_op(0.5) * Op(sigma4(0, -1, -3), sigma4(0, -2, -4))))
+    OpSum(-number_op(Fraction(1, 2)) * Op(
+        sigma4(0, -1, -3), sigma4(0, -2, -4))))
 r"""
 Substitute :math:`\epsilon_{\alpha\beta}\epsilon_{\dot{\alpha}\dot{\beta}}`
 by
@@ -78,9 +82,72 @@ rules_Lorentz_free_eps = [
      OpSum(-Op(kdelta(-1, -3), kdelta(-2, -4)),
            Op(kdelta(-1, -4), kdelta(-2, -3))))]
 
+rules_Lorentz_1_eps4 = [
+    (Op(eps4(0, 0, -1, -2)), OpSum()),
+    (Op(eps4(0, -1, 0, -2)), OpSum()),
+    (Op(eps4(0, -1, -2, 0)), OpSum()),
+    (Op(eps4(-1, 0, -2, 0)), OpSum()),
+    (Op(eps4(-1, -2, 0, 0)), OpSum())]
+
+rules_Lorentz_2_sigmas = [
+    (Op(sigma4(-1, 0, 1), sigma4bar(-2, 1, 0)),
+     OpSum(number_op(2) * Op(kdelta(-1, -2)))),
+    (Op(sigma4(0, 1, 2), sigma4bar(0, 2, 1)),
+     OpSum(number_op(8)))]
+
+rules_Lorentz_3_sigmas = [
+    (Op(sigma4(-1, -4, 0), sigma4bar(-2, 0, 1), sigma4(-3, 1, -5)),
+     OpSum(Op(kdelta(-1, -2), sigma4(-3, -4, -5)),
+           -Op(kdelta(-1, -3), sigma4(-2, -4, -5)),
+           Op(kdelta(-2, -3), sigma4(-1, -4, -5)),
+           i_op * Op(eps4(-1, -2, -3, 0), sigma4(0, -4, -5)))),
+    
+    (Op(sigma4bar(-1, -4, 0), sigma4(-2, 0, 1), sigma4bar(-3, 1, -5)),
+     OpSum(Op(kdelta(-1, -2), sigma4bar(-3, -4, -5)),
+           -Op(kdelta(-1, -3), sigma4bar(-2, -4, -5)),
+           Op(kdelta(-2, -3), sigma4bar(-1, -4, -5)),
+           -i_op * Op(eps4(-1, -2, -3, 0), sigma4bar(0, -4, -5)))),
+
+    (Op(sigma4(0, -2, 1), sigma4bar(0, 1, 2), sigma4(-1, 2, -3)),
+     OpSum(number_op(4) * Op(sigma4(-1, -2, -3)))),
+
+    (Op(sigma4(0, -2, 1), sigma4bar(-1, 1, 2), sigma4(0, 2, -3)),
+     OpSum(-number_op(2) * Op(sigma4(-1, -2, -3)))),
+
+    (Op(sigma4(-1, -2, 1), sigma4bar(0, 1, 2), sigma4(0, 2, -3)),
+     OpSum(number_op(4) * Op(sigma4(-1, -2, -3)))),
+
+    (Op(sigma4bar(0, -2, 1), sigma4(0, 1, 2), sigma4bar(-1, 2, -3)),
+     OpSum(number_op(4) * Op(sigma4bar(-1, -2, -3)))),
+
+    (Op(sigma4bar(0, -2, 1), sigma4(-1, 1, 2), sigma4bar(0, 2, -3)),
+     OpSum(-number_op(2) * Op(sigma4bar(-1, -2, -3)))),
+
+    (Op(sigma4bar(-1, -2, 1), sigma4(0, 1, 2), sigma4bar(0, 2, -3)),
+     OpSum(number_op(4) * Op(sigma4bar(-1, -2, -3))))]
+
+rules_Lorentz_2_eps4 = [
+    (Op(eps4(0, 1, 2, -1), eps4(0, 1, 2, -2)),
+     OpSum(number_op(6) * Op(kdelta(-1, -2)))),
+
+    (Op(eps4(0, 1, 2, -1), eps4(2, 1, -2, 0)),
+     OpSum(number_op(6) * Op(kdelta(-1, -2))))]
+
+rules_Lorentz_sigma_eps = [
+    (Op(sigma4(0, -1, 1), epsUpDot(1, -2),
+        sigma4bar(0, -3, 2), epsDown(2, -4)),
+     OpSum(Op(epsDown(-1, -4), epsUpDot(-3, -2)))),
+    
+    (Op(epsUp(0, -1), sigma4(1, 0, -2),
+        epsDownDot(2, -3), sigma4bar(1, 2, -4)),
+     OpSum(Op(epsUp(-1, -4), epsDownDot(-3, -2))))]
+
+
 rules_Lorentz = ([rule_Lorentz_free_epsUp, rule_Lorentz_free_epsDown] +
                  rules_Lorentz_eps_cancel + rules_Lorentz_epsDot_cancel +
-                 rules_Lorentz_free_eps)
+                 rules_Lorentz_free_eps + rules_Lorentz_1_eps4 +
+                 rules_Lorentz_2_sigmas + rules_Lorentz_3_sigmas +
+                 rules_Lorentz_2_eps4 + rules_Lorentz_sigma_eps)
 r"""All the rules defined in :mod:`matchingtools.extras.Lorentz` together"""
 
 

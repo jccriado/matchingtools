@@ -3,7 +3,7 @@ Module dedicated to the transformation and simplification of
 operators and operator sums. Defines functions for collecting
 numeric and symbolic factors.
 
-Implements the function :func:`apply_rules_until` for the
+Implements the function :func:`apply_rules` for the
 systematic substitution of patterns inside operators in an 
 operator sum until writing the sum it in a given basis of 
 operators; and the function :func:`collect` for collecting the
@@ -11,69 +11,83 @@ coefficients of each operator in a given list.
 """
 
 import sys
+import copy
 
 from matchingtools.core import (
-    Operator, OperatorSum,
-    number_op, symbol_op, tensor_op, kdelta, generic)
+    Operator, OperatorSum, Op, OpSum, Tensor, i_op,
+    number_op, power_op, tensor_op, kdelta, generic)
+
+from lsttools import concat
 
 def collect_numbers(operator):
     """
     Collect all the tensors representing numbers into a single one.
 
     A tensor is understood to represent a number when its name
-    is of the form ``"[number]"``.
+    is ``"$number"`` or ``$i``.
     """
     new_tensors = []
     number = 1
+    i_count = 0
+    is_complex = False
     for tensor in operator.tensors:
-        if tensor.name[0] == "[" and tensor.name[-1] == "]":
-            number *= complex(tensor.name[1:-1])
+        if tensor.name == "$number":
+            if tensor.content.imag != 0:
+                is_complex = True
+            number *= tensor.content
+        elif tensor.name == "$i":
+            i_count += 1
         else:
             new_tensors.append(tensor)
 
+    result = Operator(new_tensors)
+    
+    if is_complex:
+        number *= {0: 1, 1: 1j, 2: -1, 3: -1j}[i_count % 4]
+    else:
+        number, result = {
+            0: (number, result),
+            1: (number, i_op * result),
+            2: (-number, result),
+            3: (-number, i_op * result)}[i_count % 4]
+            
     # Remove coefficients 1
     if number == 1:
-        return Operator(new_tensors)
+        return result
     
-    return number_op(number) * Operator(new_tensors)
+    return number_op(number) * result
 
-def collect_symbols(operator):
+def collect_powers(operator):
     """
-    Collect all the tensors representing each symbolic constant
-    with exponent into a single one.
-
-    A tensor is understood to represent a symbolic constant with
-    exponent when its name is of the form ``"{base^exponent}"``.
+    Collect all the tensors that are equal and return the correspondin
+    powers.
     """
     new_tensors = []
     symbols = {}
     for tensor in operator.tensors:
-        if tensor.name[0] == "{" and tensor.name[-1] == "}":
-            name = tensor.name[1:tensor.name.index("^")]
-            exponent = float(tensor.name[tensor.name.index("^")+1:-1])
-
-            # Previusly collected exponent for same base and indices
-            prev_exponent = symbols.get((name, tuple(tensor.indices)), 0)
-
-            # The exponents of a product are added
-            symbols[(name, tuple(tensor.indices))] = exponent + prev_exponent
-        else:
+        if tensor.is_field or tensor.name[0] == "$":
             new_tensors.append(tensor)
+        else:
+            # Previusly collected exponent for same base and indices
+            prev_exponent = symbols.get((tensor.name, tuple(tensor.indices)), 0)
+            
+            # The exponents of a product are added
+            symbols[(tensor.name, tuple(tensor.indices))] = (
+                tensor.exponent + prev_exponent)
 
     # Remove tensors with exponent 0
     new_op = Operator([])
-    for (symbol, inds), exponent in symbols.items():
+    for (name, inds), exponent in symbols.items():
         if exponent != 0:
-            new_op *= symbol_op(symbol, exponent, indices=inds)
+            new_op *= power_op(name, exponent, indices=inds)
             
-    return new_op * Operator(new_tensors)
+    return new_op * Op(*new_tensors)
 
-def collect_numbers_and_symbols(op_sum):
-    """ 
-    Collect all the tensors representing all numeric factors and each
-    symbolic constant into a single one for all the operators in the sum.
+def collect_numbers_and_powers(op_sum):
     """
-    return OperatorSum([collect_numbers(collect_symbols(op))
+    Collect the numeric factors and powers of tensors.
+    """
+    return OperatorSum([collect_numbers(collect_powers(op))
                         for op in op_sum.operators])
 
 def remove_kdeltas(operator):
@@ -138,15 +152,19 @@ def apply_rules(op_sum, rules, max_iterations, verbose=True):
     Return:
         OperatorSum containing the result of the application of rules.
     """
-    if verbose:
-        sys.stdout.write("Applying rules... ")
-        sys.stdout.flush()
     
     for i in range(0, max_iterations):
+        if verbose:
+            sys.stdout.write(
+                "\rApplying rules (iteration " +
+                str(i + 1) + "/" + str(max_iterations) + ")")
+            sys.stdout.flush()
+
         op_sum =  apply_rules_aux(op_sum, rules)
 
     if verbose:
-        sys.stdout.write("done.\n")
+        sys.stdout.write("\rApplying rules... done.          \n")
+        sys.stdout.flush()
         
     return op_sum
 
@@ -163,8 +181,8 @@ def sum_numbers(op_sum):
         num = 1
         n_removed = 0
         op = collect_numbers(op)
-        if op.tensors[0].name[0] == "[" and op.tensors[0].name[-1] == "]":
-            num = complex(op.tensors[0].name[1:-1])
+        if op.tensors[0].name == "$number":
+            num = op.tensors[0].content
             new_op = Operator(op.tensors[1:])
         else:
             num = 1
@@ -229,20 +247,29 @@ def sum_collection(collection):
                 * op])
     return op_sum
 
-def simplify(op_sum):
-    op_sum = collect_numbers_and_symbols(op_sum)
+def simplify(op_sum, conjugates=None, verbose=True):
+    if verbose:
+        sys.stdout.write("Simplifying... ")
+        sys.stdout.flush()
+        
+    op_sum = collect_numbers_and_powers(op_sum)
+
+    if verbose:
+        sys.stdout.write("done.\n")
+        sys.stdout.flush()
+        
     return OperatorSum([number_op(n) * op
                         for op, n in sum_numbers(op_sum)])
 
 def collect(op_sum, tensor_names, verbose=True):
     """
     Simplify the numeric and exponentiated symbolic tensors
-    (using :func:`collect_numbers_and_symbols`) and collect 
+    (using :func:`collect_numbers_and_powers`) and collect 
     the coefficients of the given tensors (using
     :func:`collect_by_tensors`).
 
     Args:
-        op_sum (OperatorSum): whose terms are to be collectd
+        op_sum (OperatorSum): whose terms are to be collected
         tensor_names (list of strings): names of the tensors
             whose coefficients will be obtained
         verbose (bool): specify whether to write messages
@@ -251,8 +278,9 @@ def collect(op_sum, tensor_names, verbose=True):
     if verbose:
         sys.stdout.write("Collecting...")
         sys.stdout.flush()
-    op_sum = collect_numbers_and_symbols(op_sum)
+    op_sum = collect_numbers_and_powers(op_sum)
     collection, rest = collect_by_tensors(op_sum, tensor_names)
     if verbose:
         sys.stdout.write("done.\n")
     return collection, rest
+

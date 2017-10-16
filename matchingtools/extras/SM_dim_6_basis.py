@@ -8,9 +8,10 @@ The basis is the one in arXiv:1412.8480v2_.
 .. _arXiv:1412.8480v2: https://arxiv.org/abs/1412.8480v2.
 """
 
+from fractions import Fraction
 
 from matchingtools.core import (
-    tensor_op, flavor_tensor_op, D, Op, OpSum, number_op)
+    tensor_op, flavor_tensor_op, D, Op, OpSum, i_op, number_op)
 
 from matchingtools.extras.SM import (
     phi, phic, lL, lLc, eR, eRc, qL, qLc, uR, uRc, dR, dRc, bFS, wFS, gFS,
@@ -774,8 +775,16 @@ f_{ABC}\tilde{G}^{A,\nu}_\mu
 G^{B,\rho}_\nu G^{C,\mu}_\rho`.
 """
 
+# Auxiliary operators for intermediate calculations
 
-rules_basis_definitions = [
+O5aux = flavor_tensor_op("O5aux")
+O5auxc = flavor_tensor_op("O5auxc")
+
+Olqqqaux = flavor_tensor_op("Olqqqaux")
+Olqqqauxc = flavor_tensor_op("Olqqqauxc")
+
+
+rules_basis_defs_dim_6_5 = [
     
     # Standard Model dimension 6 four-fermion operators
 
@@ -848,11 +857,11 @@ rules_basis_definitions = [
      OpSum(Oqe(-1, -2, -3, -4))),
 
     (Op(lLc(0, 1, -1), sigma4bar(2, 0, 3), lL(3, 1, -2),
-        uRc(4, 5, -3), sigma4(2, 4, 6), uR(6, 5 -4)),
+        uRc(4, 5, -3), sigma4(2, 4, 6), uR(6, 5, -4)),
      OpSum(Olu(-1, -2, -3, -4))),
 
     (Op(lLc(0, 1, -1), sigma4bar(2, 0, 3), lL(3, 1, -2),
-        dRc(4, 5, -3), sigma4(2, 4, 6), dR(6, 5 -4)),
+        dRc(4, 5, -3), sigma4(2, 4, 6), dR(6, 5, -4)),
      OpSum(Old(-1, -2, -3, -4))),
 
     (Op(qLc(0, 1, 2, -1), sigma4bar(3, 0, 4), qL(4, 1, 2, -2),
@@ -924,14 +933,14 @@ rules_basis_definitions = [
         dRc(7, 1, -3), epsDown(7, 8), uRc(8, 2, -4)),
      OpSum(Olqdu(-1, -2, -3, -4))),
 
-    (Op(epsSU3(0, 1, 2), qL(6, 0, 5, -2), epsSU2(4, 5),
-        epsUp(6, 3), lL(3, 4, -1),
+    (Op(epsSU3(0, 1, 2), qL(6, 0, 5, -2), epsSU2(5, 4),
+        epsUp(3, 6), lL(3, 4, -1),
         uR(8, 2, -4), epsDownDot(8, 7), dR(7, 1, -3)),
      OpSum(Olqduc(-1, -2, -3, -4))),
 
-    (Op(epsSU3(0, 1, 2), qLc(3, 0, 4, -1), epsSU2(4, 5),
-        epsUpDot(3, 6), qLc(6, 1, 5, -2),
-        eRc(7, -3), epsDown(7, 8), uRc(8, 2, -4)),
+    (Op(epsSU3(0, 1, 2), qLc(3, 1, 4, -1), epsSU2(4, 5),
+        epsUpDot(3, 6), qLc(6, 2, 5, -2),
+        eRc(7, -3), epsDown(7, 8), uRc(8, 0, -4)),
      OpSum(Oqqeu(-1, -2, -3, -4))),
 
     (Op(epsSU3(0, 1, 2), qL(6, 1, 5, -2), epsSU2(4, 5),
@@ -978,15 +987,15 @@ rules_basis_definitions = [
     # S type
 
     (Op(D(0, phic(1)), D(0, phi(1)), phic(2), phi(2)),
-     OpSum(number_op(0.5) * Ophisq,
+     OpSum(number_op(Fraction(1, 2)) * Ophisq,
            -Op(mu2phi()) * Ophi4,
            number_op(6) * Op(lambdaphi()) * Ophi,
-           number_op(0.5) * Op(ye(0, 1)) * Oephi(0, 1),
-           number_op(0.5) * Op(yd(0, 1)) * Odphi(0, 1),
-           number_op(0.5) * Op(Vc(0, 1), yu(0, 2)) * Ouphi(1, 2),
-           number_op(0.5) * Op(yec(0, 1)) * Oephic(0, 1),
-           number_op(0.5) * Op(ydc(0, 1)) * Odphic(0, 1),
-           number_op(0.5) * Op(V(0, 1), yuc(0, 2)) * Ouphic(1, 2))),
+           number_op(Fraction(1, 2)) * Op(ye(0, 1)) * Oephi(0, 1),
+           number_op(Fraction(1, 2)) * Op(yd(0, 1)) * Odphi(0, 1),
+           number_op(Fraction(1, 2)) * Op(Vc(0, 1), yu(0, 2)) * Ouphi(1, 2),
+           number_op(Fraction(1, 2)) * Op(yec(0, 1)) * Oephic(0, 1),
+           number_op(Fraction(1, 2)) * Op(ydc(0, 1)) * Odphic(0, 1),
+           number_op(Fraction(1, 2)) * Op(V(0, 1), yuc(0, 2)) * Ouphic(1, 2))),
            
     
     (Op(phic(0), phi(0), phic(1), phi(1), phic(2), phi(2)),
@@ -999,71 +1008,71 @@ rules_basis_definitions = [
 
     (Op(phic(0), D(1, phi(0)),
         lLc(2, 3, -1), sigma4bar(1, 2, 4), lL(4, 3, -2)),
-     OpSum(number_op(-1j) * O1phil(-1, -2))),
+     OpSum(- i_op * O1phil(-1, -2))),
 
     (Op(D(1, phic(0)), phi(0),
         lLc(2, 3, -2), sigma4bar(1, 2, 4), lL(4, 3, -1)),
-     OpSum(number_op(1j) * O1philc(-1, -2))),
+     OpSum(i_op * O1philc(-1, -2))),
 
     (Op(phic(0), sigmaSU2(1, 0, 2), D(3, phi(2)),
         lLc(4, 5, -1), sigma4bar(3, 4, 6),
         sigmaSU2(1, 5, 7), lL(6, 7, -2)),
-     OpSum(number_op(-1j) * O3phil(-1, -2))),
+     OpSum(- i_op * O3phil(-1, -2))),
 
     (Op(D(3, phic(0)), sigmaSU2(1, 0, 2), phi(2),
         lLc(4, 5, -2), sigma4bar(3, 4, 6),
         sigmaSU2(1, 5, 7), lL(6, 7, -1)),
-     OpSum(number_op(1j) * O3philc(-1, -2))),
+     OpSum(i_op * O3philc(-1, -2))),
     
     (Op(phic(0), D(1, phi(0)),
         qLc(2, 3, 4, -1), sigma4bar(1, 2, 5), qL(5, 3, 4, -2)),
-     OpSum(number_op(-1j) * O1phiq(-1, -2))),
+     OpSum(- i_op * O1phiq(-1, -2))),
 
     (Op(D(1, phic(0)), phi(0),
         qLc(2, 3, 4, -2), sigma4bar(1, 2, 5), qL(5, 3, 4, -1)),
-     OpSum(number_op(1j) * O1phiqc(-1, -2))),
+     OpSum(i_op * O1phiqc(-1, -2))),
 
     (Op(phic(0), sigmaSU2(1, 0, 2), D(3, phi(2)),
         qLc(4, 5, 6, -1), sigma4bar(3, 4, 7),
         sigmaSU2(1, 6, 8), qL(7, 5, 8, -2)),
-     OpSum(number_op(-1j) * O3phiq(-1, -2))),
+     OpSum(- i_op * O3phiq(-1, -2))),
 
     (Op(D(3, phic(0)), sigmaSU2(1, 0, 2), phi(2),
         qLc(4, 5, 6, -2), sigma4bar(3, 4, 7),
         sigmaSU2(1, 6, 8), qL(7, 5, 8, -1)),
-     OpSum(number_op(1j) * O3phiqc(-1, -2))),
+     OpSum(i_op * O3phiqc(-1, -2))),
 
     (Op(phic(0), D(1, phi(0)),
         eRc(2, -1), sigma4(1, 2, 3), eR(3, -2)),
-     OpSum(number_op(-1j) * O1phie(-1, -2))),
+     OpSum(- i_op * O1phie(-1, -2))),
 
     (Op(D(1, phic(0)), phi(0),
         eRc(2, -2), sigma4(1, 2, 3), eR(3, -1)),
-     OpSum(number_op(1j) * O1phiec(-1, -2))),
+     OpSum(i_op * O1phiec(-1, -2))),
 
     (Op(phic(0), D(1, phi(0)),
         dRc(2, 3, -1), sigma4(1, 2, 4), dR(4, 3, -2)),
-     OpSum(number_op(-1j) * O1phid(-1, -2))),
+     OpSum(- i_op * O1phid(-1, -2))),
 
     (Op(D(1, phic(0)), phi(0),
         dRc(2, 3, -2), sigma4(1, 2, 4), dR(4, 3, -1)),
-     OpSum(number_op(1j) * O1phidc(-1, -2))),
+     OpSum(i_op * O1phidc(-1, -2))),
 
     (Op(phic(0), D(1, phi(0)),
         uRc(2, 3, -1), sigma4(1, 2, 4), uR(4, 3, -2)),
-     OpSum(number_op(-1j) * O1phiu(-1, -2))),
+     OpSum(- i_op * O1phiu(-1, -2))),
 
     (Op(D(1, phic(0)), phi(0),
         uRc(2, 3, -2), sigma4(1, 2, 4), uR(4, 3, -1)),
-     OpSum(number_op(1j) * O1phiuc(-1, -2))),
+     OpSum(i_op * O1phiuc(-1, -2))),
     
     (Op(phi(0), epsSU2(0, 1), D(2, phi(1)),
         uRc(3, 4, -1), sigma4(2, 3, 5), dR(5, 4, -2)),
-     OpSum(number_op(-1j) * Ophiud(-1, -2))),
+     OpSum(- i_op * Ophiud(-1, -2))),
 
     (Op(phic(0), epsSU2(0, 1), D(2, phic(1)),
         dRc(3, 4, -2), sigma4(2, 3, 5), uR(5, 4, -1)),
-     OpSum(number_op(1j) * Ophiudc(-1, -2))),
+     OpSum(i_op * Ophiudc(-1, -2))),
 
     # STF type
 
@@ -1221,9 +1230,9 @@ rules_basis_definitions = [
 
     (Op(lLc(0, 1, -2), epsSU2(1, 2), phic(2), epsUpDot(0, 3),
         epsSU2(4, 5), phic(5), lLc(3, 4, -1)),
-     OpSum(O5c(-1, -2))),
+     OpSum(O5c(-1, -2)))]
 
-
+rules_basis_defs_dim_4 = [
     # Standard Model dimension 4 operators
     
     (Op(D(0, phic(1)), D(0, phi(1))),
@@ -1252,102 +1261,13 @@ rules_basis_definitions = [
 
     (Op(dRc(0, 1, -2), phic(2), qL(0, 1, 2, -1)),
      OpSum(Oydc(-1, -2)))]
+
+rules_basis_definitions = rules_basis_defs_dim_6_5 + rules_basis_defs_dim_4
 """
 Rules defining the operators in the basis in terms of 
 Standard Model fields.
 """
 
-rules_four_fermions = [
-    (Op(lLc(0, 1, -1), sigma4bar(2, 0, 3), lL(3, 4, -2),
-        lLc(5, 4, -3), sigma4bar(2, 5, 6), lL(6, 1, -4)),
-     OpSum(number_op(2) * O1ll(-1, -2, -3, -4))),
-    
-    (Op(lLc(0, 1, -1), eR(0, -2), eRc(2, -3), lL(2, 1, -4)),
-     OpSum(number_op(-0.5) * Ole(-1, -4, -3, -2))),
-
-    (Op(qLc(0, 1, 2, -1), dR(0, 1, -2), dRc(3, 4, -3), qL(3, 4, 2, -4)),
-     OpSum(number_op(-1./6) * O1qd(-1, -4, -3, -2),
-           -O8qd(-1, -4, -3, -2))),
-
-    (Op(qLc(0, 1, 2, -1), uR(0, 1, -2), uRc(3, 4, -3), qL(3, 4, 2, -4)),
-     OpSum(-number_op(1./6) * O1qu(-1, -4, -3, -2),
-           -O8qu(-1, -4, -3, -2))),
-
-    (Op(lLc(0, 1, -1), sigma4bar(2, 0, 3), qL(3, 4, 6, -2),
-        qLc(5, 4, 6, -3), sigma4bar(2, 5, 7), lL(7, 1, -4)),
-     OpSum(O1lq(-1, -4, -3, -2))),
-
-    (Op(lLc(0, 1, -1), sigma4bar(2, 0, 3), qL(3, 4, 1, -2),
-        qLc(5, 4, 6, -3), sigma4bar(2, 5, 7), lL(7, 6, -4)),
-     OpSum(number_op(0.5) * O3lq(-1, -4, -3, -2),
-           number_op(0.5) * O1lq(-1, -4, -3, -2))),
-
-    (Op(epsSU3(0, 1, 2), lLc(3, 4, -1), epsUpDot(3, 5),
-        epsSU2(9, 4), qLc(5, 0, 9, -2),
-        qLc(7, 1, 6, -3), epsUpDot(7, 8),
-        epsSU2(6, 10), qLc(8, 2, 10, -4)),
-     OpSum(-O1lqqq(-1, -2, -3, -4))),
-
-    (Op(epsSU3(0, 1, 2), qL(5, 0, 9, -2), epsUp(5, 3),
-        epsSU2(9, 4), lL(3, 4, -1),
-        qL(8, 2, 10, -4), epsUp(8, 7),
-        epsSU2(6, 10), qL(7, 1, 6, -3)),
-     OpSum(-O1lqqqc(-1, -2, -3, -4))),
-
-    (Op(sigma4bar(0, 1, 2), sigma4bar(0, 3, 4),
-        qLc(1, 5, 6, -1), qL(2, 7, 8, -2),
-        qLc(3, 7, 8, -3), qL(4, 5, 6, -4)),
-     OpSum(number_op(2) * O1qq(-1, -4, -3, -2))),
-
-    (Op(sigma4bar(0, 1, 2), sigma4bar(0, 3, 4),
-        qLc(1, 5, 6, -1), qL(2, 7, 6, -2),
-        qLc(3, 7, 8, -3), qL(4, 5, 8, -4)),
-     OpSum(number_op(2./3) * O1qq(-1, -2, -3, -4), 
-           number_op(4) * O8qq(-1, -2, -3, -4))),
-
-    (Op(sigma4bar(0, 1, 2), sigma4bar(0, 3, 4),
-        qLc(1, 5, 6, -1), qL(2, 5, 8, -2),
-        qLc(3, 7, 8, -3), qL(4, 7, 6, -4)),
-     OpSum(number_op(2./3) * O1qq(-1, -4, -3, -2),
-           number_op(4) * O8qq(-1, -4, -3, -2))),
-
-    # (Op(lLc(0, 1, -1), epsUpDot(0, 2), epsSU2(4, 1), qLc(2, 3, 4, -2),
-    #     eR(5, -3), epsDownDot(5, 6), uR(6, 3, -4)),
-    #  OpSum(-Olequ(-1, -3, -2, -4),
-    #        Oluqe(-1, -4, -2, -3))),
-
-    # # \slashed{B} and \slashed{L}
-
-    (Op(epsSU3(0, 1, 2), lLc(3, 4, -1), epsSU2(4, 5),
-        epsUpDot(6, 3), qLc(6, 0, 5, -2),
-        dRc(7, 1, -3), epsDown(8, 7), uRc(8, 2, -4)),
-     OpSum(Olqdu(-1, -2, -3, -4))),
-
-    (Op(epsSU3(0, 1, 2), qL(6, 0, 5, -2), epsSU2(4, 5),
-        epsUp(3, 6), lL(3, 4, -1),
-        uR(8, 2, -4), epsDownDot(7, 8), dR(7, 1, -3)),
-     OpSum(Olqduc(-1, -2, -3, -4))),
-
-    (Op(epsSU3(2, 1, 0), qLc(3, 0, 4, -1), epsSU2(4, 5),
-        epsUpDot(6, 3), qLc(6, 1, 5, -2),
-        eRc(7, -3), epsDown(8, 7), uRc(8, 2, -4)),
-     OpSum(Oqqeu(-1, -2, -3, -4))),
-
-    (Op(epsSU3(2, 1, 0), qL(6, 1, 5, -2), epsSU2(4, 5),
-        epsUp(3, 6), qL(3, 0, 4, -1),
-        uR(8, 2, -4), epsDownDot(7, 8), eR(7, -3)),
-     OpSum(Oqqeuc(-1, -2, -3, -4))),
-
-    # (Op(qLc(0, 1, 2, -1), uR(3, 1, -2), epsSU2(4, 2),
-    #     epsUpDot(0, 5), qLc(5, 6, 4, -3),
-    #     epsDown(3, 7), dR(7, 6, -4)),
-    #  OpSum(
-    ]
-     
-"""
-Four-fermion Fierz reorderings and other operations 
-with four-fermion operators.
-"""
 
 latex_basis_coefs = {
     # Dimension 4
@@ -1364,6 +1284,16 @@ latex_basis_coefs = {
     # Dimension 5
     "O5": r"\frac{{\left(\alpha_5\right)_{{{}{}}}}}{{\Lambda}}",
     "O5c": r"\frac{{\left(\alpha_5\right)^*_{{{}{}}}}}{{\Lambda}}",
+
+    # Auxiliary
+    
+    "O5aux": r"\frac{{\left(\alpha^{{AUX}}_5\right)_{{{}{}}}}}{{\Lambda}}",
+    "O5auxc": r"\frac{{\left(\alpha^{{AUX}}_5\right)^*_{{{}{}}}}}{{\Lambda}}",
+
+    "Olqqqaux":
+    r"\frac{{\left(\alpha^{{AUX}}_{{lqqq}}\right)_{{{}{}{}{}}}}}{{\Lambda^2}}",
+    "Olqqqauxc":
+    r"\frac{{\left(\alpha^{{AUX}}_{{lqqq}}\right)^*_{{{}{}{}{}}}}}{{\Lambda^2}}",
 
     # Dimension 6 four-fermion
 
@@ -1415,18 +1345,10 @@ latex_basis_coefs = {
     (r"\frac{{\left(\alpha_{{eu}}\right)"
      r"_{{{}{}{}{}}}}}{{\Lambda^2}}"),
 
-    "Oeu":
+    "Oed":
     (r"\frac{{\left(\alpha_{{ed}}\right)"
      r"_{{{}{}{}{}}}}}{{\Lambda^2}}"),
     
-    "Oed":
-    (r"\frac{{\left(\alpha_{{eu}}\right)"
-     r"_{{{}{}{}{}}}}}{{\Lambda^2}}"),
-
-    "Oed":
-    (r"\frac{{\left(\alpha_{{ed}}\right)"
-     r"_{{{}{}{}{}}}}}{{\Lambda^2}}"),
-
     # LLRR and LRRL
     
     "Ole":

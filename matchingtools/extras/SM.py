@@ -3,9 +3,11 @@ This module defines the Standard Model tensors and fields and the rules
 for substituting their equations of motion.
 """
 
+from fractions import Fraction
+
 from matchingtools.core import (
     Op, OpSum, TensorBuilder, FieldBuilder, D,
-    number_op, sigma4, sigma4bar, boson, fermion)
+    i_op, number_op, sigma4, sigma4bar, boson, fermion)
 
 from matchingtools.extras.SU2 import sigmaSU2, epsSU2
 
@@ -117,18 +119,18 @@ Substitute :math:`D^2\phi^\dagger` by
 
 eom_bFS = (
     Op(D(0, bFS(0, -1))),
-    -OpSum(number_op(-1./2) * Op(gb(), deltaFlavor(2, 4), lLc(0, 1, 2),
+    -OpSum(number_op(-Fraction(1, 2)) * Op(gb(), deltaFlavor(2, 4), lLc(0, 1, 2),
                                  sigma4bar(-1, 0, 3), lL(3, 1, 4)),
-           number_op(1./6) * Op(gb(), deltaFlavor(3, 5),  qLc(0, 1, 2, 3),
+           number_op(Fraction(1, 6)) * Op(gb(), deltaFlavor(3, 5),  qLc(0, 1, 2, 3),
                                 sigma4bar(-1, 0, 4), qL(4, 1, 2, 5)),
-           number_op(-1.) * Op(gb(), deltaFlavor(1, 3), eRc(0, 1),
+           number_op(-1) * Op(gb(), deltaFlavor(1, 3), eRc(0, 1),
                                sigma4(-1, 0, 2), eR(2, 3)),
-           number_op(-1./3) * Op(gb(), deltaFlavor(2, 4), dRc(0, 1, 2),
+           number_op(-Fraction(1, 3)) * Op(gb(), deltaFlavor(2, 4), dRc(0, 1, 2),
                                  sigma4(-1, 0, 3), dR(3, 1, 4)),
-           number_op(2./3) * Op(gb(), deltaFlavor(2, 4), uRc(0, 1, 2),
+           number_op(Fraction(2, 3)) * Op(gb(), deltaFlavor(2, 4), uRc(0, 1, 2),
                                 sigma4(-1, 0, 3), uR(3, 1, 4)),
-           number_op(1j/2.) * Op(gb(), phic(0), D(-1, phi(0))),
-           number_op(-1j/2.) * Op(gb(), D(-1, phic(0)), phi(0))))
+           number_op(Fraction(1, 2)) * i_op * Op(gb(), phic(0), D(-1, phi(0))),
+           - number_op(Fraction(1, 2)) * i_op * Op(gb(), D(-1, phic(0)), phi(0))))
 r"""
 Rule using the :math:`U(1)` gauge field strength equation of motion. 
 Substitute :math:`D_\mu B^{\mu\nu}` by
@@ -143,14 +145,14 @@ the hypercharges.
 
 eom_wFS = (
     Op(D(0, wFS(0, -1, -2))),
-    -OpSum(number_op(0.5) * Op(gw(), deltaFlavor(0, 1), lLc(3, 4, 0),
+    -OpSum(number_op(Fraction(1, 2)) * Op(gw(), deltaFlavor(0, 1), lLc(3, 4, 0),
                                 sigma4bar(-1, 3, 5), sigmaSU2(-2, 4, 6),
                                 lL(5, 6, 1)),
-           number_op(0.5) * Op(gw(), deltaFlavor(0, 1), qLc(3, 4, 5, 0),
+           number_op(Fraction(1, 2)) * Op(gw(), deltaFlavor(0, 1), qLc(3, 4, 5, 0),
                                 sigma4bar(-1, 3, 6), sigmaSU2(-2, 5, 7),
                                 qL(6, 4, 7, 1)),
-           number_op(0.5j) * Op(gw(), phic(0), sigmaSU2(-2, 0, 1), D(-1, phi(1))),
-           number_op(-0.5j) * Op(gw(), D(-1, phic(0)), sigmaSU2(-2, 0, 1), phi(1))))
+           number_op(Fraction(1, 2)) * i_op * Op(gw(), phic(0), sigmaSU2(-2, 0, 1), D(-1, phi(1))),
+           number_op(-Fraction(1, 2)) * i_op * Op(gw(), D(-1, phic(0)), sigmaSU2(-2, 0, 1), phi(1))))
 r"""
 Rule using the :math:`SU(2)` gauge field strength equation of motion.
 Substitute :math:`D_\mu W^{a,\mu\nu}` by
@@ -164,7 +166,7 @@ where :math:`\sum_F` runs over the SM fermion doublets :math:`F`.
 
 eom_lL = (
     Op(sigma4bar(0, -1, 1), D(0, lL(1, -2, -3))),
-    OpSum(number_op(-1j) * Op(ye(-3, 0), phi(-2), eR(-1, 0))))
+    OpSum(- i_op * Op(ye(-3, 0), phi(-2), eR(-1, 0))))
 r"""
 Rule using the equation of motion of the left-handed lepton doublet.
 Substitute :math:`\gamma^\mu D_\mu l_{Li}` by
@@ -173,7 +175,7 @@ Substitute :math:`\gamma^\mu D_\mu l_{Li}` by
 
 eom_lLc = (
     Op(sigma4bar(0, 1, -1), D(0, lLc(1, -2, -3))),
-    OpSum(number_op(1j) * Op(yec(-3, 0), phic(-2), eRc(-1, 0))))
+    OpSum(i_op * Op(yec(-3, 0), phic(-2), eRc(-1, 0))))
 r"""
 Rule using the equation of motion of conjugate of the left-handed lepton doublet.
 Substitute :math:`D_\mu\bar{l}_{Li}\gamma^\mu` by
@@ -182,8 +184,8 @@ Substitute :math:`D_\mu\bar{l}_{Li}\gamma^\mu` by
     
 eom_qL = (
     Op(sigma4bar(0, -1, 1), D(0, qL(1, -2, -3, -4))),
-    OpSum(number_op(-1j) * Op(yd(-4, 0), phi(-3), dR(-1, -2, 0)),
-          number_op(-1j) * Op(Vc(0, -4), yu(0, 1), epsSU2(-3, 2),
+    OpSum(- i_op * Op(yd(-4, 0), phi(-3), dR(-1, -2, 0)),
+          - i_op * Op(Vc(0, -4), yu(0, 1), epsSU2(-3, 2),
                               phic(2), uR(-1, -2, 1))))
 r"""
 Rule using the equation of motion of the left-handed quark doublet.
@@ -193,8 +195,8 @@ Substitute :math:`\gamma^\mu D_\mu q_{Li}` by
 
 eom_qLc = (
     Op(sigma4bar(0, 1, -1), D(0, qLc(1, -2, -3, -4))),
-    OpSum(number_op(1j) * Op(ydc(-4, 0), phic(-3), dRc(-1, -2, 0)),
-          number_op(1j) * Op(V(0, -4), yuc(0, 1), epsSU2(-3, 2),
+    OpSum(i_op * Op(ydc(-4, 0), phic(-3), dRc(-1, -2, 0)),
+          i_op * Op(V(0, -4), yuc(0, 1), epsSU2(-3, 2),
                              phi(2), uRc(-1, -2, 1))))
 r"""
 Rule using the equation of motion of the conjugate of the left-handed quark doublet.
@@ -205,7 +207,7 @@ i V_{ji}y^{u*}_{kj} \bar{u}_{Rj}\tilde{\phi}^\dagger`.
 
 eom_eR = (
     Op(sigma4(0, -1, 1), D(0, eR(1, -2))),
-    OpSum(number_op(-1j) * Op(yec(0, -2), phic(1), lL(-1, 1, 0))))
+    OpSum(- i_op * Op(yec(0, -2), phic(1), lL(-1, 1, 0))))
 r"""
 Rule using the equation of motion of the right-handed electron singlet.
 Substitute :math:`\gamma^\mu D_\mu e_{Rj}` by
@@ -214,7 +216,7 @@ Substitute :math:`\gamma^\mu D_\mu e_{Rj}` by
 
 eom_eRc = (
     Op(sigma4(0, 1, -1), D(0, eRc(1, -2))),
-    OpSum(number_op(1j) * Op(ye(0, -2), phi(1), lLc(-1, 1, 0))))
+    OpSum(i_op * Op(ye(0, -2), phi(1), lLc(-1, 1, 0))))
 r"""
 Rule using the equation of motion of the conjugate of the right-handed
 electron singlet. Substitute :math:`D_\mu \bar{e}_{Rj} \gamma^\mu` by
@@ -223,7 +225,7 @@ electron singlet. Substitute :math:`D_\mu \bar{e}_{Rj} \gamma^\mu` by
 
 eom_dR = (
     Op(sigma4(0, -1, 1), D(0, dR(1, -2, -3))),
-    OpSum(number_op(-1j) * Op(ydc(0, -3), phic(1), qL(-1, -2, 1, 0))))
+    OpSum(- i_op * Op(ydc(0, -3), phic(1), qL(-1, -2, 1, 0))))
 r"""
 Rule using the equation of motion of the right-handed down quark singlet.
 Substitute :math:`\gamma^\mu D_\mu d_{Rj}` by
@@ -232,7 +234,7 @@ Substitute :math:`\gamma^\mu D_\mu d_{Rj}` by
 
 eom_dRc = (
     Op(sigma4(0, 1, -1), D(0, dRc(1, -2, -3))),
-    OpSum(number_op(1j) * Op(yd(0, -3), phi(1), qLc(-1, -2, 1, 0))))
+    OpSum(i_op * Op(yd(0, -3), phi(1), qLc(-1, -2, 1, 0))))
 r"""
 Rule using the equation of motion of the conjugate of the right-handed
 down quark singlet. Substitute :math:`D_\mu \bar{d}_{Rj} \gamma^\mu` by
@@ -241,7 +243,7 @@ down quark singlet. Substitute :math:`D_\mu \bar{d}_{Rj} \gamma^\mu` by
 
 eom_uR = (
     Op(sigma4(0, -1, 1), D(0, uR(1, -2, -3))),
-    OpSum(number_op(-1j) * Op(V(0, 1), yuc(0, -3), epsSU2(2, 3),
+    OpSum(- i_op * Op(V(0, 1), yuc(0, -3), epsSU2(2, 3),
                               phi(3), qL(-1, -2, 2, 1))))
 r"""
 Rule using the equation of motion of the right-handed up quark singlet.
@@ -251,7 +253,7 @@ Substitute :math:`\gamma^\mu D_\mu u_{Rj}` by
 
 eom_uRc = (
     Op(sigma4(0, 1, -1), D(0, uRc(1, -2, -3))),
-    OpSum(number_op(1j) * Op(Vc(0, 1), yu(0, -3), epsSU2(2, 3),
+    OpSum(i_op * Op(Vc(0, 1), yu(0, -3), epsSU2(2, 3),
                              phic(3), qLc(-1, -2, 2, 1))))
 r"""
 Rule using the equation of motion of the conjugate of the right-handed up 
