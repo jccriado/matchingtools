@@ -9,7 +9,7 @@ effective Lagrangian to simplify it or write it in terms of a chosen
 effective operator basis.
 
 Installation
-============
+===========
 
 To install MatchingTools using `pip`_ do::
 
