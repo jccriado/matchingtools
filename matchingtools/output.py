@@ -221,6 +221,16 @@ class Writer(object):
         rest (list of pairs (complex, Operator)): represents a sum
             of the operators that couldn't be collected with their
             corresponding coefficients.
+        conjugates (dictionary string: string): name of the complex
+            conjugate corresponding to the name of each tensor. If
+            it is not None, this is used for collecting conjugate
+            pairs to give their real or imaginary parts.
+        no_parens (list of strings): names of tensors that, when
+            having a non-unit exponent are to represented in latex
+            as tensor^exp instead of (tensor)^exp
+        numeric (list of strings): names of tensors that symbolically
+            represent numbers. The effect of this is the latex output:
+            they come after the "$number" tensors and before the "$i".
     """
     def __init__(self, op_sum, op_names, conjugates=None,
                  no_parens=None, numeric=None, verbose=True):
