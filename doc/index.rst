@@ -2,7 +2,7 @@
    sphinx-quickstart on Thu Mar 16 15:26:44 2017.
 
 Welcome to MatchingTools' documentation!
-=====================================
+========================================
 
 *MatchingTools* is a Python library for doing symbolic calculations in
 effective field theory.

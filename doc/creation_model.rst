@@ -10,7 +10,7 @@ Creation of models
       from matchingtools.operators import (
 	  Tensor, Operator, OperatorSum
           TensorBuilder, FieldBuilder, D, Op, OpSum,
-	  number_op, symbol_op)
+	  number_op, power_op)
 	     
 The construction of a model is done in two steps: the creation of the
 tensors and fields and the definition of the interaction Lagrangian.
@@ -59,7 +59,7 @@ The name should be of the form ``"{base^exponent}"``. Curly brakets
 allow for the summation of the exponents of tensors that appear in
 the same tensor and have the same base and indices. This is used
 mainly to produce more readable results. The function designed to
-create operators containing such tensors is :func:`symbol_op`.
+create operators containing such tensors is :func:`power_op`.
 
 
 Creation of tensors
@@ -124,5 +124,5 @@ it can be introduced as::
 
 A symbolic constant ``s`` to some power ``p`` can multiply an operator as::
 
-  symbol_op("s", p) * op
+  power_op("s", p) * op
   

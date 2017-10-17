@@ -44,7 +44,7 @@ The ``operators`` module
 
 .. autofunction:: number_op
 
-.. autofunction:: symbol_op
+.. autofunction:: power_op
 
 .. autofunction:: tensor_op
 
@@ -92,9 +92,9 @@ The ``transformations`` module
 
 .. autofunction:: collect_numbers
 
-.. autofunction:: collect_symbols
+.. autofunction:: collect_powers
 
-.. autofunction:: collect_numbers_and_symbols
+.. autofunction:: collect_numbers_and_powers
 		  
 .. autofunction:: apply_rule
 
