@@ -62,18 +62,26 @@ class Tensor(object):
         for a Tensor with indices i[0], i[1], ..., i[n-1] and 
         num_of_der equal to m
         """
+
+        # Representation of special tensors (to be used internally)
         if self.name == "$number":
             return str(self.number)
         if self.name == "$i":
             return "i"
-        
+        if self.name == "$re":
+            return "Re[{}]".format(" ".join(map(str, self.content)))
+        if self.name == "$im":
+            return "Im[{}]".format(" ".join(map(str, self.content)))
+
+        # Compute the representation of the exponent
         if self.exponent > 1:
             name = "({}^{})".format(self.name, self.exponent)
         elif self.exponent < 1:
             name = "({}^({}))".format(self.name, self.exponent)
         else:
             name = self.name
-            
+
+        # Add derivarives
         der_str = ("D({})" * self.num_of_der).format(*self.der_indices)
         if len(self.indices) > 0:
             ten_str = "{}({})".format(
