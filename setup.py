@@ -13,7 +13,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 setup(
     name='matchingtools',
 
-    version='0.2.3',
+    version='0.2.4',
 
     description='A library for symbolic Effective Field Theory calculations',
     long_description=long_description,
