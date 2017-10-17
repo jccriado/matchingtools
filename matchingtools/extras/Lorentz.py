@@ -25,7 +25,7 @@ Lorentz tensor
 
 rule_Lorentz_free_epsUp = (
     Op(epsUp(-1, -2), epsUpDot(-3, -4)),
-    OpSum(-number_op(Fraction(1, 2)) * Op(
+    OpSum(number_op(Fraction(1, 2)) * Op(
         sigma4bar(0, -3, -1), sigma4bar(0, -4, -2))))
 r"""
 Substitute :math:`\epsilon^{\alpha\beta}\epsilon^{\dot{\alpha}\dot{\beta}}`
@@ -38,7 +38,7 @@ by
 
 rule_Lorentz_free_epsDown = (
     Op(epsDown(-1, -2), epsDownDot(-3, -4)),
-    OpSum(-number_op(Fraction(1, 2)) * Op(
+    OpSum(number_op(Fraction(1, 2)) * Op(
         sigma4(0, -1, -3), sigma4(0, -2, -4))))
 r"""
 Substitute :math:`\epsilon_{\alpha\beta}\epsilon_{\dot{\alpha}\dot{\beta}}`
