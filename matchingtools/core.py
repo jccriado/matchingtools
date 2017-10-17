@@ -65,7 +65,7 @@ class Tensor(object):
 
         # Representation of special tensors (to be used internally)
         if self.name == "$number":
-            return str(self.number)
+            return str(self.content)
         if self.name == "$i":
             return "i"
         if self.name == "$re":
