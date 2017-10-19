@@ -20,8 +20,6 @@ def display_tensor_aux(structure, indices, num_of_der):
     return structure.format(*list(map(str, indices)))
 
 def display_tensor(tensor, structures, assigned_inds, no_parens=None):
-    if no_parens is None:
-        raise Exception()
     if tensor.name == "$re":
         ins = " ".join(
             [display_tensor(t, structures, assigned_inds, no_parens)
@@ -53,8 +51,8 @@ def partition(predicate, lst):
     return passed, rest
 
 def num_of_free_inds(operator):
-    return max([max(-i for tensor in operator.tensors
-                    for i in tensor.indices), 0])
+    return max([max([-i for tensor in operator.tensors
+                     for i in tensor.indices] or [0]), 0])
 
 def display_operator(operator, structures, inds, num, no_parens=None,
                      numeric=None):
