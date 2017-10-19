@@ -29,3 +29,8 @@ Documentation
 =============
 
 Read the documentation at: http://matchingtools.readthedocs.io/en/latest/.
+
+Citation
+========
+
+If you use this work, please cite: https://arxiv.org/abs/1710.06445.
