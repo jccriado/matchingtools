@@ -16,8 +16,6 @@ Defines the Lorentz tensors :data:`epsUp`, :data:`epsUpDot`,
 :data:`sigma4bar`.
 """
 
-from fractions import Fraction
-
 from matchingtools.permutations import permutations
 
 from matchingtools.lsttools import concat, enum_product
