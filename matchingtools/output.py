@@ -58,6 +58,9 @@ def display_operator(operator, structures, inds, num, no_parens=None,
                      numeric=None):
     if numeric is None:
         numeric = []
+    if no_parens is None:
+        def no_parens(x):
+            return x
     
     # Nice representation for fractions.Fraction and integers
     if isinstance(num, (int, Fraction)):

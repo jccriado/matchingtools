@@ -1225,7 +1225,7 @@ rules_basis_defs_dim_6_5 = [
     # Standard Model dimension 5 operators
     
     (Op(lL(0, 1, -1), epsSU2(1, 2), phi(2),
-        epsSU2(3, 4), phi(4), epsUp(0, 5), lL(5, 3, -2)),
+        epsSU2(3, 4), phi(4), epsUp(5, 0), lL(5, 3, -2)),
      OpSum(O5(-1, -2))),
 
     (Op(lLc(0, 1, -2), epsSU2(1, 2), phic(2), epsUpDot(0, 3),

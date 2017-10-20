@@ -60,6 +60,14 @@ Subtitute :math:`\sigma^a_{ij} \sigma^a_{kl}` by
 :math:`2\delta_{il}\delta_{kj} - \delta_{ij}\delta{kl}`.
 """
 
+rule_SU2_product_sigmas = (
+    (Op(sigmaSU2(0, -1, 1), sigmaSU2(0, 1, -2)),
+     OpSum(Op(kdelta(-1, -2)))))
+r"""
+Subtitute :math:`\sigma^a_{ij}\sigma^a_{jk}` by
+:math:`2\delta_{ik}`.
+"""
+
 rule_SU2_free_eps = (
     (Op(epsSU2(-1, -2), epsSU2(-3, -4)),
      OpSum(Op(kdelta(-1, -3), kdelta(-2, -4)),
@@ -181,7 +189,7 @@ rules_f_sigmas = [
 
                   
 
-rules_SU2 = ([rule_SU2_fierz, rule_SU2_eps_zero] +
+rules_SU2 = ([rule_SU2_fierz, rule_SU2_product_sigmas, rule_SU2_eps_zero] +
              rules_f_sigmas +
              rules_SU2_epsquadruplets_cancel +
              rules_SU2_C_sigma +

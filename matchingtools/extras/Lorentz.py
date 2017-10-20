@@ -136,11 +136,11 @@ rules_Lorentz_2_eps4 = [
 rules_Lorentz_sigma_eps = [
     (Op(sigma4(0, -1, 1), epsUpDot(1, -2),
         sigma4bar(0, -3, 2), epsDown(2, -4)),
-     OpSum(Op(epsDown(-1, -4), epsUpDot(-3, -2)))),
+     OpSum(number_op(2) * Op(epsDown(-1, -4), epsUpDot(-3, -2)))),
     
     (Op(epsUp(0, -1), sigma4(1, 0, -2),
         epsDownDot(2, -3), sigma4bar(1, 2, -4)),
-     OpSum(Op(epsUp(-1, -4), epsDownDot(-3, -2))))]
+     OpSum(number_op(2) * Op(epsUp(-1, -4), epsDownDot(-3, -2))))]
 
 
 rules_Lorentz = ([rule_Lorentz_free_epsUp, rule_Lorentz_free_epsDown] +

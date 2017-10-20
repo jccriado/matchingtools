@@ -31,7 +31,7 @@ rule_SU3_eps = (
 rule_fierz_SU3 = (
     Op(TSU3(0, -1, -2), TSU3(0, -3, -4)),
     OpSum(number_op(Fraction(1, 2)) * Op(kdelta(-1, -4), kdelta(-3, -2)),
-          number_op(Fraction(1, 6)) * Op(kdelta(-1, -2), kdelta(-3, -4))))
+          -number_op(Fraction(1, 6)) * Op(kdelta(-1, -2), kdelta(-3, -4))))
 
 rules_SU3 = [rule_SU3_eps, rule_fierz_SU3]
 
