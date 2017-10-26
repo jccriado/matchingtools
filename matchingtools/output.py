@@ -11,6 +11,7 @@ from matchingtools.core import Operator, Op, OpSum, Tensor, number_op, i_op
 from matchingtools.transformations import collect, sum_numbers
 
 from fractions import Fraction
+from lsttools import concat
 from subprocess import call
 import copy
 
@@ -58,9 +59,6 @@ def display_operator(operator, structures, inds, num, no_parens=None,
                      numeric=None):
     if numeric is None:
         numeric = []
-    if no_parens is None:
-        def no_parens(x):
-            return x
     
     # Nice representation for fractions.Fraction and integers
     if isinstance(num, (int, Fraction)):
@@ -190,7 +188,8 @@ def real_part(op, complex_tensors):
     op_real_tensors = [
         tensor for tensor in op.tensors
         if tensor.name not in complex_tensors]
-    re_tensor = Tensor("$re", [], content=op_complex_tensors)
+    indices = concat([tensor.indices for tensor in op_complex_tensors])
+    re_tensor = Tensor("$re", indices, content=op_complex_tensors)
     return Op(re_tensor) * Op(*op_real_tensors)
 
 def imaginary_part(op, complex_tensors):
@@ -200,7 +199,8 @@ def imaginary_part(op, complex_tensors):
     op_real_tensors = [
         tensor for tensor in op.tensors
         if tensor.name not in complex_tensors]
-    im_tensor = Tensor("$im", [], content=op_complex_tensors)
+    indices = concat([tensor.indices for tensor in op_complex_tensors])
+    im_tensor = Tensor("$im", indices, content=op_complex_tensors)
     return Op(im_tensor) * Op(*op_real_tensors)
     
 class Writer(object):
@@ -233,8 +233,7 @@ class Writer(object):
             represent numbers. The effect of this is the latex output:
             they come after the "$number" tensors and before the "$i".
     """
-    def __init__(self, op_sum, op_names, conjugates=None,
-                 no_parens=None, numeric=None, verbose=True):
+    def __init__(self, op_sum, op_names, conjugates=None, verbose=True):
         """
         Args:
             op_sum (OperatorSum): to be represented
@@ -246,8 +245,6 @@ class Writer(object):
         self.collection = [(key, collect_conjugates(val, conjugates))
                            for key, val in self.collection]
         self.no_parens = no_parens
-        self.numeric = numeric
-        self.verbose = verbose
 
     def __str__(self):
         """
@@ -265,7 +262,7 @@ class Writer(object):
                              self.collection),
             rest = "\n".join(str(num) + str(op) for op, num in self.rest))
 
-    def latex_code(self, structures, op_reps, inds):
+    def latex_code(self, structures, op_reps, inds, no_parens=None, numeric=None):
         """
         Representation as LaTeX's amsmath ``align`` environments
 
@@ -280,6 +277,12 @@ class Writer(object):
                 representation.
             inds (list of strings): the symbols to be used to represent
                 the indices, in the order in which they should appear.
+            no_parens (function): receives the name of a tensor and returns
+                True if its LaTeX representation should not have parenthesis
+                around it when exponentiated to some power.
+            numeric (list of strings): list of names of tensors that should
+                appear with the numeric coefficients in the representation,
+                before the rest of the tensors.
         """
         out_str = "Collected operators:\n"
         for (op_name, n_inds), coef_lst in self.collection:
@@ -316,7 +319,8 @@ class Writer(object):
         with open(filename, "w") as f:
             f.write(str(self))
 
-    def write_latex(self, filename, structures, op_reps, inds):
+    def write_latex(self, filename, structures, op_reps, inds, no_parens=None,
+                    numeric=None):
         """
         Write a LaTeX document with the representation.
 
@@ -332,16 +336,21 @@ class Writer(object):
                 in the basis. The corresponding values are the LaTeX formula
                 representation.
             inds (list of strings): the symbols to be used to represent
-                the indices, in the order in which they should appear.v
+                the indices, in the order in which they should appear.
+            no_parens (function): receives the name of a tensor and returns
+                True if its LaTeX representation should not have parenthesis
+                around it when exponentiated to some power.
+            numeric (list of strings): list of names of tensors that should
+                appear with the numeric coefficients in the representation,
+                before the rest of the tensors.
         """
-        out_str = self.latex_code(structures, op_reps, inds)
+        out_str = self.latex_code(structures, op_reps, inds, no_parens, numeric)
         with open(filename + ".tex", "w") as f:
             f.write((r"\documentclass{{article}}" + "\n" +
                      r"\usepackage{{amsmath}}" + "\n" +
                      r"\usepackage{{amssymb}}" + "\n" +
                      r"\begin{{document}}" + "\n" + "{}" + "\n" +
-                     r"\end{{document}}").format(
-                         self.latex_code(structures, op_reps, inds)))
+                     r"\end{{document}}").format(out_str))
 
     def write_pdf(self, filename, structures, op_reps, inds):
         """
