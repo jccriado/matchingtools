@@ -41,7 +41,7 @@ class Tensor(object):
     """
     
     def __init__(self, name, indices, is_field=False, num_of_der=0,
-                 dimension=0, statistics=True, content=None, exponent=1):
+                 dimension=0, statistics=True, content=None, exponent=None):
         self.name = name
         self.indices = indices
         self.is_field = is_field
@@ -72,7 +72,9 @@ class Tensor(object):
             return "Im[{}]".format(" ".join(map(str, self.content)))
 
         # Compute the representation of the exponent
-        if self.exponent > 1:
+        if self.exponent is None:
+            name = self.name
+        elif self.exponent > 1:
             name = "({}^{})".format(self.name, self.exponent)
         elif self.exponent < 1:
             name = "({}^({}))".format(self.name, self.exponent)
@@ -622,9 +624,9 @@ def number_op(number):
     """
     Create an operator correponding to a number.
     """
-    return Op(Tensor("$number", [], content=number))
+    return Op(Tensor("$number", [], content=number, exponent=1))
 
-i_op = Op(Tensor("$i", []))
+i_op = Op(Tensor("$i", [], exponent=1))
 """Operator representing the imaginary unit."""
 
 def power_op(name, exponent, indices=None):

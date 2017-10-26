@@ -65,7 +65,7 @@ def collect_powers(operator):
     new_tensors = []
     symbols = {}
     for tensor in operator.tensors:
-        if tensor.is_field or tensor.name[0] == "$":
+        if tensor.is_field or tensor.name[0] == "$" or tensor.exponent is None:
             new_tensors.append(tensor)
         else:
             # Previusly collected exponent for same base and indices

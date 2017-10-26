@@ -36,10 +36,13 @@ def display_tensor(tensor, structures, assigned_inds, no_parens=None):
         structures[tensor.name],
         list(map(assigned_inds.get, tensor.indices)),
         tensor.num_of_der)
-    exp = display_exponent(abs(tensor.exponent))
-    if (abs(tensor.exponent) != 1 and
-        (no_parens is None or not no_parens(tensor.name))):
-        base = r"\left({}\right)".format(base)
+    if tensor.exponent is None:
+        exp = ""
+    else:
+        exp = display_exponent(abs(tensor.exponent))
+        if (abs(tensor.exponent) != 1 and
+            (no_parens is None or not no_parens(tensor.name))):
+            base = r"\left({}\right)".format(base)
     return base + exp
 
 def partition(predicate, lst):
@@ -96,21 +99,25 @@ def display_operator(operator, structures, inds, num, no_parens=None,
     numerator = " ".join(
         [display_tensor(tensor, structures, assigned_inds, no_parens)
          for tensor in operator.tensors
-         if tensor.exponent > -1 and tensor.name not in numeric])
+         if ((tensor.exponent > -1 or tensor.exponent is None) and
+             tensor.name not in numeric)])
     denominator = " ".join(
         [display_tensor(tensor, structures, assigned_inds, no_parens)
          for tensor in operator.tensors
-         if tensor.exponent < 0 and tensor.name not in numeric])
+         if ((tensor.exponent < 0 and tensor.exponent is not None) and
+             tensor.name not in numeric)])
 
     # Numeric factors with symbolic expression as tensors
     num_up = " ".join(
         [display_tensor(tensor, structures, assigned_inds, no_parens)
          for tensor in operator.tensors
-         if tensor.exponent > -1 and tensor.name in numeric])
+         if ((tensor.exponent > -1 or tensor.exponent is None) and
+             tensor.name in numeric)])
     num_down = " ".join(
         [display_tensor(tensor, structures, assigned_inds, no_parens)
          for tensor in operator.tensors
-         if tensor.exponent < 0 and tensor.name in numeric])                    
+         if ((tensor.exponent < 0 and tensor.exponent is not None) and
+             tensor.name in numeric)])
 
     return "{} \\frac{{{} {} {} {}}}{{{} {} {}}}".format(
         pre,
@@ -244,7 +251,6 @@ class Writer(object):
         self.collection, self.rest = collect(op_sum, op_names, conjugates)
         self.collection = [(key, collect_conjugates(val, conjugates))
                            for key, val in self.collection]
-        self.no_parens = no_parens
 
     def __str__(self):
         """
@@ -290,8 +296,7 @@ class Writer(object):
             out_str += op_reps[op_name].format(*inds[:n_inds]) + "= & \n "
             for i, (op_coef, num) in enumerate(coef_lst):
                 out_str += display_operator(op_coef, structures, inds,
-                                            num, self.no_parens,
-                                            self.numeric)
+                                            num, no_parens, numeric)
                 if i < len(coef_lst) - 1:
                     if i%3 == 2:
                         out_str += r"\\ &"
@@ -305,8 +310,7 @@ class Writer(object):
             out_str += r"\begin{align*}" + "\n &"
             for i, (op, num) in enumerate(self.rest):
                 out_str += display_operator(op, structures, inds, num,
-                                            self.no_parens,
-                                            self.numeric)
+                                            no_parens, numeric)
                 out_str += r"\\ &"
                 if i%15 == 14:
                     out_str += "\n" + r"+\cdots\end{align*}" + "\n"
