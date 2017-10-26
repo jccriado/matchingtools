@@ -26,7 +26,7 @@ class Scalar(object):
                 -self.free_inv_mass_sq * operator)
         return final_op_sum
 
-    def apply_propagator(self, operator_sum, max_order=2, max_dim=4):
+    def apply_propagator(self, operator_sum, max_order, max_dim):
         """
         Apply the scalar propagator -(D^2 + M^2)^(-1).
 
@@ -45,7 +45,7 @@ class Scalar(object):
             final_op_sum += operator_sum
         coef_op = -self.free_inv_mass_sq
         return OpSum(*[op * coef_op for op in final_op_sum.operators
-                       if op.dimension <= max_dim])
+                       if op.dimension <= self.max_dim])
 
     
 class Vector(object):
@@ -70,7 +70,7 @@ class Vector(object):
                      generic_der_2)
         return structure.replace_all({"generic": operator_sum}, 6)
 
-    def apply_propagator(self, operator_sum, max_order=2, max_dim=4):
+    def apply_propagator(self, operator_sum, max_order, max_dim):
         """
         Apply the vector propagator [(M^2 + D^2) eta_{munu} - D_mu D_nu]^(-1).
 
@@ -104,7 +104,7 @@ class RealBoson(object):
         mass_sq (Operator): operator containing the mass squared tensor
                             non-negative index (ready to appear directly)
     """
-    def __init__(self, name, num_of_inds, has_flavor=True, order=2):
+    def __init__(self, name, num_of_inds, has_flavor=True, order=2, max_dim=4):
         """
         Args:
             name (string): name identifier of the corresponding tensor
@@ -120,9 +120,9 @@ class RealBoson(object):
         mass_inds = [num_of_inds-1] if has_flavor else None
         self.mass_sq = power_op(mass, 2, indices=mass_inds)
         self.order = order
+        self.max_dim = max_dim
     
-    def equations_of_motion(self, interaction_lagrangian,
-                            max_order=2, max_dim=4):
+    def equations_of_motion(self, interaction_lagrangian):
         """
         Solve the EOMs to given order in 1/M.
 
@@ -137,7 +137,7 @@ class RealBoson(object):
         """
         variation = interaction_lagrangian.variation(self.name, True)
         return [(self.name,
-                 self.apply_propagator(-variation, max_order, max_dim))]
+                 self.apply_propagator(-variation, self.order, self.max_dim))]
 
 class ComplexBoson(object):
     """
@@ -152,7 +152,8 @@ class ComplexBoson(object):
         mass_sq (Operator): operator containing the mass squared tensor
                             non-negative index (ready to appear directly)
     """
-    def __init__(self, name, c_name, num_of_inds, has_flavor=True, order=2):
+    def __init__(self, name, c_name, num_of_inds, has_flavor=True, order=2,
+                 max_dim=4):
         """
         Args:
             name (string): name identifier of the corresponding tensor
@@ -170,6 +171,7 @@ class ComplexBoson(object):
         mass_inds = [num_of_inds-1] if has_flavor else None
         self.mass_sq = power_op(mass, 2, indices=mass_inds)
         self.order = order
+        self.max_dim = max_dim
 
     def equations_of_motion(self, interaction_lagrangian):
         """
@@ -188,8 +190,12 @@ class ComplexBoson(object):
         variation = interaction_lagrangian.variation(self.name, True)
         c_variation = interaction_lagrangian.variation(self.c_name, True)
         
-        return [(self.name, self.apply_propagator(-c_variation)),
-                (self.c_name, self.apply_propagator(-variation))]
+        return [(self.name,
+                 self.apply_propagator(
+                     -c_variation, self.order, self.max_dim)),
+                (self.c_name,
+                 self.apply_propagator(
+                     -variation, self.order, self.max_dim))]
 
 class RealScalar(RealBoson, Scalar):
     """
@@ -210,7 +216,8 @@ class RealScalar(RealBoson, Scalar):
         f = Tensor(self.name, list(range(n)), is_field=True,
                    dimension=1, statistics=boson)
         f_op = Op(f)
-        kinetic_term = (OpSum(number_op(Fraction(1, 2))) * Op(f).derivative(n + 1) *
+        kinetic_term = (OpSum(number_op(Fraction(1, 2))) *
+                        Op(f).derivative(n + 1) *
                         Op(f).derivative(n + 1))
         mass_term = number_op(-Fraction(1, 2)) * self.mass_sq * f_op * f_op
         return kinetic_term + OpSum(mass_term)
