@@ -108,7 +108,6 @@ if __name__ == "__main__":
 #                      "MXi": r"M_{{\Xi}}",
 #                      "phi": r"\phi_{}",
 #                      "phic": r"\phi^*_{}"}
-#
 # latex_coef_reps = {
 #     "Ophi6": r"\frac{{\alpha_{{\phi 6}}}}{{\Lambda^2}}",
 #     "Ophi4": r"\alpha_{{\phi 4}}",
@@ -116,7 +115,6 @@ if __name__ == "__main__":
 #     "O3phi": r"\frac{{\alpha^{{(3)}}_{{\phi}}}}{{\Lambda^2}}",
 #     "ODphi": r"\frac{{\alpha_{{D\phi}}}}{{\Lambda^2}}",
 #     "ODphic": r"\frac{{\alpha^*_{{D\phi}}}}{{\Lambda^2}}"}
-#		   
 # latex_indices = ["i", "j", "k", "l"]
 # eff_lag_writer.write_latex(
 #     "simple_example", latex_tensor_reps, 

@@ -98,7 +98,7 @@ Integration
 Before doing the integration of the heavy fields, we must specify who they are. 
 To integrate out the heavy :math:`\Xi` we do::
   
-  heavy_Xi = RealScalar("Xi", 1)
+  heavy_Xi = RealScalar("Xi", 1, has_flavor=False)
 
 Now it is ready to be integrated out::
 
