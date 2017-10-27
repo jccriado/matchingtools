@@ -37,59 +37,58 @@ examples/simple_example.py. It should produce a text file named
 
   Collected:
     O1phi:
-      2 (MXi^(-4)) (kappa^2)
+      2 (MXi^(-4)) kappa kappa
   
     O3phi:
-      -1 (MXi^(-4)) (kappa^2)
+      -1 (MXi^(-4)) kappa kappa
   
     ODphi:
-      1/2 (kappa^2) (MXi^(-4))
+      1/2 (MXi^(-4)) kappa kappa
   
     ODphic:
-      1/2 (MXi^(-4)) (kappa^2)
+      1/2 (MXi^(-4)) kappa kappa
   
     Ophi4:
-      1/2 (MXi^(-2)) (kappa^2)
+      1/2 (MXi^(-2)) kappa kappa
   
     Ophi6:
-      -1 lamb (kappa^2) (MXi^(-4))
+      -1 (MXi^(-4)) lamb kappa kappa
   
-  Rest:  
+  Rest:
 
 Similarly, the script "extras_example.py" should produce the
 following output:
 
   Collected:
     O1phid:
-      -1/2 lambdaDYdc(14,-1) lambdaDYd(14,-2) (MDY^(-2))(14)
+      -1/2 (MDY^(-2))(14) lambdaDYd(14,-2) lambdaDYdc(14,-1)
   
     O1phidc:
-      -1/2 lambdaDYd(14,-1) lambdaDYdc(14,-2) (MDY^(-2))(14)
+      -1/2 (MDY^(-2))(14) lambdaDYdc(14,-2) lambdaDYd(14,-1)
   
     O1phiq:
-      (-0.25+0j) (MD^(-2))(0) lambdaDqc(0,-1) lambdaDq(0,-2)
+      (-0.25+0j) (MD^(-2))(0) lambdaDq(0,-2) lambdaDqc(0,-1)
   
     O1phiqc:
-      (-0.25+0j) lambdaDq(0,-1) (MD^(-2))(0) lambdaDqc(0,-2)
+      (-0.25+0j) (MD^(-2))(0) lambdaDqc(0,-2) lambdaDq(0,-1)
   
     O3phiq:
-      (-0.25+0j) lambdaDq(0,-2) lambdaDqc(0,-1) (MD^(-2))(0)
+      (-0.25+0j) (MD^(-2))(0) lambdaDq(0,-2) lambdaDqc(0,-1)
   
     O3phiqc:
-      (-0.25+0j) lambdaDq(0,-1) (MD^(-2))(0) lambdaDqc(0,-2)
+      (-0.25+0j) (MD^(-2))(0) lambdaDqc(0,-2) lambdaDq(0,-1)
   
     Odphi:
-      1/2 lambdaDq(0,10) (MD^(-2))(0) lambdaDqc(0,-1) yd(10,-2)
-      -1 lambdaDYd(14,-2) (MDY^(-1))(14) lambdaDqc(15,-1) (MD^(-1))(15) lambdaDYDc(14,15)
-      1/2 lambdaDYdc(14,26) (MDY^(-2))(14) yd(-1,26) lambdaDYd(14,-2)
+      1/2 (MD^(-2))(0) yd(10,-2) lambdaDqc(0,-1) lambdaDq(0,10)
+      -1 (MD^(-1))(15) (MDY^(-1))(14) lambdaDYDc(14,15) lambdaDqc(15,-1) lambdaDYd(14,-2)
+      1/2 (MDY^(-2))(14) yd(-1,26) lambdaDYd(14,-2) lambdaDYdc(14,26)
   
     Odphic:
-      1/2 lambdaDq(0,-1) lambdaDqc(0,10) (MD^(-2))(0) ydc(10,-2)
-      -1 lambdaDq(19,-1) lambdaDYD(18,19) (MDY^(-1))(18) lambdaDYdc(18,-2) (MD^(-1))(19)
-      1/2 lambdaDYd(14,26) ydc(-1,26) lambdaDYdc(14,-2) (MDY^(-2))(14)
+      1/2 (MD^(-2))(0) ydc(10,-2) lambdaDq(0,-1) lambdaDqc(0,10)
+      -1 (MDY^(-1))(18) (MD^(-1))(19) lambdaDYD(18,19) lambdaDYdc(18,-2) lambdaDq(19,-1)
+      1/2 (MDY^(-2))(14) ydc(-1,26) lambdaDYdc(14,-2) lambdaDYd(14,26)
   
   Rest:
-
 
 
 File list
