@@ -116,6 +116,12 @@ matchingtools (directory) -- Contains the code of library itself:
 |-- output.py           Defines the class Writer for the output of the
 |                       calculations.
 |
+|-- permutations.py     Defines functions for constructing lists of
+|                       permutations.
+|
+|-- lsttools.py         Contains useful simple functions for dealing
+|                       with lists.
+|
 |-- extras (subdirectory) -- Modules for the application to physics
     |	                     beyond the Standard Model:
     |
