@@ -111,7 +111,7 @@ def display_operator(operator, structures, inds, num, no_parens=None,
     num_up = " ".join(
         [display_tensor(tensor, structures, assigned_inds, no_parens)
          for tensor in operator.tensors
-         if ((tensor.exponent is None or tensor.exponent > -1 or ) and
+         if ((tensor.exponent is None or tensor.exponent > -1) and
              tensor.name in numeric)])
     num_down = " ".join(
         [display_tensor(tensor, structures, assigned_inds, no_parens)
