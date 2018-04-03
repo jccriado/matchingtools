@@ -99,24 +99,24 @@ def display_operator(operator, structures, inds, num, no_parens=None,
     numerator = " ".join(
         [display_tensor(tensor, structures, assigned_inds, no_parens)
          for tensor in operator.tensors
-         if ((tensor.exponent > -1 or tensor.exponent is None) and
+         if ((tensor.exponent is None or tensor.exponent > -1) and
              tensor.name not in numeric)])
     denominator = " ".join(
         [display_tensor(tensor, structures, assigned_inds, no_parens)
          for tensor in operator.tensors
-         if ((tensor.exponent < 0 and tensor.exponent is not None) and
+         if ((tensor.exponent is not None and tensor.exponent < 0) and
              tensor.name not in numeric)])
 
     # Numeric factors with symbolic expression as tensors
     num_up = " ".join(
         [display_tensor(tensor, structures, assigned_inds, no_parens)
          for tensor in operator.tensors
-         if ((tensor.exponent > -1 or tensor.exponent is None) and
+         if ((tensor.exponent is None or tensor.exponent > -1 or ) and
              tensor.name in numeric)])
     num_down = " ".join(
         [display_tensor(tensor, structures, assigned_inds, no_parens)
          for tensor in operator.tensors
-         if ((tensor.exponent < 0 and tensor.exponent is not None) and
+         if ((tensor.exponent is not None and tensor.exponent < 0) and
              tensor.name in numeric)])
 
     return "{} \\frac{{{} {} {} {}}}{{{} {} {}}}".format(
