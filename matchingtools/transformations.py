@@ -17,7 +17,7 @@ from matchingtools.core import (
     Operator, OperatorSum, Op, OpSum, Tensor, i_op,
     number_op, power_op, tensor_op, kdelta, generic)
 
-from lsttools import concat
+from matchingtools.lsttools import concat
 
 def collect_numbers(operator):
     """

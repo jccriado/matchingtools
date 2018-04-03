@@ -11,7 +11,7 @@ from matchingtools.core import Operator, Op, OpSum, Tensor, number_op, i_op
 from matchingtools.transformations import collect, sum_numbers
 
 from fractions import Fraction
-from lsttools import concat
+from matchingtools.lsttools import concat
 from subprocess import call
 import copy
 

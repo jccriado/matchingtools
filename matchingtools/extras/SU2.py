@@ -62,10 +62,10 @@ Subtitute :math:`\sigma^a_{ij} \sigma^a_{kl}` by
 
 rule_SU2_product_sigmas = (
     (Op(sigmaSU2(0, -1, 1), sigmaSU2(0, 1, -2)),
-     OpSum(Op(kdelta(-1, -2)))))
+     OpSum(number_op(3) * Op(kdelta(-1, -2)))))
 r"""
 Subtitute :math:`\sigma^a_{ij}\sigma^a_{jk}` by
-:math:`2\delta_{ik}`.
+:math:`3\delta_{ik}`.
 """
 
 rule_SU2_free_eps = (

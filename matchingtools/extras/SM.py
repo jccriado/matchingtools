@@ -300,7 +300,8 @@ latex_SM = {
     "uR": r"u^{{\dot{{{}}}}}_{{R{}{}}}",
     "uRc": r"u^{{c{}}}_{{R{}{}}}",
     "bFS": r"B_{{{}{}}}",
-    "wFS": r"W_{{{}{}}}"}
+    "wFS": r"W^{{{2}}}_{{{0}{1}}}",
+    "gFS": r"G^{{{2}}}_{{{0}{1}}}"}
 r"""
 LaTeX code representation of the tensors and fields of the Standard Model.
 """

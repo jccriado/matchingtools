@@ -1104,7 +1104,7 @@ rules_basis_defs_dim_6_5 = [
         sigmaSU2(6, 2, 7), epsSU2(7, 8), phic(8), wFS(3, 4, 6)),
      OpSum(OuW(-1, -2))),
 
-    (Op(uRc(5, 1, -2), sigmaTensor(3, 4, 5, 0), qLc(0, 1, 2, -1),
+    (Op(uRc(5, 1, -2), sigmaTensor(3, 4, 5, 0), qL(0, 1, 2, -1),
         sigmaSU2(6, 7, 2), epsSU2(7, 8), phi(8), wFS(3, 4, 6)),
      OpSum(OuWc(-1, -2))),
 
@@ -1131,7 +1131,7 @@ rules_basis_defs_dim_6_5 = [
 
     (Op(uRc(5, 7, -2), sigmaTensor(3, 4, 5, 0),
         TSU3(6, 7, 1), qL(0, 1, 2, -1),
-        epsSU2(2, 7), phi(8), gFS(3, 4, 6)),
+        epsSU2(2, 8), phi(8), gFS(3, 4, 6)),
      OpSum(OuGc(-1, -2))),
 
     (Op(qLc(0, 1, 2, -1), sigmaTensor(3, 4, 0, 5),
@@ -1139,8 +1139,8 @@ rules_basis_defs_dim_6_5 = [
         phi(2), gFS(3, 4, 6)),
      OpSum(OdG(-1, -2))),
 
-    (Op(dRc(5, 7, -2), sigmaTensor(3, 4, 5, 0),
-        TSU3(6, 1, 7), qL(0, 1, 2, -1),
+    (Op(dRc(5, 1, -2), sigmaTensor(3, 4, 5, 0),
+        TSU3(6, 1, 7), qL(0, 7, 2, -1),
         phic(2), gFS(3, 4, 6)),
      OpSum(OdGc(-1, -2))),
      
@@ -1195,13 +1195,13 @@ rules_basis_defs_dim_6_5 = [
     (Op(phic(0), phi(0), wFS(1, 2, 3), wFS(1, 2, 3)),
      OpSum(OphiW)),
 
-    (Op(phic(0), phi(0), eps4(1, 2, 4, 5), wFS(3, 4, 3), wFS(1, 2, 3)),
+    (Op(phic(0), phi(0), eps4(1, 2, 4, 5), wFS(4, 5, 3), wFS(1, 2, 3)),
      OpSum(OphiWTilde)),
 
     (Op(phic(0), phi(0), gFS(1, 2, 3), gFS(1, 2, 3)),
      OpSum(OphiG)),
     
-    (Op(phic(0), phi(0), eps4(1, 2, 4, 5), gFS(3, 4, 3), gFS(1, 2, 3)),
+    (Op(phic(0), phi(0), eps4(1, 2, 4, 5), gFS(4, 5, 3), gFS(1, 2, 3)),
      OpSum(OphiGTilde)),
 
     # Gauge type
@@ -1542,29 +1542,29 @@ latex_basis_coefs = {
 
     # STF type
     
-    "OeB":
-    r"\frac{{\left(\alpha_{{eB}}\right)_{{{}{}}}}}{{\Lambda^2}}",
+    "OeB": r"\frac{{\left(\alpha_{{eB}}\right)_{{{}{}}}}}{{\Lambda^2}}",
+    "OeBc": r"\frac{{\left(\alpha_{{eB}}\right)^*_{{{}{}}}}}{{\Lambda^2}}",
 
-    "OeW":
-    r"\frac{{\left(\alpha_{{eW}}\right)_{{{}{}}}}}{{\Lambda^2}}",
+    "OeW": r"\frac{{\left(\alpha_{{eW}}\right)_{{{}{}}}}}{{\Lambda^2}}",
+    "OeWc": r"\frac{{\left(\alpha_{{eW}}\right)^*_{{{}{}}}}}{{\Lambda^2}}",
 
-    "OuB":
-    r"\frac{{\left(\alpha_{{uB}}\right)_{{{}{}}}}}{{\Lambda^2}}",
+    "OuB": r"\frac{{\left(\alpha_{{uB}}\right)_{{{}{}}}}}{{\Lambda^2}}",
+    "OuBc": r"\frac{{\left(\alpha_{{uB}}\right)^*_{{{}{}}}}}{{\Lambda^2}}",
 
-    "OuW":
-    r"\frac{{\left(\alpha_{{uW}}\right)_{{{}{}}}}}{{\Lambda^2}}",
+    "OuW": r"\frac{{\left(\alpha_{{uW}}\right)_{{{}{}}}}}{{\Lambda^2}}",
+    "OuWc": r"\frac{{\left(\alpha_{{uW}}\right)^*_{{{}{}}}}}{{\Lambda^2}}",
 
-    "OdB":
-    r"\frac{{\left(\alpha_{{dB}}\right)_{{{}{}}}}}{{\Lambda^2}}",
+    "OdB": r"\frac{{\left(\alpha_{{dB}}\right)_{{{}{}}}}}{{\Lambda^2}}",
+    "OdBc": r"\frac{{\left(\alpha_{{dB}}\right)^*_{{{}{}}}}}{{\Lambda^2}}",
 
-    "OdW":
-    r"\frac{{\left(\alpha_{{dW}}\right)_{{{}{}}}}}{{\Lambda^2}}",
+    "OdW": r"\frac{{\left(\alpha_{{dW}}\right)_{{{}{}}}}}{{\Lambda^2}}",
+    "OdWc": r"\frac{{\left(\alpha_{{dW}}\right)^*_{{{}{}}}}}{{\Lambda^2}}",
 
-    "OdG":
-    r"\frac{{\left(\alpha_{{uG}}\right)_{{{}{}}}}}{{\Lambda^2}}",
+    "OuG": r"\frac{{\left(\alpha_{{uG}}\right)_{{{}{}}}}}{{\Lambda^2}}",
+    "OuGc": r"\frac{{\left(\alpha_{{uG}}\right)^*_{{{}{}}}}}{{\Lambda^2}}",
 
-    "OdG":
-    r"\frac{{\left(\alpha_{{dG}}\right)_{{{}{}}}}}{{\Lambda^2}}",
+    "OdG": r"\frac{{\left(\alpha_{{dG}}\right)_{{{}{}}}}}{{\Lambda^2}}",
+    "OdGc": r"\frac{{\left(\alpha_{{dG}}\right)^*_{{{}{}}}}}{{\Lambda^2}}",
 
     # SF type
 

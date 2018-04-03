@@ -153,6 +153,7 @@ r"""All the rules defined in :mod:`matchingtools.extras.Lorentz` together"""
 
 latex_Lorentz = {
     "eps4": r"\epsilon_{{{}{}{}{}}}",
+    "sigmaTensor": r"\sigma^{{{}{}}}_{{{}{}}}",
 
     "epsUp": r"\epsilon^{{{}{}}}",
     "epsUpDot": r"\epsilon^{{\dot{{{}}}\dot{{{}}}}}",
