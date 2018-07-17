@@ -402,10 +402,9 @@ class OperatorSum(object):
         Replace all ocurrences of several fields.
 
         Args:
-            substitutions ([(string, OperatorSum)]):
-                list of pairs with the first element of the pair being the
-                name of a field to be replaced and the second being the
-                replacement.
+            substitutions ({string: OperatorSum}):
+                dictionary with the names of the fields to be replaced as keys
+                and the replacements as values.
             max_dim (int): maximum dimension of the operators in the result
 
         Return:
