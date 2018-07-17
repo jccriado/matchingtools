@@ -1,30 +1,30 @@
 """
-Core module with the definitions of the basic building blocks: the 
+Core module with the definitions of the basic building blocks: the
 classes :class:`Tensor`, :class:`Operator`, and :class:`OperatorSum`.
 Implements the Leibniz rule for derivatives and the algorithms for
 matching and replacing as well as functional derivatives.
 
-Defines interfaces for the creation of tensors, fields, operators and 
-operator sums: :class:`TensorBuilder`, :class:`FieldBuilder`, 
+Defines interfaces for the creation of tensors, fields, operators and
+operator sums: :class:`TensorBuilder`, :class:`FieldBuilder`,
 :func:`Op` and :func:`OpSum`; the interface for creating derivatives
 of single tensors: the function :func:`D`; and interfaces for creating
-special single-tensor associated to (complex) numbers and powers of 
+special single-tensor associated to (complex) numbers and powers of
 constants.
 
-Defines the Lorentz tensors :data:`epsUp`, :data:`epsUpDot`, 
+Defines the Lorentz tensors :data:`epsUp`, :data:`epsUpDot`,
 :data:`epsDown`, :data:`epsDownDot`, :data:`sigma4` and
 :data:`sigma4bar`.
 """
 
 from matchingtools.permutations import permutations
-
 from matchingtools.lsttools import concat, enum_product
+
 
 class Tensor(object):
     """
     Basic building block for operators.
 
-    A tensor might have some derivatives applied to it. The 
+    A tensor might have some derivatives applied to it. The
     indices correponding to the derivatives are given by the first
     indices in the list of indices of the Tensor.
 
@@ -39,7 +39,7 @@ class Tensor(object):
         content: to be used internally to carry associated data
         exponent: to be used internally to simplify repetitions of a tensor
     """
-    
+
     def __init__(self, name, indices, is_field=False, num_of_der=0,
                  dimension=0, statistics=True, content=None, exponent=None):
         self.name = name
@@ -52,12 +52,12 @@ class Tensor(object):
         self.exponent = exponent
         if self.name == "$number" and self.content is None:
             raise Exception()
-        
+
     def __str__(self):
         """
         Returns a string of the form:
             D(i[0])D(i[1])...D(i[m])T(i[m+1],i[m+2],...,i[n-1])
-        for a Tensor with indices i[0], i[1], ..., i[n-1] and 
+        for a Tensor with indices i[0], i[1], ..., i[n-1] and
         num_of_der equal to m
         """
 
@@ -88,7 +88,7 @@ class Tensor(object):
                 name, ",".join(map(str, self.non_der_indices)))
         else:
             ten_str = name
-            
+
         return der_str + ten_str
 
     # __repr__ = __str__
@@ -120,6 +120,7 @@ class Tensor(object):
                       content=self.content,
                       exponent=self.exponent)
 
+
 class Operator(object):
     """
     Container for a list of tensors with their indices contracted.
@@ -128,13 +129,13 @@ class Operator(object):
     indices should be positive. Negative indices represent free indices
     and should appear in order: -1, -2, ...
 
-    The methods include the basic derivation, matching and replacing 
+    The methods include the basic derivation, matching and replacing
     operations, as well as the implementation of functional derivatives.
 
     Attributes:
         tensors ([Tensor]): list of the tensors contained
     """
-    
+
     def __init__(self, tensors):
         self.tensors = tensors
 
@@ -148,7 +149,7 @@ class Operator(object):
 
     def __neg__(self):
         return number_op(-1) * self
-    
+
     @property
     def dimension(self):
         return sum([tensor.dimension + tensor.num_of_der
@@ -166,7 +167,7 @@ class Operator(object):
 
     def derivative(self, index):
         return leibniz_rule(index, self)
-                
+
     def remove_tensor(self, position):
         """
         Return an operator obtained from self by removing the
@@ -181,7 +182,7 @@ class Operator(object):
             new_indices = remove_indices(tensor.indices, target_indices)
             new_tensors.append(tensor.change_indices(new_indices))
         return Operator(new_tensors)
-    
+
     def variation(self, field_name, statistics):
         """
         Take functional derivative of the spacetime integral of self:
@@ -197,7 +198,7 @@ class Operator(object):
                 inside_op = self.remove_tensor(pos)
                 der_inds = remove_indices(tensor.der_indices,
                                           tensor.non_der_indices)
-                
+
                 # Compute the sign taking into account the number of
                 # derivatives that act on the field and the number of
                 # fermions before it in the fermionic case
@@ -269,7 +270,7 @@ class Operator(object):
         Replace all ocurrences of several fields.
 
         Args:
-            substitutions ([(string, OperatorSum)]): 
+            substitutions ([(string, OperatorSum)]):
                 list of pairs with the first element of the pair being the
                 name of a field to be replaced and the second being the
                 replacement.
@@ -295,7 +296,7 @@ class Operator(object):
 
         Return:
             if the matching succeeds, an Operator with the first occurrence
-                of the pattern substituted by a "generic" tensor (with a sign 
+                of the pattern substituted by a "generic" tensor (with a sign
                 change if needed); None otherwise
         """
         fermions = tuple(pos for pos, tensor in enumerate(self.tensors)
@@ -308,7 +309,8 @@ class Operator(object):
                 fermion_reorder = tuple(fermions.index(pos)
                                         for pos in match if pos in fermions)
                 sign = permutations(len(fermions))[fermion_reorder]
-                if sign == -1: candidate.append(number_op(-1).tensors[0])
+                if sign == -1:
+                    candidate.append(number_op(-1).tensors[0])
 
                 # Replace the matched part by a "generic" tensor
                 return Operator([generic(*free_indices)] +
@@ -333,7 +335,8 @@ class Operator(object):
                 fermion_reorder = tuple(fermions.index(pos)
                                         for pos in match if pos in fermions)
                 sign = permutations(len(fermions))[fermion_reorder]
-                if sign == -1: return False
+                if sign == -1:
+                    return False
 
                 # Checking that all free indices are equal
                 same_free_indices = True
@@ -344,13 +347,14 @@ class Operator(object):
                     return True
         return False
 
+
 class OperatorSum(object):
     """
     Container for lists of operators representing their sum.
 
     The methods perform the basic operations defined for operators
-    generalized for sums of them 
-    
+    generalized for sums of them
+
     Attributes:
         operators ([Operator]): the operators whose sum is represented
     """
@@ -392,13 +396,13 @@ class OperatorSum(object):
         return sum([op.variation(field_name, statistics)
                     for op in self.operators],
                    OperatorSum())
-    
+
     def replace_all(self, substitutions, max_dim):
         """
         Replace all ocurrences of several fields.
 
         Args:
-            substitutions ([(string, OperatorSum)]): 
+            substitutions ([(string, OperatorSum)]):
                 list of pairs with the first element of the pair being the
                 name of a field to be replaced and the second being the
                 replacement.
@@ -412,8 +416,11 @@ class OperatorSum(object):
         changed = False
         result = []
         for operator in self.operators:
-            if (operator.dimension <= max_dim and
-                not any(operator.contains(name) for name in field_names)):
+            name_clash = any(
+                operator.contains(name) for name in field_names
+            )
+
+            if (operator.dimension <= max_dim and not name_clash):
                 result.append(operator)
             elif operator.dimension < max_dim:
                 changed = True
@@ -424,8 +431,10 @@ class OperatorSum(object):
         else:
             return OperatorSum(result)
 
+
 def rest(lst, index):
     return lst[:index] + lst[index+1:]
+
 
 def remove_indices(indices, inds_to_be_rm):
     """
@@ -444,9 +453,10 @@ def remove_indices(indices, inds_to_be_rm):
             else -inds_to_be_rm.index(ind)-1
             for ind in indices]
 
+
 def increase_and_bind_indices(indices, incr, free_indices):
     """
-    Increase all indices greater than or equal to zero by some constant 
+    Increase all indices greater than or equal to zero by some constant
     amount and change the free indices to the ones given as:
         i -> free_indices[-i - 1]
 
@@ -461,7 +471,8 @@ def increase_and_bind_indices(indices, incr, free_indices):
     return [ind + incr if ind >= 0
             else free_indices[-ind - 1]
             for ind in indices]
-    
+
+
 def leibniz_rule(index, operator):
     """
     Take the derivative of an operator and apply the Leibniz rule to it
@@ -485,24 +496,31 @@ def leibniz_rule(index, operator):
                                    operator.tensors[i+1:]))
     return OperatorSum(result)
 
+
 def apply_derivatives(indices, target):
     """Applies any number of derivatives to an Operator or OperatorSum"""
     for index in reversed(indices):
         target = target.derivative(index)
     return target
 
+
 def match_tensor_lists_aux(lst, pattern):
     if not pattern:
         return [tuple(pos for pos, _ in lst)]
     results = []
     for i, (pos, tensor) in enumerate(lst):
-        if (tensor.name == pattern[0].name and
-            tensor.num_of_der == pattern[0].num_of_der and
-            tensor.content == pattern[0].content and
-            tensor.exponent == pattern[0].exponent):
+        is_match = (tensor.name == pattern[0].name
+                    and tensor.num_of_der == pattern[0].num_of_der
+                    and tensor.content == pattern[0].content
+                    and tensor.exponent == pattern[0].exponent
+                    )
+
+        if is_match:
             match_rest = match_tensor_lists_aux(rest(lst, i), pattern[1:])
             results += [(pos,) + prev for prev in match_rest]
+
     return results
+
 
 def match_tensor_lists(lst, pattern):
     """
@@ -519,10 +537,15 @@ def match_tensor_lists(lst, pattern):
         of the positions of the tensors in lst that matches the names of
         the pattern in its first elements.
     """
-    if (len(pattern) > len(lst) or
-        not all(t1.name in [t2.name for t2 in lst] for t1 in pattern)):
+    pattern_is_subset = all(
+        t1.name in [t2.name for t2 in lst] for t1 in pattern
+    )
+
+    if (len(pattern) > len(lst) or not pattern_is_subset):
         return []
+
     return match_tensor_lists_aux(list(enumerate(lst)), pattern)
+
 
 def match_indices(lst, pattern):
     """
@@ -555,6 +578,7 @@ def match_indices(lst, pattern):
                 free_indices[-index-1] = lst[pos].indices[i]
     return True, free_indices
 
+
 class TensorBuilder(object):
     """
     Interface for the creation of constant tensors.
@@ -572,6 +596,7 @@ class TensorBuilder(object):
         ``num_of_der = 0``, ``dimension = 0``, ``statistics = boson``
         """
         return Tensor(self.name, list(indices))
+
 
 class FieldBuilder(object):
     """
@@ -597,6 +622,7 @@ class FieldBuilder(object):
                       num_of_der=0, dimension=self.dimension,
                       statistics=self.statistics)
 
+
 def D_op(index, *tensors):
     """
     Interface for the creation of operator sums of obtained from
@@ -604,15 +630,18 @@ def D_op(index, *tensors):
     """
     return Operator(list(tensors)).derivative(index)
 
+
 def D(index, tensor):
     """
     Interface for the creation of tensors with derivatives applied.
     """
     return Operator([tensor]).derivative(index).operators[0].tensors[0]
 
+
 def Op(*tensors):
     """Interface for the creation of operators"""
     return Operator(list(tensors))
+
 
 def OpSum(*operators):
     """Interface for the creation of operator sums"""
@@ -620,14 +649,17 @@ def OpSum(*operators):
         return OperatorSum()
     return OperatorSum(list(operators))
 
+
 def number_op(number):
     """
     Create an operator correponding to a number.
     """
     return Op(Tensor("$number", [], content=number, exponent=1))
 
+
 i_op = Op(Tensor("$i", [], exponent=1))
 """Operator representing the imaginary unit."""
+
 
 def power_op(name, exponent, indices=None):
     """
@@ -637,10 +669,12 @@ def power_op(name, exponent, indices=None):
         indices = []
     return Operator([Tensor(name, indices, exponent=exponent)])
 
+
 def tensor_op(name, indices=None):
     if indices is None:
         indices = []
     return Operator([Tensor(name, indices)])
+
 
 def flavor_tensor_op(name):
     """Interface for the creation of one-tensor operators with indices"""
@@ -648,7 +682,9 @@ def flavor_tensor_op(name):
         return Op(Tensor(name, list(indices)))
     return f
 
+
 # To be used to specify the statistics of fields
+
 boson = True
 fermion = False
 
