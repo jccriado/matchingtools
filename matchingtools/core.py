@@ -81,7 +81,7 @@ class Tensor(object):
         else:
             name = self.name
 
-        # Add derivarives
+        # Add derivatives
         der_str = ("D({})" * self.num_of_der).format(*self.der_indices)
         if len(self.indices) > 0:
             ten_str = "{}({})".format(
