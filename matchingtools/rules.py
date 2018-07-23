@@ -4,7 +4,7 @@ from functools import reduce
 import itertools
 from operator import mul
 
-from core import Operator, OperatorSum, Statistics
+from core import Constant, Operator, OperatorSum, RealMixin, Statistics
 from indices import Index
 
 
@@ -78,7 +78,7 @@ class Rule(object):
         )
 
 
-class Match(object):
+class Match(object):  # TODO make sure things that don't match don't match
     """
     Type representing an operator target - rule pattern match.
     For this to happen:
@@ -104,11 +104,10 @@ class Match(object):
     def tensors_do_match(t1, t2):
         return (
             t1.name == t2.name
-            and t1.derivatives_count == t2.derivatives_count
-            and t1.is_field == t2.is_field
             and t1.statistics == t2.statistics
-            and t1.content == t2.content
-            and t1.exponent == t2.exponent
+            and t1.is_conjugated == t2.is_conjugated
+            and isinstance(t1, Constant) == isinstance(t2, Constant)
+            and isinstance(t1, RealMixin) == isinstance(t2, RealMixin)
         )
 
     @staticmethod
