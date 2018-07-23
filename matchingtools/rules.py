@@ -113,12 +113,14 @@ class Match(object):
 
     @staticmethod
     def _map_tensors(pattern_operator, target_operator):
-        associates = {tensor: [] for tensor in pattern_operator.tensors}
+        associates = {
+            pattern_tensor: [] for pattern_tensor in pattern_operator.tensors
+        }
 
-        for candidate in target_operator.tensors:
-            for tensor in pattern_operator.tensors:
-                if Match.tensors_do_match(tensor, candidate):
-                    associates[tensor].append(candidate)
+        for target_tensor in target_operator.tensors:
+            for pattern_tensor in pattern_operator.tensors:
+                if Match.tensors_do_match(pattern_tensor, target_tensor):
+                    associates[pattern_tensor].append(target_tensor)
 
         return (
             {
