@@ -13,24 +13,8 @@ class Rule(object):
         self.pattern = pattern._to_operator()
         self.replacement = replacement._to_operator_sum()
 
-    def match_operator(self, target):
-        tensors_mappings = Match._map_tensors(self.pattern, target)
-
-        for tensor_mapping in tensors_mappings:
-            """
-            Testing if a certain possible tensor mapping leads to a viable
-            indices mapping. If there is any inconsistency in the indices
-            mapping we can discard it right away.
-            """
-            indices_mapping = Match._map_operator_indices(tensor_mapping)
-
-            if indices_mapping is None:
-                continue
-
-            return Match(tensor_mapping, indices_mapping)
-
     def _apply_to_operator(self, target):
-        match = self.match_operator(target)
+        match = Match.match_operator(self.pattern, target)
 
         if match is None:
             return target
@@ -191,6 +175,25 @@ class Match(object):
             indices_mapping.update(local_indices_mapping)
 
         return indices_mapping
+
+    @staticmethod
+    def match_operators(pattern, target):
+        tensors_mappings = Match._map_tensors(pattern, target)
+
+        for tensor_mapping in tensors_mappings:
+            """
+            Testing if a certain possible tensor mapping leads to a viable
+            indices mapping. If there is any inconsistency in the indices
+            mapping we can discard it right away.
+            """
+            indices_mapping = Match._map_operator_indices(tensor_mapping)
+
+            if indices_mapping is None:
+                continue
+
+            return Match(tensor_mapping, indices_mapping)
+
+        return None
 
 
 class Permutation(object):
