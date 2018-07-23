@@ -16,13 +16,12 @@ Defines the Lorentz tensors :data:`epsUp`, :data:`epsUpDot`,
 :data:`sigma4bar`.
 """
 
+from abc import ABCMeta, abstractmethod
 from enum import Enum
 from collections import Counter
 from numbers import Number
 
-
-from lsttools import concat, enum_product
-from permutations import permutations
+import rules
 
 
 class Statistics(Enum):
@@ -30,7 +29,58 @@ class Statistics(Enum):
     FERMION = 2
 
 
-class Tensor(object):
+class Conjugable(object, metaclass=ABCMeta):
+    is_conjugated = False
+
+    @abstractmethod
+    def conjugate(self):
+        pass
+
+
+class Differentiable(object, metaclass=ABCMeta):
+    @abstractmethod
+    def differentiate(self, index):
+        pass
+
+
+class Term(Conjugable, Differentiable):
+    class DemoteError(ValueError):
+        def __init__(self, what, src, dest):
+            error_msg = "Unable to demote {what} from {src} to {dest}"
+            super().__init__(
+                error_msg.format(
+                    what=what,
+                    src=src.__name__,
+                    dest=dest.__name__
+                )
+            )
+
+    @abstractmethod
+    def _to_tensor(self):
+        pass
+
+    @abstractmethod
+    def _to_operator(self):
+        pass
+
+    @abstractmethod
+    def _to_operator_sum(self):
+        pass
+
+
+class RealMixin(object):
+    def conjugate(self):
+        return self
+
+
+class ComplexMixin(object):
+    def conjugate(self):
+        conjugated = self.clone()
+        conjugated.is_conjugated = not self.is_conjugated
+        return conjugated
+
+
+class Tensor(Term, Differentiable):
     """
     Basic building block for operators.
 
@@ -42,36 +92,18 @@ class Tensor(object):
         name (string): identifier
         indices (list of ints): indices of the tensor and the
                                 derivatives applied to it
-        is_field (bool): specifies whether it is non-constant
-        derivatives_count (int): number of derivatives acting
         dimension (int): energy dimensions
         statistics (Statistics): Either BOSON or FERMION
-        content: to be used internally to carry associated data
-        exponent: to be used internally to simplify repetitions of a tensor
     """
 
     def __init__(
-            self, name, indices, is_field=False,
-            derivatives_count=0, dimension=0, statistics=Statistics.BOSON,
-            content=None, exponent=None
+            self, name, indices, dimension=0,
+            statistics=Statistics.BOSON
     ):
-
-        if len(indices) < derivatives_count:
-            raise "Unable to create tensor {name}: too many derivatives".format(
-                name=name
-            )
-
         self.name = name
         self.indices = indices
-        self.is_field = is_field
-        self.derivatives_count = derivatives_count
         self.dimension = dimension
         self.statistics = statistics
-        self.content = content
-        self.exponent = exponent
-
-        if self.name == "$number" and self.content is None:
-            raise Exception()
 
     def __str__(self):
         """
@@ -81,47 +113,28 @@ class Tensor(object):
         derivatives_count equal to m
         """
 
-        # Representation of special tensors (to be used internally)
-        if self.name == "$number":
-            return "({})".format(str(self.content))
-        if self.name == "$i":
-            return "i"
-        if self.name == "$re":
-            return "Re[{}]".format(" ".join(map(str, self.content)))
-        if self.name == "$im":
-            return "Im[{}]".format(" ".join(map(str, self.content)))
-
-        # Compute the representation of the exponent
-        if self.exponent is None:
-            name = self.name
-        elif self.exponent > 1:
-            name = "({}^{})".format(self.name, self.exponent)
-        elif self.exponent < 1:
-            name = "({}^({}))".format(self.name, self.exponent)
-        else:
-            name = self.name
-
         # Add derivatives
-        der_str = ("D({})" * self.derivatives_count).format(
+        derivatives_str = ("D({})" * self.derivatives_count).format(
             *self.derivatives_indices
         )
-        if len(self.indices) > 0:
-            ten_str = "{}({})".format(
-                name, ", ".join(map(str, self.non_derivatives_indices)))
-        else:
-            ten_str = name
 
-        return der_str + ten_str
+        if len(self.indices) > 0:
+            tensor_str = "{}({})".format(
+                self.name, ", ".join(map(str, self.non_derivatives_indices)))
+        else:
+            tensor_str = self.name
+
+        return derivatives_str + tensor_str
 
     __repr__ = __str__
 
     def __add__(self, other):
-        return Op(self) + other
+        return self._to_operator_sum() + other
 
     __radd__ = __add__
 
     def __mul__(self, other):
-        return Op(self) * other
+        return self._to_operator_sum() * other
 
     __rmul__ = __mul__
 
@@ -132,12 +145,8 @@ class Tensor(object):
         return (
             self.name == other.name
             and self.indices == other.indices
-            and self.is_field == other.is_field
-            and self.derivatives_count == other.derivatives_count
             and self.dimension == other.dimension
             and self.statistics == other.statistics
-            and self.content == other.content
-            and self.exponent == other.exponent
         )
 
     def __hash__(self):
@@ -156,20 +165,12 @@ class Tensor(object):
         return self._to_operator()._to_operator_sum()
 
     def _replace_indices(self, indices_mapping):
-        new_indices = [
+        new_tensor = self.clone()
+        new_tensor.indices = [
             indices_mapping.get(index, index) for index in self.indices
         ]
 
-        return Tensor(
-            name=self.name,
-            indices=new_indices,
-            is_field=self.is_field,
-            derivatives_count=self.derivatives_count,
-            dimension=self.dimension,
-            statistics=self.statistics,
-            content=self.content,
-            exponent=self.exponent
-        )
+        return new_tensor
 
     @property
     def derivatives_indices(self):
@@ -179,49 +180,101 @@ class Tensor(object):
     def non_derivatives_indices(self):
         return self.indices[self.derivatives_count:]
 
-    def change_indices(self, new_indices):
-        return Tensor(
-            self.name, new_indices,
-            is_field=self.is_field,
-            derivatives_count=self.derivatives_count,
+    @abstractmethod
+    def clone(self):
+        pass
+
+
+class Constant(Tensor):
+    def clone(self):
+        return Constant(
+            name=self.name,
+            indices=[index for index in self.indices],
             dimension=self.dimension,
-            statistics=self.statistics,
-            content=self.content,
-            exponent=self.exponent
+            statistics=self.statistics
         )
 
+    def differentiate(self, index):
+        return 0
 
-class Operator(object):
+
+class Field(Tensor):
+    def __init__(
+            self, name, indices, derivatives_count=0,
+            dimension=0, statistics=Statistics.BOSON
+    ):
+        if len(indices) < derivatives_count:
+            raise ValueError(
+                "Unable to create tensor {name}: too many derivatives".format(
+                    name=name
+                )
+            )
+
+        super().__init__(self, name, indices, dimension, statistics)
+        self.derivatives_count = derivatives_count
+
+    def clone(self):
+        return Field(
+            name=self.name,
+            indices=[index for index in self.indices],
+            derivatives_count=self.derivatives_count,
+            dimension=self.dimension,
+            statistics=self.statistics
+        )
+
+    def differentiate(self, index):
+        diff = self.clone()
+        diff.derivatives_count += 1
+        diff.indices = [index] + diff.indices
+
+        return diff
+
+
+class RealConstant(RealMixin, Constant):
+    pass
+
+
+class RealField(RealMixin, Field):
+    pass
+
+
+class Operator(Term):
     """
     Container for a list of tensors with their indices contracted.
-
-    Indices repeated in different tensors mean contraction. Contracted
-    indices should be positive. Negative indices represent free indices
-    and should appear in order: -1, -2, ...
 
     The methods include the basic derivation, matching and replacing
     operations, as well as the implementation of functional derivatives.
 
     Attributes:
+        coefficient (Number): the numeric coefficient of the term
         tensors ([Tensor]): list of the tensors contained
     """
 
-    def __init__(self, tensors):
+    def __init__(self, tensors, coefficient=1):
         self.tensors = tensors
+        self.coefficient = coefficient
+
+        self._simplify()
 
     def __str__(self):
-        return " ".join(map(str, self.tensors))
+        tensors = " ".join(map(str, self.tensors))
+
+        if self.coefficient == 1:
+            return tensors
+
+        return "{} {}".format(self.coefficient, tensors)
 
     __repr__ = __str__
 
     def __add__(self, other):
-        return OpSum(self) + other
+        return self._to_operator_sum() + other
+
+    __radd__ = __add__
 
     def __mul__(self, other):
-        return OpSum(self) * other
+        return self._to_operator_sum() * other
 
-    def __rmul__(self, other):
-        return self * other
+    __rmul__ = __mul__
 
     def __neg__(self):
         return self * (-1)
@@ -230,7 +283,7 @@ class Operator(object):
         if len(self.tensors) == 1:
             return self.tensors[0]
         else:
-            raise ValueError("Can't demote operator {} to tensor".format(self))
+            raise Term.DemoteError(self, Operator, Tensor)
 
     def _to_operator(self):
         return self
@@ -238,23 +291,39 @@ class Operator(object):
     def _to_operator_sum(self):
         return OperatorSum([self])
 
+    def _simplify(self):
+        if self.coefficient == 0:
+            self.tensors = []
+
+        kdeltas = []
+        rest = []
+
+        for tensor in self.tensors:
+            if isinstance(tensor, Kdelta):
+                kdeltas.append(tensor)
+            else:
+                rest.append(tensor)
+
+        # TODO fix this shit
+        for tensor in rest:
+            for pos, index in enumerate(tensor.indices):
+                for kdelta in kdeltas:
+                    i, j = kdelta.indices
+                    if index == i:
+                        tensor.indices[pos] = j
+                        kdeltas.remove(kdelta)
+                    elif index == j:
+                        tensor.indices[pos] = i
+                        kdeltas.remove(kdelta)
     @property
     def dimension(self):
-        return sum([tensor.dimension + tensor.derivatives_count
-                    for tensor in self.tensors])
+        return sum([
+            tensor.dimension + tensor.derivatives_count
+            for tensor in self.tensors
+        ])
 
-    @property
-    def max_index(self):
-        indices = concat([tensor.indices for tensor in self.tensors])
-        if indices:
-            return max(indices)
-        return 0
-
-    def contains(self, name):
-        return name in self
-
-    def __contains__(self, name):
-        return any(tensor.name == name for tensor in self.tensors)
+    def __contains__(self, tensor):
+        return tensor in self.tensors
 
     def is_free_index(self, index):
         return len([
@@ -273,23 +342,22 @@ class Operator(object):
             if multiplicity == 1
         ]
 
-    def derivative(self, index):
-        return leibniz_rule(index, self)
+    def conjugate(self):
+        return Operator([
+            tensor.conjugate() for tensor in self.tensors
+        ], coefficient=self.coefficient)
 
-    def remove_tensor(self, position):
-        """
-        Return an operator obtained from self by removing the
-        tensor at the given position and changing the correponding
-        contracted indices to free ones.
+    def differentiate(self, index):
+        acc = 0
 
-        The derivatives acting on the tensor aren't taken into account.
-        """
-        target_indices = self.tensors[position].non_derivatives_indices
-        new_tensors = []
-        for tensor in rest(self.tensors, position):
-            new_indices = remove_indices(tensor.indices, target_indices)
-            new_tensors.append(tensor.change_indices(new_indices))
-        return Operator(new_tensors)
+        for pos, tensor in enumerate(self.tensors):
+            left = Operator(self.tensors[:pos])
+            diff = self.tensors[pos].differentiate(index)
+            right = Operator(self.tensors[pos+1:])
+
+            acc += left * diff * right
+
+        return acc
 
     def variation(self, field_name, statistics):
         """
@@ -300,6 +368,8 @@ class Operator(object):
                                  which the functional derivative is taken
             statistics (Statistics): statistics of the field
         """
+
+        raise NotImplementedError()
         result = OperatorSum()
         for pos, tensor in enumerate(self.tensors):
             if tensor.name == field_name:
@@ -325,144 +395,41 @@ class Operator(object):
                                             inside_ops)
         return result
 
-    def prepare_indices(self, incr, free_indices):
-        """
-        Increase all contracted indices by incr and set all free
-        indices to free_indices in the order given:
-            -1 -> free_indices[0], -2 -> free_indices[1], ...
-        """
-        new_tensors = []
-        for tensor in self.tensors:
-            new_indices = increase_and_bind_indices(
-                tensor.indices, incr, free_indices)
-            new_tensors.append(tensor.change_indices(new_indices))
-        return Operator(new_tensors)
-
-    def replace_at_position(self, position, operator):
-        """Replace the tensor at the given position by the given operator"""
-        # Prepare the replacement operator
-        target_tensor = self.tensors[position]
-        free_indices = target_tensor.non_derivatives_indices
-        subs_op = operator.prepare_indices(self.max_index + 1, free_indices)
-
-        # Apply the corresponding derivatives
-        der_subs_ops = apply_derivatives(target_tensor.derivatives_indices,
-                                         OperatorSum([subs_op]))
-
-        # Insert in the corresponding position
-        tens_left = self.tensors[:position]
-        tens_right = self.tensors[position+1:]
-        return OperatorSum([Operator(tens_left + op.tensors + tens_right)
-                            for op in der_subs_ops.operators])
-
-    def replace_first(self, field_name, operator_sum):
-        """
-        Replace the first ocurrence of a field.
-
-        Args:
-            field_name (string): name of the field to be replaced
-            operator_sum (OperatorSum): replacement
-
-        Return:
-            An OperatorSum resulting from replacing the first ocurrence of
-            the field by its replacement
-        """
-        for pos, tensor in enumerate(self.tensors):
-            if tensor.name == field_name:
-                return sum([self.replace_at_position(pos, op)
-                            for op in operator_sum.operators],
-                           OperatorSum())
-
-    def replace_all(self, substitutions, max_dim):
-        """
-        Replace all ocurrences of several fields.
-
-        Args:
-            substitutions ([(string, OperatorSum)]):
-                list of pairs with the first element of the pair being the
-                name of a field to be replaced and the second being the
-                replacement.
-            max_dim (int): maximum dimension of the operators in the result
-
-        Return:
-            An OperatorSum resulting from replacing every ocurrence of the
-            fields by their replacements
-        """
-        for field_name, subs in substitutions.items():
-            new_ops = self.replace_first(field_name, subs)
-            if new_ops is not None:
-                return new_ops.replace_all(substitutions, max_dim)
-        return OperatorSum()
-
-    def match_first(self, pattern):
-        """
-        Match the first ocurrence of a pattern
-
-        Args:
-            pattern (``Operator``): contains the tensors and index structure
-                to be matched
-
-        Return:
-            if the matching succeeds, an Operator with the first occurrence
-                of the pattern substituted by a "generic" tensor (with a sign
-                change if needed); None otherwise
-        """
-
-        fermions_positions = list(
-            pos for pos, tensor in enumerate(self.tensors)
-            if tensor.statistics == Statistics.FERMION
-        )
-
-        for match in match_tensor_lists(self.tensors, pattern.tensors):
-            candidate = [self.tensors[pos] for pos in match]
-            matches, free_indices = match_indices(candidate, pattern.tensors)
-            if matches:
-                # Compute change of sign due to fermion permutation
-                fermion_reorder = tuple(
-                    fermions_positions.index(pos)
-                    for pos in match if pos in fermions_positions
-                )
-                sign = permutations(len(fermions_positions))[fermion_reorder]
-                if sign == -1:
-                    candidate.append(number_op(-1).tensors[0])
-
-                # Replace the matched part by a "generic" tensor
-                return Operator([generic(*free_indices)] +
-                                candidate[len(pattern.tensors):])
-
     def __eq__(self, other):
         """
         Match self with other operator. All tensors and index contractions
         should match. No sign differences allowed. All free indices should
-        be equal.
+        be equal. Reorderings allowed.
         """
+        try:
+            other = other._to_operator()
+        except (AttributeError, ValueError):
+            return False
+
+        if abs(self.coefficient) != abs(other.coefficient):
+            return False
+
         if len(self.tensors) != len(other.tensors):
             return False
-        fermions = tuple(pos for pos, tensor in enumerate(self.tensors)
-                         if tensor.statistics == fermion)
-        for match in match_tensor_lists(self.tensors, other.tensors):
-            candidate = [self.tensors[pos] for pos in match]
-            matches, free_indices = match_indices(candidate, other.tensors)
-            if matches:
-                # If there has been an odd permutation of fermions,
-                # equality fails
-                fermion_reorder = tuple(fermions.index(pos)
-                                        for pos in match if pos in fermions)
-                sign = permutations(len(fermions))[fermion_reorder]
-                if sign == -1:
-                    return False
 
-                # Checking that all free indices are equal
-                same_free_indices = True
-                for i, index in enumerate(free_indices):
-                    if i != -1 - index:
-                        same_free_indices = False
-                if same_free_indices:
-                    return True
-        return False
+        match = rules.Match.match_operators(self, other)
+
+        if match is None:
+            return False
+
+        for index, associate in match.indices_mapping.items():
+            if index != associate:
+                return False
+
+        sign = rules.Permutation.compare(
+            self.tensors,
+            [match.tensor_mapping[tensor] for tensor in self.tensors]
+        ).parity
+
+        return self.coeffient * sign == other.coefficient
 
 
-class OperatorSum(object):
+class OperatorSum(Term):
     """
     Container for lists of operators representing their sum.
 
@@ -483,47 +450,41 @@ class OperatorSum(object):
     __repr__ = __str__
 
     def __add__(self, other):
-        if isinstance(other, Number):
+        if not isinstance(other, Term):
             if other == 0:
                 return self
-            return self + Tensor("$number", [], content=other, exponent=1)
-        elif isinstance(other, Tensor):
-            return self + Op(other)
-        elif isinstance(other, Operator):
-            return self + OpSum(other)
-        elif isinstance(other, OperatorSum):
-            return OperatorSum(self.operators + other.operators)
-        else:
-            raise NotImplementedError(
-                "Couldn't add {} to {}: erroneous types".format(self, other)
-            )
+            return self + OperatorSum([Operator([], coefficient=other)])
+
+        if not isinstance(other, OperatorSum):
+            return self + other._to_operator_sum()
+
+        return OperatorSum(self.operators + other.operators)
 
     __radd__ = __add__
 
     def __mul__(self, other):
-        if isinstance(other, Number):
+        if not isinstance(other, Term):
+            if other == 0:
+                return OperatorSum()
+
             if other == 1:
                 return self
-            return self * Tensor("$number", [], content=other, exponent=1)
-        elif isinstance(other, Tensor):
-            return self * Op(other)
-        elif isinstance(other, Operator):
-            return self * OpSum(other)
-        elif isinstance(other, OperatorSum):
-            return OperatorSum([
-                Operator(self_op.tensors + other_op.tensors)
+
+            return self * OperatorSum([Operator([], coefficient=other)])
+
+        if not isinstance(other, OperatorSum):
+            return self + other._to_operator_sum()
+
+        return OperatorSum([
+                Operator(
+                    self_op.tensors + other_op.tensors,
+                    coefficient=self_op.coefficient * other_op.coefficient
+                )
                 for self_op in self.operators
                 for other_op in other.operators
-            ])
-        else:
-            raise TypeError(
-                "Couldn't multiply {} by {}: erroneous types".format(
-                    self, other
-                )
-            )
+        ])
 
-    def __rmul__(self, other):
-        return self * other
+    __rmul__ = __mul__
 
     def __neg__(self):
         return OperatorSum([-op for op in self.operators])
@@ -535,18 +496,20 @@ class OperatorSum(object):
         if len(self.operators) == 1:
             return self.operators[0]
         else:
-            raise ValueError(
-                "Can't demote operator sum {} to operator".format(self)
-            )
+            raise Term.DemoteError(self, OperatorSum, Operator)
 
     def _to_operator_sum(self):
         return self
 
-    def derivative(self, index):
-        """Takes the derivative with the given index"""
-        return OperatorSum(concat(
-            op.derivative(index).operators for op in self.operators
-        ))
+    def conjugate(self):
+        return OperatorSum([
+            operator.conjugate() for operator in self.operators
+        ])
+
+    def differentiate(self, index):
+        return OperatorSum([
+            operator.differentiate(index) for operator in self.operators
+        ])
 
     def variation(self, field_name, statistics):
         """
@@ -557,83 +520,10 @@ class OperatorSum(object):
                                  which the functional derivative is taken
             statistics (bool): statistics of the field
         """
-        return sum([op.variation(field_name, statistics)
-                    for op in self.operators],
-                   OperatorSum())
-
-    def replace_all(self, substitutions, max_dim):
-        """
-        Replace all ocurrences of several fields.
-
-        Args:
-            substitutions ({string: OperatorSum}):
-                dictionary with the names of the fields to be replaced as keys
-                and the replacements as values.
-            max_dim (int): maximum dimension of the operators in the result
-
-        Return:
-            An OperatorSum resulting from replacing every ocurrence of the
-            fields by their replacements
-        """
-        field_names = substitutions.keys()
-        changed = False
-        result = []
-        for operator in self.operators:
-            name_clash = any(
-                operator.contains(name) for name in field_names
-            )
-
-            if (operator.dimension <= max_dim and not name_clash):
-                result.append(operator)
-            elif operator.dimension < max_dim:
-                changed = True
-                result += operator.replace_all(substitutions,
-                                               max_dim).operators
-        if changed:
-            return OperatorSum(result).replace_all(substitutions, max_dim)
-        else:
-            return OperatorSum(result)
-
-
-def rest(lst, index):
-    return lst[:index] + lst[index+1:]
-
-
-def remove_indices(indices, inds_to_be_rm):
-    """
-    Convert some bound indices to free ones.
-
-    The conversion goes as: inds_to_be_rm[i] -> -1 - i
-
-    Args:
-        indices ([int]): list in which the conversion is to be done
-        inds_to_be_rm ([int]): list of the indices to be made free in order
-
-    Return:
-       A list of the changed indices.
-    """
-    return [ind if ind not in inds_to_be_rm
-            else -inds_to_be_rm.index(ind)-1
-            for ind in indices]
-
-
-def increase_and_bind_indices(indices, incr, free_indices):
-    """
-    Increase all indices greater than or equal to zero by some constant
-    amount and change the free indices to the ones given as:
-        i -> free_indices[-i - 1]
-
-    Args:
-        indices ([int]): list in which the operation is to be done
-        incr (int): constant amount to increase the non-negative indices
-        free_indices ([int]): list of new free_indices
-
-    Return:
-        A list of the changed indices.
-    """
-    return [ind + incr if ind >= 0
-            else free_indices[-ind - 1]
-            for ind in indices]
+        return sum([
+            operator.variation(field_name, statistics)
+            for operator in self.operators
+        ])
 
 
 def leibniz_rule(index, operator):
@@ -667,130 +557,36 @@ def apply_derivatives(indices, target):
     return target
 
 
-def match_tensor_lists_aux(lst, pattern):
-    if not pattern:
-        return [tuple(pos for pos, _ in lst)]
-    results = []
-    for i, (pos, tensor) in enumerate(lst):
-        is_match = (
-            tensor.name == pattern[0].name
-            and tensor.derivatives_count == pattern[0].derivatives_count
-            and tensor.content == pattern[0].content
-            and tensor.exponent == pattern[0].exponent
+def TensorBuilder(name):
+    def builder(*indices):
+        """
+        Creates a Tensor object with the given indices and default attributes
+        """
+        return Tensor(name, list(indices))
+
+    return builder
+
+
+def FieldBuilder(name, dimension, statistics):
+    """
+    Creates a Tensor object with the given indices and
+    the following attributes: ``is_field = True``,
+    ``derivatives_count = 0``
+    """
+    def builder(*indices):
+        return Tensor(
+            name=name, indices=list(indices), is_field=True,
+            derivatives_count=0, dimension=dimension,
+            statistics=statistics
         )
 
-        if is_match:
-            match_rest = match_tensor_lists_aux(rest(lst, i), pattern[1:])
-            results += [(pos,) + prev for prev in match_rest]
-
-    return results
-
-
-def match_tensor_lists(lst, pattern):
-    """
-    Match the names of a pattern list of tensors in another list of tensors
-
-    Reorderings of the main list are considered.
-
-    Args:
-        lst ([Tensor]): list inside which the pattern is to be found
-        pattern ([Tensor]): pattern to find
-
-    Return:
-        A list of tuples of integers. Each tuple represents a reordering
-        of the positions of the tensors in lst that matches the names of
-        the pattern in its first elements.
-    """
-    pattern_is_subset = all(
-        t1.name in [t2.name for t2 in lst] for t1 in pattern
-    )
-
-    if (len(pattern) > len(lst) or not pattern_is_subset):
-        return []
-
-    return match_tensor_lists_aux(list(enumerate(lst)), pattern)
-
-
-def match_indices(lst, pattern):
-    """
-    Match the index structure of a pattern list of tensors in another
-    list of tensors without reorderings
-
-    Args:
-        lst ([Tensor]): list inside which the pattern is to be found
-        pattern ([Tensor]): pattern to find
-
-    Return:
-        if they match: a pair with the first element being True and the
-                       second one being a list of the indices of lst that
-                       correspond to the free indices of pattern
-        otherwise: a pair (False, None)
-    """
-    # Check the index structure
-    for (pos1, t1), (pos2, t2) in enum_product(pattern, pattern):
-        for (i, i1), (j, i2) in enum_product(t1.indices, t2.indices):
-            li1 = lst[pos1].indices[i]
-            li2 = lst[pos2].indices[j]
-            if not ((i1 == i2) == (li1 == li2)):
-                return False, None
-
-    # Find the indices of lst correponding to the free ones of pattern
-    free_indices = [0] * sum([1 for t in pattern for i in t.indices if i < 0])
-    for pos, tensor in enumerate(pattern):
-        for i, index in enumerate(tensor.indices):
-            if index < 0:
-                free_indices[-index-1] = lst[pos].indices[i]
-    return True, free_indices
-
-
-class TensorBuilder(object):
-    """
-    Interface for the creation of constant tensors.
-
-    Attributes:
-        name (string): the ``name`` attribute of the tensors to be created
-    """
-    def __init__(self, name):
-        self.name = name
-
-    def __call__(self, *indices):
-        """
-        Creates a Tensor object with the given indices and
-        the following attributes: ``is_field = False``,
-        ``derivatives_count = 0``, ``dimension = 0``, ``statistics = boson``
-        """
-        return Tensor(self.name, list(indices))
-
-
-class FieldBuilder(object):
-    """
-    Interface for the creation of fields.
-
-    Attributes:
-        name (string): identifier of the fields to be created
-        dimension (int): energy dimensions of the fields to be created
-        statistics (bool): statistics of the fields to be created
-    """
-    def __init__(self, name, dimension, statistics):
-        self.name = name
-        self.dimension = dimension
-        self.statistics = statistics
-
-    def __call__(self, *indices):
-        """
-        Creates a Tensor object with the given indices and
-        the following attributes: ``is_field = True``,
-        ``derivatives_count = 0``
-        """
-        return Tensor(self.name, list(indices), is_field=True,
-                      derivatives_count=0, dimension=self.dimension,
-                      statistics=self.statistics)
+    return builder
 
 
 def D_op(index, *tensors):
     """
-    Interface for the creation of operator sums of obtained from
-    de application of derivatives to producs of tensors.
+    Interface for the creation of operator sums obtained from
+    the application of derivatives to producs of tensors.
     """
     return Operator(list(tensors)).derivative(index)
 
