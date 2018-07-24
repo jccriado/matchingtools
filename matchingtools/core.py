@@ -238,6 +238,28 @@ class RealField(RealMixin, Field):
     pass
 
 
+class ComplexConstant(ComplexMixin, Constant):
+    pass
+
+
+class ComplexField(ComplexMixin, Field):
+    pass
+
+
+class Kdelta(RealConstant):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        try:
+            assert len(self.indices) == 2
+        except AssertionError:
+            raise ValueError(
+                "A Kdelta tensor takes exactly 2 indices ({} given)".format(
+                    len(self.indices)
+                )
+            )
+
+
 class Operator(Term):
     """
     Container for a list of tensors with their indices contracted.
