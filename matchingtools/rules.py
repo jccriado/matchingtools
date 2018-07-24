@@ -48,7 +48,7 @@ class Rule(object):
         # extend indices mapping
         for operator in self.replacement.operators:
             for tensor in operator.tensors:
-                for index in tensor.indices:
+                for index in tensor.all_indices:
                     is_mapped = index in match.indices_mapping
                     is_contracted = not operator.is_free_index(index)
                     name_clashes = any(
@@ -56,7 +56,7 @@ class Rule(object):
                     )
 
                     if not is_mapped and is_contracted and name_clashes:
-                        # TODO new_index might already be mapped (!)
+                        # name could be repeated, but new_index is unique
                         new_index = Index(index.name + "'")
                         match.indices_mapping[index] = new_index
 
@@ -96,9 +96,28 @@ class Match(object):  # TODO make sure things that don't match don't match
     indices. Note that the parity of the permutation can be computed from
     the tensors correspondence.
     """
+    class IncoherenceError(Exception):
+        def __init__(self, base, offendant):
+            error_msg = "Unable to extend {} by {}: incoherent overlapping"
+            super().__init__(
+                error_msg.format(base, offendant)
+            )
+
     def __init__(self, tensors_mapping, indices_mapping):
         self.tensors_mapping = tensors_mapping
         self.indices_mapping = indices_mapping
+
+    @staticmethod
+    def extend_dict(base, addition):
+        for key, value in addition.items():
+            incoherent = (
+                key in base
+                and base[key] != value
+            )
+
+            if incoherent:
+                raise ValueError()
+
 
     @staticmethod
     def tensors_do_match(t1, t2):
@@ -135,8 +154,10 @@ class Match(object):  # TODO make sure things that don't match don't match
 
     @staticmethod
     def _map_tensor_indices(I, J):
-        mapping = {}
+        if len(I) != len(J):
+            return None
 
+        mapping = {}
         for i, j in zip(I, J):
             if i in mapping and mapping[i] != j:
                 # unable to match the indices: incoherence reached
@@ -153,9 +174,6 @@ class Match(object):  # TODO make sure things that don't match don't match
         indices_mapping = {}
 
         for tensor, associate in tensor_mapping.items():
-            if len(tensor.indices) != len(associate.indices):
-                return None
-
             local_indices_mapping = Match._map_tensor_indices(
                 tensor.indices, associate.indices
             )
@@ -163,17 +181,28 @@ class Match(object):  # TODO make sure things that don't match don't match
             if local_indices_mapping is None:
                 return None
 
-            for tensor_index, associate_index in local_indices_mapping.items():
-                incoherent = (
-                    tensor_index in indices_mapping  # known
-                    and indices_mapping[tensor_index] != associate_index
+            local_derivatives_mapping = Match._map_tensor_indices(
+                tensor.derivatives_indices, associate.derivatives_indices
+            )
+
+            if local_derivatives_mapping is None:
+                return None
+
+            # check for local incoherence
+
+            try:
+                Match.extend_dict(
+                    local_indices_mapping, local_derivatives_mapping
                 )
+            except Match.IncoherenceError:
+                return None
 
-                if incoherent:
-                    return None
+            # check for incoherence when merging back
 
-            # coherent mapping for the moment
-            indices_mapping.update(local_indices_mapping)
+            try:
+                Match.extend_dict(indices_mapping, local_indices_mapping)
+            except Match.IncoherenceError:
+                return None
 
         return indices_mapping
 

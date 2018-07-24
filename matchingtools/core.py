@@ -19,7 +19,6 @@ Defines the Lorentz tensors :data:`epsUp`, :data:`epsUpDot`,
 from abc import ABCMeta, abstractmethod
 from enum import Enum
 from collections import Counter
-from numbers import Number
 
 import rules
 
@@ -43,8 +42,8 @@ class Differentiable(object, metaclass=ABCMeta):
         pass
 
 
-class Term(Conjugable, Differentiable):
-    class DemoteError(ValueError):
+class Convertible(object, metaclass=ABCMeta):
+    class DemoteError(Exception):
         def __init__(self, what, src, dest):
             error_msg = "Unable to demote {what} from {src} to {dest}"
             super().__init__(
@@ -80,7 +79,7 @@ class ComplexMixin(object):
         return conjugated
 
 
-class Tensor(Term, Differentiable):
+class Tensor(Conjugable, Convertible, Differentiable):
     """
     Basic building block for operators.
 
@@ -97,34 +96,32 @@ class Tensor(Term, Differentiable):
     """
 
     def __init__(
-            self, name, indices, dimension=0,
-            statistics=Statistics.BOSON
+            self, name, indices, derivatives_indices,
+            dimension=0, statistics=Statistics.BOSON
     ):
         self.name = name
         self.indices = indices
+        self.derivatives_indices = derivatives_indices
         self.dimension = dimension
         self.statistics = statistics
 
     def __str__(self):
         """
         Returns a string of the form:
-            D(i[0])D(i[1])...D(i[m])T(i[m+1],i[m+2],...,i[n-1])
+            D(di[0])D(di[1])...D(di[m-1])T(i[0], i[1], ..., i[n-1])
         for a Tensor with indices i[0], i[1], ..., i[n-1] and
-        derivatives_count equal to m
+        derivatives_indices di[0], di[1], ..., di[m-1]
         """
-
-        # Add derivatives
-        derivatives_str = ("D({})" * self.derivatives_count).format(
-            *self.derivatives_indices
+        derivatives_str = ''.join(
+            'D({})'.format(index) for index in self.derivatives_indices
         )
+        indices_str = ', '.join(map(str, self.indices))
 
-        if len(self.indices) > 0:
-            tensor_str = "{}({})".format(
-                self.name, ", ".join(map(str, self.non_derivatives_indices)))
-        else:
-            tensor_str = self.name
-
-        return derivatives_str + tensor_str
+        return '{derivatives}{name}({indices})'.format(
+            derivatives=derivatives_str,
+            name=self.name,
+            indices=indices_str
+        )
 
     __repr__ = __str__
 
@@ -145,6 +142,7 @@ class Tensor(Term, Differentiable):
         return (
             self.name == other.name
             and self.indices == other.indices
+            and self.derivatives_indices == other.derivatives_indices
             and self.dimension == other.dimension
             and self.statistics == other.statistics
         )
@@ -153,7 +151,7 @@ class Tensor(Term, Differentiable):
         return hash(self.name)
 
     def __contains__(self, index):
-        return index in self.indices
+        return index in self.all_indices
 
     def _to_tensor(self):
         return self
@@ -169,16 +167,16 @@ class Tensor(Term, Differentiable):
         new_tensor.indices = [
             indices_mapping.get(index, index) for index in self.indices
         ]
+        new_tensor.derivatives_indices = [
+            indices_mapping.get(index, index)
+            for index in self.derivatives_indices
+        ]
 
         return new_tensor
 
     @property
-    def derivatives_indices(self):
-        return self.indices[:self.derivatives_count]
-
-    @property
-    def non_derivatives_indices(self):
-        return self.indices[self.derivatives_count:]
+    def all_indices(self):
+        return self.derivatives_indices + self.indices
 
     @abstractmethod
     def clone(self):
@@ -186,6 +184,10 @@ class Tensor(Term, Differentiable):
 
 
 class Constant(Tensor):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.derivatives_indices = []
+
     def clone(self):
         return Constant(
             name=self.name,
@@ -199,20 +201,6 @@ class Constant(Tensor):
 
 
 class Field(Tensor):
-    def __init__(
-            self, name, indices, derivatives_count=0,
-            dimension=0, statistics=Statistics.BOSON
-    ):
-        if len(indices) < derivatives_count:
-            raise ValueError(
-                "Unable to create tensor {name}: too many derivatives".format(
-                    name=name
-                )
-            )
-
-        super().__init__(self, name, indices, dimension, statistics)
-        self.derivatives_count = derivatives_count
-
     def clone(self):
         return Field(
             name=self.name,
@@ -260,7 +248,7 @@ class Kdelta(RealConstant):
             )
 
 
-class Operator(Term):
+class Operator(Conjugable, Convertible, Differentiable):
     """
     Container for a list of tensors with their indices contracted.
 
@@ -272,7 +260,9 @@ class Operator(Term):
         tensors ([Tensor]): list of the tensors contained
     """
 
-    def __init__(self, tensors, coefficient=1):
+    def __init__(self, tensors=None, coefficient=1):
+        if tensors is None:
+            tensors = []
         self.tensors = tensors
         self.coefficient = coefficient
 
@@ -301,11 +291,14 @@ class Operator(Term):
     def __neg__(self):
         return self * (-1)
 
+    def __hash__(self):
+        return hash(tuple(self.tensors))
+
     def _to_tensor(self):
         if len(self.tensors) == 1:
             return self.tensors[0]
         else:
-            raise Term.DemoteError(self, Operator, Tensor)
+            raise Convertible.DemoteError(self, Operator, Tensor)
 
     def _to_operator(self):
         return self
@@ -337,6 +330,7 @@ class Operator(Term):
                     elif index == j:
                         tensor.indices[pos] = i
                         kdeltas.remove(kdelta)
+
     @property
     def dimension(self):
         return sum([
@@ -363,6 +357,12 @@ class Operator(Term):
             index for index, multiplicity in counter.items()
             if multiplicity == 1
         ]
+
+    def clone(self):
+        return Operator(
+            [tensor.clone() for tensor in self.tensors],
+            self.coefficient
+        )
 
     def conjugate(self):
         return Operator([
@@ -423,9 +423,12 @@ class Operator(Term):
         should match. No sign differences allowed. All free indices should
         be equal. Reorderings allowed.
         """
+        if not isinstance(other, Convertible):
+            return False
+
         try:
             other = other._to_operator()
-        except (AttributeError, ValueError):
+        except Convertible.DemoteError:
             return False
 
         if abs(self.coefficient) != abs(other.coefficient):
@@ -451,7 +454,7 @@ class Operator(Term):
         return self.coeffient * sign == other.coefficient
 
 
-class OperatorSum(Term):
+class OperatorSum(Conjugable, Convertible, Differentiable):
     """
     Container for lists of operators representing their sum.
 
@@ -472,7 +475,7 @@ class OperatorSum(Term):
     __repr__ = __str__
 
     def __add__(self, other):
-        if not isinstance(other, Term):
+        if not isinstance(other, Convertible):
             if other == 0:
                 return self
             return self + OperatorSum([Operator([], coefficient=other)])
@@ -485,7 +488,7 @@ class OperatorSum(Term):
     __radd__ = __add__
 
     def __mul__(self, other):
-        if not isinstance(other, Term):
+        if not isinstance(other, Convertible):
             if other == 0:
                 return OperatorSum()
 
@@ -511,6 +514,15 @@ class OperatorSum(Term):
     def __neg__(self):
         return OperatorSum([-op for op in self.operators])
 
+    def __eq__(self, other):
+        if len(self.operators) != len(other.operators):
+            return False
+
+        return all(
+            self_operator in other.operators
+            for self_operator in self.operators
+        )
+
     def _to_tensor(self):
         return self._to_operator()._to_tensor()
 
@@ -518,10 +530,25 @@ class OperatorSum(Term):
         if len(self.operators) == 1:
             return self.operators[0]
         else:
-            raise Term.DemoteError(self, OperatorSum, Operator)
+            raise Convertible.DemoteError(self, OperatorSum, Operator)
 
     def _to_operator_sum(self):
         return self
+
+    def _simplify(self):
+        coefficients = {}
+
+        for operator in self.operators:
+            coefficients.setdefault(operator, 0)
+            coefficients[operator] += operator.coefficient
+
+        self.operators = [
+            Operator(
+                operator.tensors,
+                coefficient
+            )
+            for operator, coefficient in coefficients.items()
+        ]
 
     def conjugate(self):
         return OperatorSum([
