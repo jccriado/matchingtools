@@ -116,7 +116,9 @@ class Match(object):  # TODO make sure things that don't match don't match
             )
 
             if incoherent:
-                raise ValueError()
+                raise Match.IncoherenceError(base, addition)
+
+        base.update(addition)
 
 
     @staticmethod
