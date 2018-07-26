@@ -4,13 +4,6 @@ classes :class:`Tensor`, :class:`Operator`, and :class:`OperatorSum`.
 Implements the Leibniz rule for derivatives and the algorithms for
 matching and replacing as well as functional derivatives.
 
-Defines interfaces for the creation of tensors, fields, operators and
-operator sums: :class:`TensorBuilder`, :class:`FieldBuilder`,
-:func:`Op` and :func:`OpSum`; the interface for creating derivatives
-of single tensors: the function :func:`D`; and interfaces for creating
-special single-tensor associated to (complex) numbers and powers of
-constants.
-
 Defines the Lorentz tensors :data:`epsUp`, :data:`epsUpDot`,
 :data:`epsDown`, :data:`epsDownDot`, :data:`sigma4` and
 :data:`sigma4bar`.
@@ -19,6 +12,7 @@ Defines the Lorentz tensors :data:`epsUp`, :data:`epsUpDot`,
 from abc import ABCMeta, abstractmethod
 from collections import Counter
 from enum import Enum
+from fractions import Fraction
 from functools import partial
 
 import rules
@@ -41,6 +35,14 @@ class Differentiable(object, metaclass=ABCMeta):
     @abstractmethod
     def differentiate(self, index):
         pass
+
+    def nth_derivative(self, indices):
+        differentiated = self
+        # TODO: decide whether to use indices of reversed(indices)
+        for index in indices:
+            differentiated = differentiated.differentiate(index)
+
+        return differentiated
 
 
 class Convertible(object, metaclass=ABCMeta):
@@ -90,21 +92,25 @@ class Tensor(Conjugable, Convertible, Differentiable):
 
     Attributes:
         name (string): identifier
-        indices (list of ints): indices of the tensor and the
-                                derivatives applied to it
-        dimension (int): energy dimensions
+        indices (list of Index): indices of the tensor
+        derivatives_indices (list of Index): indices of its derivatives
+        dimension (float): energy dimensions
         statistics (Statistics): Either BOSON or FERMION
     """
 
     def __init__(
             self, name, indices, derivatives_indices,
-            dimension=0, statistics=Statistics.BOSON
+            _tensor_dimension=0, statistics=Statistics.BOSON
     ):
         self.name = name
         self.indices = indices
         self.derivatives_indices = derivatives_indices
-        self.dimension = dimension
+        self._tensor_dimension = Fraction(round(2 * _tensor_dimension), 2)
         self.statistics = statistics
+
+    @property
+    def dimension(self):
+        return self._tensor_dimension + len(self.derivatives_indices)
 
     def __str__(self):
         """
@@ -114,7 +120,8 @@ class Tensor(Conjugable, Convertible, Differentiable):
         derivatives_indices di[0], di[1], ..., di[m-1]
         """
         derivatives_str = ''.join(
-            'D({})'.format(index) for index in self.derivatives_indices
+            'D({})'.format(index)
+            for index in reversed(self.derivatives_indices)
         )
         indices_str = ', '.join(map(str, self.indices))
 
@@ -158,7 +165,7 @@ class Tensor(Conjugable, Convertible, Differentiable):
         return self
 
     def _to_operator(self):
-        return Operator([self])
+        return Operator(tensors=[self])
 
     def _to_operator_sum(self):
         return self._to_operator()._to_operator_sum()
@@ -199,7 +206,9 @@ class Constant(Tensor):
     def clone(self):
         return Constant(
             name=self.name,
-            indices=[index for index in self.indices],
+            indices=self.indices.copy(),
+            # TODO: What is derivatives_indices here?
+            derivatives_indices=[],
             dimension=self.dimension,
             statistics=self.statistics
         )
@@ -212,16 +221,15 @@ class Field(Tensor):
     def clone(self):
         return Field(
             name=self.name,
-            indices=[index for index in self.indices],
-            derivatives_count=self.derivatives_count,
+            indices=self.indices.copy()
+            derivatives_indices=self.derivatives_indices.copy()
             dimension=self.dimension,
             statistics=self.statistics
         )
 
     def differentiate(self, index):
         diff = self.clone()
-        diff.derivatives_count += 1
-        diff.indices = [index] + diff.indices
+        diff.derivative_indices.append(index)
 
         return diff
 
@@ -327,10 +335,9 @@ class Operator(Conjugable, Convertible, Differentiable):
             else:
                 rest.append(tensor)
 
-        # TODO fix this shit
         for tensor in rest:
             for pos, index in enumerate(tensor.indices):
-                for kdelta in kdeltas:
+                for kdelta in kdeltas.copy():
                     i, j = kdelta.indices
                     if index == i:
                         tensor.indices[pos] = j
@@ -341,10 +348,7 @@ class Operator(Conjugable, Convertible, Differentiable):
 
     @property
     def dimension(self):
-        return sum([
-            tensor.dimension + tensor.derivatives_count
-            for tensor in self.tensors
-        ])
+        return sum([tensor.dimension for tensor in self.tensors])
 
     def __contains__(self, tensor):
         return tensor in self.tensors
@@ -373,9 +377,10 @@ class Operator(Conjugable, Convertible, Differentiable):
         )
 
     def conjugate(self):
-        return Operator([
-            tensor.conjugate() for tensor in self.tensors
-        ], coefficient=self.coefficient)
+        return Operator(
+            [tensor.conjugate() for tensor in self.tensors],
+            coefficient=self.coefficient
+        )
 
     def differentiate(self, index):
         acc = 0
@@ -388,42 +393,6 @@ class Operator(Conjugable, Convertible, Differentiable):
             acc += left * diff * right
 
         return acc
-
-    def variation(self, field_name, statistics):
-        """
-        Take functional derivative of the spacetime integral of self:
-
-        Args:
-            field_name (string): the name of the field with respect to
-                                 which the functional derivative is taken
-            statistics (Statistics): statistics of the field
-        """
-
-        raise NotImplementedError()
-        result = OperatorSum()
-        for pos, tensor in enumerate(self.tensors):
-            if tensor.name == field_name:
-                inside_op = self.remove_tensor(pos)
-                der_inds = remove_indices(tensor.derivatives_indices,
-                                          tensor.non_derivatives_indices)
-
-                # Compute the sign taking into account the number of
-                # derivatives that act on the field and the number of
-                # fermions before it in the fermionic case
-                minus_sign = len(der_inds) % 2 == 1
-
-                if statistics == fermion:
-                    number_of_fermions = len([1 for t in self.tensors[:pos]
-                                              if not t.statistics])
-                    minus_sign = minus_sign != (number_of_fermions % 2 == 1)
-                if minus_sign:
-                    inside_op *= number_op(-1)
-
-                # Apply the derivatives with the correponding indices
-                inside_ops = OperatorSum([inside_op])
-                result += apply_derivatives(list(reversed(der_inds)),
-                                            inside_ops)
-        return result
 
     def __eq__(self, other):
         """
@@ -508,6 +477,7 @@ class OperatorSum(Conjugable, Convertible, Differentiable):
         if not isinstance(other, OperatorSum):
             return self + other._to_operator_sum()
 
+        # TODO: Do want to generate new bound indices for other_op to avoid clashes?
         return OperatorSum([
                 Operator(
                     self_op.tensors + other_op.tensors,
@@ -568,151 +538,26 @@ class OperatorSum(Conjugable, Convertible, Differentiable):
             operator.differentiate(index) for operator in self.operators
         ])
 
-    def variation(self, field_name, statistics):
-        """
-        Take functional derivative of the spacetime integral of self.
-
-        Args:
-            field_name (string): the name of the field with respect to
-                                 which the functional derivative is taken
-            statistics (bool): statistics of the field
-        """
-        return sum([
-            operator.variation(field_name, statistics)
-            for operator in self.operators
+    def filter_by_max_dimension(self, max_dimension):
+        return OperatorSum([
+            operator for operator in self.operators
+            if operator.dimension <= max_dimension
         ])
-
-
-def leibniz_rule(index, operator):
-    """
-    Take the derivative of an operator and apply the Leibniz rule to it
-
-    Args:
-        index (int): index of the derivative
-        operator (Operator): operator to which the derivative is to be applied
-
-    Return:
-        An OperatorSum resulting from the Leibniz rule
-    """
-    result = []
-    for i, tensor in enumerate(operator.tensors):
-        if tensor.is_field:
-            new_indices = [index] + tensor.indices
-            new_tensor = Tensor(tensor.name, new_indices, is_field=True,
-                                derivatives_count=tensor.derivatives_count + 1,
-                                dimension=tensor.dimension,
-                                statistics=tensor.statistics)
-            result.append(Operator(operator.tensors[:i] + [new_tensor] +
-                                   operator.tensors[i+1:]))
-    return OperatorSum(result)
-
-
-def apply_derivatives(indices, target):
-    """Applies any number of derivatives to an Operator or OperatorSum"""
-    for index in reversed(indices):
-        target = target.derivative(index)
-    return target
-
-
-def TensorBuilder(name):
-    def builder(*indices):
-        """
-        Creates a Tensor object with the given indices and default attributes
-        """
-        return Tensor(name, list(indices))
-
-    return builder
-
-
-def FieldBuilder(name, dimension, statistics):
-    """
-    Creates a Tensor object with the given indices and
-    the following attributes: ``is_field = True``,
-    ``derivatives_count = 0``
-    """
-    def builder(*indices):
-        return Tensor(
-            name=name, indices=list(indices), is_field=True,
-            derivatives_count=0, dimension=dimension,
-            statistics=statistics
-        )
-
-    return builder
-
-
-def D_op(index, *tensors):
-    """
-    Interface for the creation of operator sums obtained from
-    the application of derivatives to producs of tensors.
-    """
-    return Operator(list(tensors)).derivative(index)
 
 
 def D(index, tensor):
     """
     Interface for the creation of tensors with derivatives applied.
     """
-    return Operator([tensor]).derivative(index).operators[0].tensors[0]
-
-
-def Op(*tensors):
-    """Interface for the creation of operators"""
-    return Operator(list(tensors))
-
-
-def OpSum(*operators):
-    """Interface for the creation of operator sums"""
-    return OperatorSum(list(operators))
-
-
-def number_op(number):
-    """
-    Create an operator correponding to a number.
-    """
-    return Op(Tensor("$number", [], content=number, exponent=1))
-
-
-i_op = Op(Tensor("$i", [], exponent=1))
-"""Operator representing the imaginary unit."""
-
-
-def power_op(name, exponent, indices=None):
-    """
-    Create an operator corresponding to a tensor exponentiated to some power.
-    """
-    if indices is None:
-        indices = []
-    return Operator([Tensor(name, indices, exponent=exponent)])
-
-
-def tensor_op(name, indices=None):
-    if indices is None:
-        indices = []
-    return Operator([Tensor(name, indices)])
-
-
-def flavor_tensor_op(name):
-    """Interface for the creation of one-tensor operators with indices"""
-    def f(*indices):
-        return Op(Tensor(name, list(indices)))
-    return f
+    return tensor.differentiate(index)
 
 
 # To be used to specify the statistics of fields
 
+# TODO: decide whether we want to keep these aliases or not
+
 boson = Statistics.BOSON
 fermion = Statistics.FERMION
-
-kdelta = TensorBuilder("kdelta")
-"""
-Kronecker delta. To be replaced by the correponding
-index contraction appearing instead (module transformations).
-"""
-generic = FieldBuilder("generic", 0, boson)
-"""
-Generic tensor to be used for intermediate steps in calculations
-and in the output of matching.
-"""
 
 # Basic Lorentz group related tensors.
 #
@@ -724,6 +569,8 @@ and in the output of matching.
 #   using the three Pauli matrices and the 2x2 identity. The Lorentz vector
 #   index is the first, the two two-component spinor indices are the second
 #   and third.
+
+# TODO: Rewrite these
 
 epsUp = TensorBuilder("epsUp")
 """
