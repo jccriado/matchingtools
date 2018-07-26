@@ -209,7 +209,7 @@ class Constant(Tensor):
             indices=self.indices.copy(),
             # TODO: What is derivatives_indices here?
             derivatives_indices=[],
-            dimension=self.dimension,
+            _tensor_dimension=self.dimension,
             statistics=self.statistics
         )
 
@@ -221,9 +221,9 @@ class Field(Tensor):
     def clone(self):
         return Field(
             name=self.name,
-            dimension=self.dimension,
             indices=self.indices.copy(),
             derivatives_indices=self.derivatives_indices.copy(),
+            _tensor_dimension=self.dimension,
             statistics=self.statistics
         )
 
