@@ -16,6 +16,5 @@ class Index(object):
         return hash(self._id)
 
     @staticmethod
-    def create_indices(names):
-        for name in names:
-            globals()[name] = Index(name)
+    def make(*names):
+        return [Index(name) for name in names]

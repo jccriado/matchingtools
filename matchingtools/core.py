@@ -17,8 +17,9 @@ Defines the Lorentz tensors :data:`epsUp`, :data:`epsUpDot`,
 """
 
 from abc import ABCMeta, abstractmethod
-from enum import Enum
 from collections import Counter
+from enum import Enum
+from functools import partial
 
 import rules
 
@@ -181,6 +182,13 @@ class Tensor(Conjugable, Convertible, Differentiable):
     @abstractmethod
     def clone(self):
         pass
+
+    @classmethod
+    def make(cls, *names):
+        def builder(name, indices):
+            return cls(name=name, indices=indices, derivatives_indices=[])
+
+        return [partial(builder, name) for name in names]
 
 
 class Constant(Tensor):
