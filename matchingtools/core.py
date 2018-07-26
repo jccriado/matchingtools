@@ -529,6 +529,12 @@ class OperatorSum(Conjugable, Convertible, Differentiable):
             operator.differentiate(index) for operator in self.operators
         ])
 
+    def filter_dimension(self, max_dimension):
+        return OperatorSum([
+            operator for operator in self.operators
+            if operator.dimension <= max_dimension
+        ])
+
 
 def D(index, tensor):
     """
