@@ -475,7 +475,7 @@ class OperatorSum(Conjugable, Convertible, Differentiable):
             return self * OperatorSum([Operator([], coefficient=other)])
 
         if not isinstance(other, OperatorSum):
-            return self + other._to_operator_sum()
+            return self * other._to_operator_sum()
 
         # TODO: Do want to generate new bound indices for other_op to avoid clashes?
         return OperatorSum([

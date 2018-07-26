@@ -14,7 +14,7 @@ class Rule(object):
         self.replacement = replacement._to_operator_sum()
 
     def _apply_to_operator(self, target):
-        match = Match.match_operator(self.pattern, target)
+        match = Match.match_operators(self.pattern, target)
 
         if match is None:
             return target
