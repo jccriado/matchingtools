@@ -192,8 +192,8 @@ class Tensor(Conjugable, Convertible, Differentiable):
 
     @classmethod
     def make(cls, *names):
-        def builder(name, indices):
-            return cls(name=name, indices=indices, derivatives_indices=[])
+        def builder(name, *indices):
+            return cls(name=name, indices=list(indices), derivatives_indices=[])
 
         return [partial(builder, name) for name in names]
 
