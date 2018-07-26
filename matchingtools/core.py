@@ -220,7 +220,7 @@ class Field(Tensor):
 
     def differentiate(self, index):
         diff = self.clone()
-        diff.indices.append(index)
+        diff.derivative_indices.append(index)
 
         return diff
 
