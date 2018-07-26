@@ -1,7 +1,6 @@
 from core import TensorBuilder
 from indices import Index
 from rules import Rule
-from utils import GeneralDict
 
 
 sigma = TensorBuilder("sigma")
