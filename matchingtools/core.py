@@ -12,6 +12,7 @@ Defines the Lorentz tensors :data:`epsUp`, :data:`epsUpDot`,
 from abc import ABCMeta, abstractmethod
 from enum import Enum
 from collections import Counter
+from fractions import Fraction
 
 import rules
 
@@ -103,7 +104,7 @@ class Tensor(Conjugable, Convertible, Differentiable):
         self.name = name
         self.indices = indices
         self.derivatives_indices = derivatives_indices
-        self._tensor_dimension = _tensor_dimension
+        self._tensor_dimension = Fraction(round(2 * _tensor_dimension), 2)
         self.statistics = statistics
 
     @property
