@@ -221,9 +221,9 @@ class Field(Tensor):
     def clone(self):
         return Field(
             name=self.name,
-            indices=self.indices.copy()
-            derivatives_indices=self.derivatives_indices.copy()
             dimension=self.dimension,
+            indices=self.indices.copy(),
+            derivatives_indices=self.derivatives_indices.copy(),
             statistics=self.statistics
         )
 
