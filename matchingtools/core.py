@@ -204,7 +204,7 @@ class Constant(Tensor):
         self.derivatives_indices = []
 
     def clone(self):
-        return Constant(
+        return type(self)(
             name=self.name,
             indices=self.indices.copy(),
             # TODO: What is derivatives_indices here?
@@ -219,7 +219,7 @@ class Constant(Tensor):
 
 class Field(Tensor):
     def clone(self):
-        return Field(
+        return type(self)(
             name=self.name,
             indices=self.indices.copy(),
             derivatives_indices=self.derivatives_indices.copy(),
@@ -571,43 +571,11 @@ fermion = Statistics.FERMION
 #   and third.
 
 # TODO: Rewrite these
-
+'''
 epsUp = TensorBuilder("epsUp")
-"""
-Totally anti-symmetric tensor with two two-component spinor
- undotted superindices
-"""
-
 epsUpDot = TensorBuilder("epsUpDot")
-"""
-Totally anti-symmetric tensor with two two-component spinor
- dotted superindices
-"""
-
 epsDown = TensorBuilder("epsDown")
-"""
-Totally anti-symmetric tensor with two two-component spinor
- undotted subindices
-"""
-
 epsDownDot = TensorBuilder("epsDownDot")
-"""
-Totally anti-symmetric tensor with two two-component spinor
- dotted subindices
-"""
-
 sigma4bar = TensorBuilder("sigma4bar")
-"""
-Tensor with one lorentz index, one two-component spinor dotted
-superindex and one two-component spinor undotted superindex.
-Represents the four-vector of 2x2 matrices built out identity
-and minus the Pauli matrices.
-"""
-
 sigma4 = TensorBuilder("sigma4")
-"""
-Tensor with one lorentz index, one two-component spinor undotted
-subindex and one two-component spinor dotted subindex.
-Represents the four-vector of 2x2 matrices built out identity
-and the Pauli matrices.
-"""
+'''
