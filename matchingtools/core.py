@@ -38,7 +38,7 @@ class Differentiable(object, metaclass=ABCMeta):
         differentiated = self
         # TODO: decide whether to use indices of reversed(indices)
         for index in indices:
-            differentiated.differentiate(index)
+            differentiated = differentiated.differentiate(index)
             
         return differentiated
 
