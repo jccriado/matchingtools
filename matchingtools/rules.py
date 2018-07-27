@@ -3,8 +3,11 @@
 from functools import reduce
 import itertools
 from operator import mul
+from fractions import Fraction
 
-from core import Constant, Operator, OperatorSum, RealMixin, Statistics
+import core
+
+# from core import Constant, Operator, OperatorSum, RealMixin, Statistics
 from indices import Index
 
 
@@ -27,17 +30,18 @@ class Rule(object):
             target_tensor for target_tensor in target.tensors
             if target_tensor not in matched
         ]
+
         # compute the new operator tensors list
         reordered_target = matched + rest
 
         # check if a sign change is needed because of the reordering
         original_fermions = [
             tensor for tensor in target.tensors
-            if tensor.statistics == Statistics.FERMION
+            if tensor.statistics == core.Statistics.FERMION
         ]
         reordered_fermions = [
             tensor for tensor in reordered_target
-            if tensor.statistics == Statistics.FERMION
+            if tensor.statistics == core.Statistics.FERMION
         ]
 
         fermions_permutation = Permutation.compare(
@@ -60,19 +64,25 @@ class Rule(object):
                         new_index = Index(index.name + "'")
                         match.indices_mapping[index] = new_index
 
-        adapted_replacement = OperatorSum([
-            Operator([
-                tensor._replace_indices(match.indices_mapping)
-                for tensor in operator.tensors
-            ])
+        adapted_replacement = core.OperatorSum([
+            core.Operator(
+                [
+                    tensor._replace_indices(match.indices_mapping)
+                    for tensor in operator.tensors
+                ],
+                Fraction(
+                    operator.coefficient * target.coefficient,
+                    self.pattern.coefficient
+                )
+            )
             for operator in self.replacement.operators
         ])
 
-        return sign * adapted_replacement * Operator(rest)
+        return sign * adapted_replacement * core.Operator(rest)
 
     def apply(self, target):
         target = target._to_operator_sum()
-
+        
         return sum(
             self._apply_to_operator(operator) for operator in target.operators
         )
@@ -127,8 +137,8 @@ class Match(object):  # TODO make sure things that don't match don't match
             t1.name == t2.name
             and t1.statistics == t2.statistics
             and t1.is_conjugated == t2.is_conjugated
-            and isinstance(t1, Constant) == isinstance(t2, Constant)
-            and isinstance(t1, RealMixin) == isinstance(t2, RealMixin)
+            and isinstance(t1, core.Constant) == isinstance(t2, core.Constant)
+            and isinstance(t1, core.RealMixin) == isinstance(t2, core.RealMixin)
         )
 
     @staticmethod
@@ -137,10 +147,15 @@ class Match(object):  # TODO make sure things that don't match don't match
             pattern_tensor: [] for pattern_tensor in pattern_operator.tensors
         }
 
-        for target_tensor in target_operator.tensors:
-            for pattern_tensor in pattern_operator.tensors:
+        remaining_target_tensors = target_operator.tensors.copy()
+        for pattern_tensor in pattern_operator.tensors:
+            for target_tensor in remaining_target_tensors:
                 if Match.tensors_do_match(pattern_tensor, target_tensor):
                     associates[pattern_tensor].append(target_tensor)
+                    remaining_target_tensors.remove(target_tensor)
+                    break
+            else:
+                return None
 
         return (
             {
@@ -211,6 +226,9 @@ class Match(object):  # TODO make sure things that don't match don't match
     @staticmethod
     def match_operators(pattern, target):
         tensors_mappings = Match._map_tensors(pattern, target)
+
+        if tensors_mappings is None:
+            return None
 
         for tensor_mapping in tensors_mappings:
             """
@@ -295,4 +313,4 @@ class Cycle(object):
         def odd(x):
             return (x % 2) == 1
 
-        return 1 if odd(len(self.cycle)) else -1
+        return -1 if odd(len(self.cycle)) else 1

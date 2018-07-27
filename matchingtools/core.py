@@ -14,8 +14,11 @@ from collections import Counter
 from enum import Enum
 from fractions import Fraction
 from functools import partial
+from itertools import permutations
+from operator import add, __eq__
 
 import rules
+from lsttools import LookUpTable
 
 
 class Statistics(Enum):
@@ -138,13 +141,16 @@ class Tensor(Conjugable, Convertible, Differentiable):
 
     __radd__ = __add__
 
+    def __neg__(self):
+        return -self._to_operator()
+
     def __mul__(self, other):
         return self._to_operator_sum() * other
 
     __rmul__ = __mul__
 
     def __eq__(self, other):
-        if(not isinstance(other, Tensor)):
+        if not isinstance(other, Tensor):
             return False
 
         return (
@@ -191,9 +197,13 @@ class Tensor(Conjugable, Convertible, Differentiable):
         pass
 
     @classmethod
-    def make(cls, *names):
-        def builder(name, *indices):
-            return cls(name=name, indices=list(indices), derivatives_indices=[])
+    def make(cls, *names, **kwargs):
+        def builder(name, *indices, **kwargs):
+            return cls(
+                name=name,
+                indices=list(indices),
+                derivatives_indices=[],
+                **kwargs)
 
         return [partial(builder, name) for name in names]
 
@@ -251,8 +261,14 @@ class ComplexField(ComplexMixin, Field):
 
 
 class Kdelta(RealConstant):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, *indices):
+        super().__init__(
+            name="Kdelta",
+            indices=list(indices),
+            derivatives_indices=[],
+            _tensor_dimension=0,
+            statistics=Statistics.BOSON
+        )
 
         try:
             assert len(self.indices) == 2
@@ -262,6 +278,9 @@ class Kdelta(RealConstant):
                     len(self.indices)
                 )
             )
+
+    def clone(self):
+        return Kdelta(*self.indices)
 
 
 class Operator(Conjugable, Convertible, Differentiable):
@@ -330,21 +349,34 @@ class Operator(Conjugable, Convertible, Differentiable):
         rest = []
 
         for tensor in self.tensors:
-            if isinstance(tensor, Kdelta):
+            # TODO: understand this, sometimes:
+            # type(tensor) == Kdelta AND isinstance(tensor, Kdelta) == False
+            if tensor.name == "Kdelta":
                 kdeltas.append(tensor)
             else:
-                rest.append(tensor)
+                rest.append(tensor.clone())
 
-        for tensor in rest:
-            for pos, index in enumerate(tensor.indices):
-                for kdelta in kdeltas.copy():
+        # TODO: Refactor this?
+        remaining_kdeltas = []
+        for pos, kdelta in enumerate(kdeltas):
+            found_index = False
+            for tensor in kdeltas[pos+1:] + rest:
+                for pos, index in enumerate(tensor.indices):
                     i, j = kdelta.indices
                     if index == i:
                         tensor.indices[pos] = j
-                        kdeltas.remove(kdelta)
+                        found_index = True
+                        break
                     elif index == j:
                         tensor.indices[pos] = i
-                        kdeltas.remove(kdelta)
+                        found_index = True
+                        break
+                if found_index:
+                    break
+            if not found_index:
+                remaining_kdeltas.append(kdelta)
+
+        self.tensors = rest + remaining_kdeltas
 
     @property
     def dimension(self):
@@ -400,14 +432,19 @@ class Operator(Conjugable, Convertible, Differentiable):
         should match. No sign differences allowed. All free indices should
         be equal. Reorderings allowed.
         """
-        if not isinstance(other, Convertible):
-            return False
+
+        # TODO: understand this, sometimes:
+        # type(other) == Operator AND isinstance(other, Convertible) == False
+        # ---
+        # When this is solved, uncomment the following two lines:
+        #   if not isinstance(other, Convertible):
+        #     return False
 
         try:
             other = other._to_operator()
         except Convertible.DemoteError:
             return False
-
+        
         if abs(self.coefficient) != abs(other.coefficient):
             return False
 
@@ -419,16 +456,34 @@ class Operator(Conjugable, Convertible, Differentiable):
         if match is None:
             return False
 
-        for index, associate in match.indices_mapping.items():
-            if index != associate:
-                return False
+        # TODO: make sure this previous code isn't the right solution:
+        #   for index, associate in match.indices_mapping.items():
+        #     if index != associate:
+        #       return False
+        # ---
+        # it's been substituted by this:
+        for tensor in self.tensors:
+            for index in tensor.indices:
+                is_free = self.is_free_index(index)
+                if is_free and index in match.indices_mapping:
+                    if index != match.indices_mapping[index]:
+                        return False
 
+        own_fermions = [
+            tensor for tensor in self.tensors
+            if tensor.statistics == Statistics.FERMION
+        ]
         sign = rules.Permutation.compare(
-            self.tensors,
-            [match.tensor_mapping[tensor] for tensor in self.tensors]
+            own_fermions,
+            [match.tensors_mapping[tensor] for tensor in own_fermions]
         ).parity
 
-        return self.coeffient * sign == other.coefficient
+        return self.coefficient * sign == other.coefficient
+
+    def with_unit_coefficient(self):
+        new_operator = self.clone()
+        new_operator.coefficient = 1
+        return new_operator
 
 
 class OperatorSum(Conjugable, Convertible, Differentiable):
@@ -444,7 +499,12 @@ class OperatorSum(Conjugable, Convertible, Differentiable):
     def __init__(self, operators=None):
         if operators is None:
             operators = []
-        self.operators = operators
+        # TODO: understand why this has to be done in order not to have
+        # elements of self.operators that are OperatorSum. This seems like
+        # a there's a bug somewhere else.
+        self.operators = [operator._to_operator() for operator in operators]
+
+        self._simplify()
 
     def __str__(self):
         return " + ".join(map(str, self.operators))
@@ -464,6 +524,9 @@ class OperatorSum(Conjugable, Convertible, Differentiable):
 
     __radd__ = __add__
 
+    def __sub__(self, other):
+        return self + (-other)
+
     def __mul__(self, other):
         if not isinstance(other, Convertible):
             if other == 0:
@@ -477,7 +540,6 @@ class OperatorSum(Conjugable, Convertible, Differentiable):
         if not isinstance(other, OperatorSum):
             return self * other._to_operator_sum()
 
-        # TODO: Do want to generate new bound indices for other_op to avoid clashes?
         return OperatorSum([
                 Operator(
                     self_op.tensors + other_op.tensors,
@@ -496,10 +558,17 @@ class OperatorSum(Conjugable, Convertible, Differentiable):
         if len(self.operators) != len(other.operators):
             return False
 
-        return all(
-            self_operator in other.operators
-            for self_operator in self.operators
+        # TODO: is there a more efficient version of this?
+        return any(
+            all(map(__eq__, self.operators, other_permutation))
+            for other_permutation in permutations(other.operators)
         )
+        # Does the following work always?
+        #   return (
+        #       all(op in other.operators for op in self.operators)
+        #       and
+        #       all(op in self.operators for op in other.operators)
+        #   )
 
     def _to_tensor(self):
         return self._to_operator()._to_tensor()
@@ -514,18 +583,21 @@ class OperatorSum(Conjugable, Convertible, Differentiable):
         return self
 
     def _simplify(self):
-        coefficients = {}
+        coefficients = LookUpTable()
 
         for operator in self.operators:
-            coefficients.setdefault(operator, 0)
-            coefficients[operator] += operator.coefficient
+            coefficients.update(
+                operator.with_unit_coefficient(),
+                operator.coefficient,
+                add
+            )
 
         self.operators = [
             Operator(
                 operator.tensors,
                 coefficient
             )
-            for operator, coefficient in coefficients.items()
+            for operator, coefficient in coefficients.items
         ]
 
     def conjugate(self):
@@ -534,6 +606,7 @@ class OperatorSum(Conjugable, Convertible, Differentiable):
         ])
 
     def differentiate(self, index):
+        # TODO: missing concat?
         return OperatorSum([
             operator.differentiate(index) for operator in self.operators
         ])
