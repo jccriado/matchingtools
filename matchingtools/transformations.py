@@ -258,7 +258,7 @@ def simplify(op_sum, conjugates=None, verbose=True):
         sys.stdout.write("done.\n")
         sys.stdout.flush()
         
-    return OperatorSum([number_op(n) * op
+    return OperatorSum([number_op(n) * remove_kdeltas(op)
                         for op, n in sum_numbers(op_sum)])
 
 def collect(op_sum, tensor_names, verbose=True):
