@@ -198,14 +198,7 @@ class Tensor(Conjugable, Convertible, Differentiable):
 
     @classmethod
     def make(cls, *names, **kwargs):
-        def builder(name, *indices, **kwargs):
-            return cls(
-                name=name,
-                indices=list(indices),
-                derivatives_indices=[],
-                **kwargs)
-
-        return [partial(builder, name) for name in names]
+        return [Builder(name, cls, kwargs) for name in names]
 
 
 class Constant(Tensor):
@@ -624,6 +617,24 @@ def D(index, tensor):
     """
     return tensor.differentiate(index)
 
+
+class Builder(object):
+    def __init__(self, name, cls, kwargs):
+        self.name = name
+        self.cls = cls
+        self.kwargs = kwargs
+                
+    def __call__(self, *indices):
+        return self.cls(
+            name=self.name,
+            indices=list(indices),
+            derivatives_indices=[],
+            **self.kwargs
+        )
+
+    def c(self, *indices):
+        return self(*indices).conjugate()
+    
 
 # To be used to specify the statistics of fields
 
