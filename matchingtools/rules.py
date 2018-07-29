@@ -312,4 +312,4 @@ class Cycle(object):
         def odd(x):
             return (x % 2) == 1
 
-        return -1 if odd(len(self.cycle)) else 1
+        return 1 if odd(len(self.cycle)) else -1
