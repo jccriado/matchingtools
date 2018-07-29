@@ -404,7 +404,7 @@ class Operator(Conjugable, Convertible, Differentiable):
     def conjugate(self):
         return Operator(
             [tensor.conjugate() for tensor in self.tensors],
-            coefficient=self.coefficient
+            coefficient=self.coefficient.conjugate()
         )
 
     def differentiate(self, index):
