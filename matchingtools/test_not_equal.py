@@ -1,4 +1,5 @@
 from core import ComplexField, Statistics
+from indices import Index
 
 import unittest
 
