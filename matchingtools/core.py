@@ -103,12 +103,12 @@ class Tensor(Conjugable, Convertible, Differentiable):
 
     def __init__(
             self, name, indices, derivatives_indices,
-            _tensor_dimension=0, statistics=Statistics.BOSON
+            dimension=0, statistics=Statistics.BOSON
     ):
         self.name = name
         self.indices = indices
         self.derivatives_indices = derivatives_indices
-        self._tensor_dimension = Fraction(round(2 * _tensor_dimension), 2)
+        self._tensor_dimension = Fraction(round(2 * dimension), 2)
         self.statistics = statistics
 
     @property
@@ -212,7 +212,7 @@ class Constant(Tensor):
             indices=self.indices.copy(),
             # TODO: What is derivatives_indices here?
             derivatives_indices=[],
-            _tensor_dimension=self.dimension,
+            dimension=self._tensor_dimension,
             statistics=self.statistics
         )
 
@@ -226,7 +226,7 @@ class Field(Tensor):
             name=self.name,
             indices=self.indices.copy(),
             derivatives_indices=self.derivatives_indices.copy(),
-            _tensor_dimension=self.dimension,
+            dimension=self._tensor_dimension,
             statistics=self.statistics
         )
 
@@ -259,7 +259,7 @@ class Kdelta(RealConstant):
             name="Kdelta",
             indices=list(indices),
             derivatives_indices=[],
-            _tensor_dimension=0,
+            dimension=0,
             statistics=Statistics.BOSON
         )
 
