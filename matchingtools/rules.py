@@ -70,10 +70,9 @@ class Rule(object):
                     tensor._replace_indices(match.indices_mapping)
                     for tensor in operator.tensors
                 ],
-                Fraction(
-                    operator.coefficient * target.coefficient,
-                    self.pattern.coefficient
-                )
+                operator.coefficient
+                * target.coefficient
+                / self.pattern.coefficient
             )
             for operator in self.replacement.operators
         ])
