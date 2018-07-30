@@ -260,6 +260,7 @@ class Kdelta(RealConstant):
                 "A Kdelta tensor takes exactly 2 indices ({} given)".format(
                     indices_count
                 )
+            )
 
         super().__init__(
             name="Kdelta",
