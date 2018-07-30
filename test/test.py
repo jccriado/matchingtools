@@ -4,7 +4,7 @@ from matchingtools.rules import Rule
 
 
 kappa, mu, sigma = Tensor.make('kappa', 'mu', 'sigma')
-i, j, k, x, y, z = Index.make(*'ijkxyz'.split())
+i, j, k, x, y, z = Index.make(*'i j k x y z'.split())
 
 target = kappa(z) * sigma(i, j) * mu(j) + mu(i, j)
 rule = Rule(
