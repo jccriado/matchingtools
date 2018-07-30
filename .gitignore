@@ -9,3 +9,4 @@ doc/_static
 *.pdf
 *.tex
 *.txt
+*.egg-info
