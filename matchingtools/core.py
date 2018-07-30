@@ -71,7 +71,7 @@ class Convertible(object, metaclass=ABCMeta):
         pass
 
 
-class Tensor(Convertible):
+class Tensor(Conjugable, Convertible, Differentiable):
     """
     Basic building block for operators.
 
@@ -161,7 +161,6 @@ class Tensor(Convertible):
             and isinstance(self, RealMixin) == isinstance(other, RealMixin)
         )
 
-
     def __hash__(self):
         return hash(self.name)
 
@@ -209,13 +208,13 @@ class Tensor(Convertible):
         return [Builder(name, cls, kwargs) for name in names]
 
 
-class Constant(Tensor, Differentiable):
+class Constant(Tensor):
     # TODO: enforce derivatives_indices==[]?
     def differentiate(self, index):
         return 0
 
 
-class Field(Tensor, Differentiable):
+class Field(Tensor):
     def differentiate(self, index):
         diff = self.clone()
         diff.derivative_indices.append(index)
@@ -228,31 +227,40 @@ class RealMixin(object):
         return self
 
 
-class ComplexMixin(object): # TODO: inherit from Tensor?
+class ComplexMixin(object):  # TODO: inherit from Tensor?
     def conjugate(self):
         conjugated = self.clone()
         conjugated.is_conjugated = not self.is_conjugated
         return conjugated
 
 
-class RealConstant(RealMixin, Constant, Conjugable):
+class RealConstant(RealMixin, Constant):
     pass
 
 
-class RealField(RealMixin, Field, Conjugable):
+class RealField(RealMixin, Field):
     pass
 
 
-class ComplexConstant(ComplexMixin, Constant, Conjugable):
+class ComplexConstant(ComplexMixin, Constant):
     pass
 
 
-class ComplexField(ComplexMixin, Field, Conjugable):
+class ComplexField(ComplexMixin, Field):
     pass
 
 
 class Kdelta(RealConstant):
     def __init__(self, *indices):
+        indices_list = list(indices)
+        indices_count = len(indices_list)
+
+        if indices_count != 2:
+            raise ValueError(
+                "A Kdelta tensor takes exactly 2 indices ({} given)".format(
+                    indices_count
+                )
+
         super().__init__(
             name="Kdelta",
             indices=list(indices),
@@ -260,15 +268,6 @@ class Kdelta(RealConstant):
             dimension=0,
             statistics=Statistics.BOSON
         )
-
-        try:
-            assert len(self.indices) == 2
-        except AssertionError:
-            raise ValueError(
-                "A Kdelta tensor takes exactly 2 indices ({} given)".format(
-                    len(self.indices)
-                )
-            )
 
     def clone(self):
         return Kdelta(*self.indices)
