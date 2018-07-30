@@ -27,8 +27,6 @@ class Statistics(Enum):
 
 
 class Conjugable(object, metaclass=ABCMeta):
-    is_conjugated = False
-
     @abstractmethod
     def conjugate(self):
         pass
@@ -73,19 +71,7 @@ class Convertible(object, metaclass=ABCMeta):
         pass
 
 
-class RealMixin(object):
-    def conjugate(self):
-        return self
-
-
-class ComplexMixin(object):
-    def conjugate(self):
-        conjugated = self.clone()
-        conjugated.is_conjugated = not self.is_conjugated
-        return conjugated
-
-
-class Tensor(Conjugable, Convertible, Differentiable):
+class Tensor(Convertible):
     """
     Basic building block for operators.
 
@@ -103,13 +89,15 @@ class Tensor(Conjugable, Convertible, Differentiable):
 
     def __init__(
             self, name, indices, derivatives_indices,
-            dimension=0, statistics=Statistics.BOSON
+            dimension=0, statistics=Statistics.BOSON,
+            is_conjugated=False
     ):
         self.name = name
         self.indices = indices
         self.derivatives_indices = derivatives_indices
         self._tensor_dimension = Fraction(round(2 * dimension), 2)
         self.statistics = statistics
+        self.is_conjugated = is_conjugated
 
     @property
     def dimension(self):
@@ -127,10 +115,12 @@ class Tensor(Conjugable, Convertible, Differentiable):
             for index in reversed(self.derivatives_indices)
         )
         indices_str = ', '.join(map(str, self.indices))
+        conjugate_str = '.c' if self.is_conjugated else ''
 
-        return '{derivatives}{name}({indices})'.format(
+        return '{derivatives}{name}{conjugate}({indices})'.format(
             derivatives=derivatives_str,
             name=self.name,
+            conjugate=conjugate_str,
             indices=indices_str
         )
 
@@ -203,44 +193,29 @@ class Tensor(Conjugable, Convertible, Differentiable):
     def all_indices(self):
         return self.derivatives_indices + self.indices
 
-    @abstractmethod
     def clone(self):
-        pass
+        # TODO: .copy() has been included for indices lists. Is it necessary?
+        return type(self)(
+            name=self.name,
+            indices=self.indices.copy(),
+            derivatives_indices=self.derivatives_indices.copy(),
+            dimension=self._tensor_dimension,
+            statistics=self.statistics,
+            is_conjugated=self.is_conjugated
+        )
 
     @classmethod
     def make(cls, *names, **kwargs):
         return [Builder(name, cls, kwargs) for name in names]
 
 
-class Constant(Tensor):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.derivatives_indices = []
-
-    def clone(self):
-        return type(self)(
-            name=self.name,
-            indices=self.indices.copy(),
-            # TODO: What is derivatives_indices here?
-            derivatives_indices=[],
-            dimension=self._tensor_dimension,
-            statistics=self.statistics
-        )
-
+class Constant(Tensor, Differentiable):
+    # TODO: enforce derivatives_indices==[]?
     def differentiate(self, index):
         return 0
 
 
-class Field(Tensor):
-    def clone(self):
-        return type(self)(
-            name=self.name,
-            indices=self.indices.copy(),
-            derivatives_indices=self.derivatives_indices.copy(),
-            dimension=self._tensor_dimension,
-            statistics=self.statistics
-        )
-
+class Field(Tensor, Differentiable):
     def differentiate(self, index):
         diff = self.clone()
         diff.derivative_indices.append(index)
@@ -248,19 +223,31 @@ class Field(Tensor):
         return diff
 
 
-class RealConstant(RealMixin, Constant):
+class RealMixin(object):
+    def conjugate(self):
+        return self
+
+
+class ComplexMixin(object): # TODO: inherit from Tensor?
+    def conjugate(self):
+        conjugated = self.clone()
+        conjugated.is_conjugated = not self.is_conjugated
+        return conjugated
+
+
+class RealConstant(RealMixin, Constant, Conjugable):
     pass
 
 
-class RealField(RealMixin, Field):
+class RealField(RealMixin, Field, Conjugable):
     pass
 
 
-class ComplexConstant(ComplexMixin, Constant):
+class ComplexConstant(ComplexMixin, Constant, Conjugable):
     pass
 
 
-class ComplexField(ComplexMixin, Field):
+class ComplexField(ComplexMixin, Field, Conjugable):
     pass
 
 
