@@ -1,10 +1,12 @@
-from core import ComplexField, Statistics
-
 import unittest
 
-i, j = Index.make('i', 'j')
+from matchingtools.core import ComplexField, Statistics
+from matchingtools.indices import Index
 
+
+i, j = Index.make('i', 'j')
 x, y = ComplexField.make('x', 'y', statistics=Statistics.BOSON, dimension=1)
+
 
 class TestNotEqual(unittest.TestCase):
     def test_different_index(self):

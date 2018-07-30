@@ -13,12 +13,12 @@ from abc import ABCMeta, abstractmethod
 from collections import Counter
 from enum import Enum
 from fractions import Fraction
-from functools import partial
 from itertools import permutations
 from operator import add, __eq__
 
-import rules
-from lsttools import LookUpTable
+from matchingtools.lsttools import LookUpTable
+from matchingtools.matches import Match
+from matchingtools.utils import Permutation
 
 
 class Statistics(Enum):
@@ -150,16 +150,27 @@ class Tensor(Conjugable, Convertible, Differentiable):
     __rmul__ = __mul__
 
     def __eq__(self, other):
+        return (
+            self.does_match(other)
+            and self.indices == other.indices
+            and self.derivatives_indices == other.derivatives_indices
+            and self._tensor_dimension == other._tensor_dimension
+            and self.dimension == other.dimension
+            and self.statistics == other.statistics
+        )
+
+    def does_match(self, other):
         if not isinstance(other, Tensor):
             return False
 
         return (
             self.name == other.name
-            and self.indices == other.indices
-            and self.derivatives_indices == other.derivatives_indices
-            and self.dimension == other.dimension
             and self.statistics == other.statistics
+            and self.is_conjugated == other.is_conjugated
+            and isinstance(self, Constant) == isinstance(other, Constant)
+            and isinstance(self, RealMixin) == isinstance(other, RealMixin)
         )
+
 
     def __hash__(self):
         return hash(self.name)
@@ -437,14 +448,14 @@ class Operator(Conjugable, Convertible, Differentiable):
             other = other._to_operator()
         except Convertible.DemoteError:
             return False
-        
+
         if abs(self.coefficient) != abs(other.coefficient):
             return False
 
         if len(self.tensors) != len(other.tensors):
             return False
 
-        match = rules.Match.match_operators(self, other)
+        match = Match.match_operators(self, other)
 
         if match is None:
             return False
@@ -466,7 +477,7 @@ class Operator(Conjugable, Convertible, Differentiable):
             tensor for tensor in self.tensors
             if tensor.statistics == Statistics.FERMION
         ]
-        sign = rules.Permutation.compare(
+        sign = Permutation.compare(
             own_fermions,
             [match.tensors_mapping[tensor] for tensor in own_fermions]
         ).parity
@@ -623,7 +634,7 @@ class Builder(object):
         self.name = name
         self.cls = cls
         self.kwargs = kwargs
-                
+
     def __call__(self, *indices):
         return self.cls(
             name=self.name,
@@ -634,7 +645,7 @@ class Builder(object):
 
     def c(self, *indices):
         return self(*indices).conjugate()
-    
+
 
 # To be used to specify the statistics of fields
 
