@@ -14,10 +14,12 @@ class Rule(object):
         self.replacement = replacement._to_operator_sum()
 
     def _apply_to_operator(self, target):
-        match = Match.match_operators(self.pattern, target)
+        matches = Match.match_operators(self.pattern, target)
 
-        if match is None:
+        if matches is None:
             return target
+
+        match = next(matches)
 
         matched = [
             match.tensors_mapping[pattern_tensor]
