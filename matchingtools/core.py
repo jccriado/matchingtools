@@ -445,9 +445,9 @@ class Operator(Conjugable, Convertible, Differentiable):
         if len(self.tensors) != len(other.tensors):
             return False
 
-        match = Match.match_operators(self, other)
+        matches = Match.all_matches(self, other)
 
-        if match is None:
+        if len(matches) == 0:
             return False
 
         # TODO: make sure this previous code isn't the right solution:
@@ -456,12 +456,18 @@ class Operator(Conjugable, Convertible, Differentiable):
         #       return False
         # ---
         # it's been substituted by this:
-        for tensor in self.tensors:
-            for index in tensor.indices:
-                is_free = self.is_free_index(index)
-                if is_free and index in match.indices_mapping:
-                    if index != match.indices_mapping[index]:
-                        return False
+        free_indices_coincide = []
+        for match in matches:
+            free_indices_coincide.append(True)
+            for tensor in self.tensors:
+                for index in tensor.indices:
+                    is_free = self.is_free_index(index)
+                    if is_free and index in match.indices_mapping:
+                        if index != match.indices_mapping[index]:
+                            free_indices_coincide[-1] = False
+                            
+        if not any(free_indices_coincide):
+            return False
 
         own_fermions = [
             tensor for tensor in self.tensors
