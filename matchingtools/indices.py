@@ -12,6 +12,8 @@ class Index(object):
     def __str__(self):
         return self.name
 
+    __repr__ = __str__
+
     def __hash__(self):
         return hash(self._id)
 

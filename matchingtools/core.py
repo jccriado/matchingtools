@@ -438,29 +438,28 @@ class Operator(Conjugable, Convertible, Differentiable):
         if len(self.tensors) != len(other.tensors):
             return False
 
-        matches = Match.all_matches(self, other)
+        matches = Match.match_operators(self, other)
 
-        if len(matches) == 0:
+        if matches is None:
             return False
 
-        # TODO: make sure this previous code isn't the right solution:
-        #   for index, associate in match.indices_mapping.items():
-        #     if index != associate:
-        #       return False
-        # ---
-        # it's been substituted by this:
-        for match in matches:
-            free_indices_coincide = True
-            for tensor in self.tensors:
-                for index in tensor.indices:
-                    is_free = self.is_free_index(index)
-                    if is_free and index in match.indices_mapping:
-                        if index != match.indices_mapping[index]:
-                            free_indices_coincide = False
-            if free_indices_coincide:
+        match = None
+
+        def is_valid_match(match):
+            for free_index in self.free_indices:
+                # a free index is mapped to a different free index (!)
+                if free_index != match.indices_mapping[free_index]:
+                    return False
+
+            # every free index coincides
+            return True
+
+        for attempt in matches:
+            if is_valid_match(attempt):
+                match = attempt
                 break
         else:
-            return False            
+            return False  # no valid match found
 
         own_fermions = [
             tensor for tensor in self.tensors
@@ -492,7 +491,7 @@ class OperatorSum(Conjugable, Convertible, Differentiable):
     def __init__(self, operators=None):
         if operators is None:
             operators = []
-                
+
         self.operators = [operator._to_operator() for operator in operators]
 
         self._simplify()
