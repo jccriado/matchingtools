@@ -39,7 +39,6 @@ class Differentiable(object, metaclass=ABCMeta):
 
     def nth_derivative(self, indices):
         differentiated = self
-        # TODO: decide whether to use indices of reversed(indices)
         for index in indices:
             differentiated = differentiated.differentiate(index)
 
