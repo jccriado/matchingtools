@@ -163,5 +163,3 @@ class Match(object):  # TODO make sure things that don't match don't match
                 continue
 
             yield Match(tensor_mapping, indices_mapping)
-
-        return None
