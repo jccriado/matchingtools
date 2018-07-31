@@ -155,8 +155,11 @@ class Tensor(Conjugable, Convertible, Differentiable):
 
         return (
             self.name == other.name
+            and self.dimension == other.dimension
             and self.statistics == other.statistics
             and self.is_conjugated == other.is_conjugated
+            and len(self.indices) == len(other.indices)
+            and len(self.derivatives_indices) == len(other.derivatives_indices)
             and isinstance(self, Constant) == isinstance(other, Constant)
             and isinstance(self, RealMixin) == isinstance(other, RealMixin)
         )
