@@ -499,9 +499,7 @@ class OperatorSum(Conjugable, Convertible, Differentiable):
     def __init__(self, operators=None):
         if operators is None:
             operators = []
-        # TODO: understand why this has to be done in order not to have
-        # elements of self.operators that are OperatorSum. This seems like
-        # a there's a bug somewhere else.
+                
         self.operators = [operator._to_operator() for operator in operators]
 
         self._simplify()
@@ -552,7 +550,7 @@ class OperatorSum(Conjugable, Convertible, Differentiable):
     __rmul__ = __mul__
 
     def __neg__(self):
-        return OperatorSum([-op for op in self.operators])
+        return sum(-op for op in self.operators)
 
     def __eq__(self, other):
         if len(self.operators) != len(other.operators):
@@ -601,15 +599,14 @@ class OperatorSum(Conjugable, Convertible, Differentiable):
         ]
 
     def conjugate(self):
-        return OperatorSum([
+        return sum(
             operator.conjugate() for operator in self.operators
-        ])
+        )
 
     def differentiate(self, index):
-        # TODO: missing concat?
-        return OperatorSum([
+        return sum(
             operator.differentiate(index) for operator in self.operators
-        ])
+        )
 
     def filter_by_max_dimension(self, max_dimension):
         return OperatorSum([
