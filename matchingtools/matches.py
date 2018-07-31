@@ -2,6 +2,8 @@
 
 import itertools
 
+from matchingtools.utils import groupby
+
 
 class Match(object):  # TODO make sure things that don't match don't match
     """
@@ -47,31 +49,46 @@ class Match(object):  # TODO make sure things that don't match don't match
 
     @staticmethod
     def _map_tensors(pattern_operator, target_operator):
-        associates = {
-            pattern_tensor: [] for pattern_tensor in pattern_operator.tensors
-        }
-
-        remaining_target_tensors = target_operator.tensors.copy()
-        for pattern_tensor in pattern_operator.tensors:
-            for target_tensor in remaining_target_tensors:
-                if pattern_tensor.does_match(target_tensor):
-                    associates[pattern_tensor].append(target_tensor)
-                    remaining_target_tensors.remove(target_tensor)
-                    break
-            else:
-                return None
-
-        return (
-            {
-                tensor: associate
-                for tensor, associate in zip(
-                    pattern_operator.tensors, mapping
-                )
-            } for mapping in itertools.product(
-                *[associates[tensor] for tensor in pattern_operator.tensors]
-            )
+        Tensor = type(pattern_operator.tensors[0])  # not true, but good enough
+        pattern_eqclasses = groupby(
+            pattern_operator.tensors,
+            Tensor.does_match
         )
 
+        associates = {
+            pattern_eqclass[0]: []
+            for pattern_eqclass in pattern_eqclasses
+        }
+
+        for target_tensor in target_operator.tensors:
+            for pattern_representative in associates:
+                if pattern_representative.does_match(target_tensor):
+                    associates[pattern_representative].append(target_tensor)
+                    break
+
+        partial_mappings = [
+            [
+                list(
+                    zip(
+                        pattern_eqclass,
+                        image
+                    )
+                ) for base_image in itertools.combinations(
+                    associates[pattern_eqclass[0]],
+                    len(pattern_eqclass)
+                ) for image in itertools.permutations(base_image)
+            ] for pattern_eqclass in pattern_eqclasses
+        ]
+
+        mappings = (
+            dict(
+                itertools.chain.from_iterable(
+                    local_mappings_choice
+                )
+            ) for local_mappings_choice in itertools.product(*partial_mappings)
+        )
+
+        return mappings
 
     @staticmethod
     def _map_tensor_indices(I, J):
