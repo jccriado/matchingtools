@@ -343,9 +343,7 @@ class Operator(Conjugable, Convertible, Differentiable):
         rest = []
 
         for tensor in self.tensors:
-            # TODO: understand this, sometimes:
-            # type(tensor) == Kdelta AND isinstance(tensor, Kdelta) == False
-            if tensor.name == "Kdelta":
+            if isinstance(tensor, Kdelta):
                 kdeltas.append(tensor)
             else:
                 rest.append(tensor.clone())
@@ -427,12 +425,8 @@ class Operator(Conjugable, Convertible, Differentiable):
         be equal. Reorderings allowed.
         """
 
-        # TODO: understand this, sometimes:
-        # type(other) == Operator AND isinstance(other, Convertible) == False
-        # ---
-        # When this is solved, uncomment the following two lines:
-        #   if not isinstance(other, Convertible):
-        #     return False
+        if not isinstance(other, Convertible):
+            return False
 
         try:
             other = other._to_operator()
