@@ -95,3 +95,19 @@ class Cycle(object):
             return (x % 2) == 1
 
         return 1 if odd(len(self.cycle)) else -1
+
+
+def groupby(iterable, on):
+    groups = []
+    similar = on
+
+    for item in iterable:
+        for group in groups:
+            if similar(item, group[0]):
+                group.append(item)
+                break
+        else:
+            # does not belong to any known group
+            groups.append([item])
+
+    return groups
