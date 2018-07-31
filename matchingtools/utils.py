@@ -16,12 +16,19 @@ class Permutation(object):
                 "Unable to build permutation: samples have different sizes"
             )
 
-        try:
-            new_positions = [transformed.index(item) for item in original]
-        except ValueError as e:
-            raise ValueError(
-                "Unable to build permutation: elements do not match"
-            ) from e
+        new_positions = []
+        remaining_positions = list(range(len(transformed)))
+        for item in original:
+            for position in remaining_positions:
+                if transformed[position] == item:
+                    found_position = position
+                    break
+            else:
+                raise ValueError(
+                    "Unable to build permutation: elements do not match"   
+                )
+            new_positions.append(found_position)
+            remaining_positions.remove(found_position)
 
         return Permutation(new_positions)
 
