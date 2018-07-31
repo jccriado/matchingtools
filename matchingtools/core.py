@@ -456,18 +456,18 @@ class Operator(Conjugable, Convertible, Differentiable):
         #       return False
         # ---
         # it's been substituted by this:
-        free_indices_coincide = []
         for match in matches:
-            free_indices_coincide.append(True)
+            free_indices_coincide = True
             for tensor in self.tensors:
                 for index in tensor.indices:
                     is_free = self.is_free_index(index)
                     if is_free and index in match.indices_mapping:
                         if index != match.indices_mapping[index]:
-                            free_indices_coincide[-1] = False
-                            
-        if not any(free_indices_coincide):
-            return False
+                            free_indices_coincide = False
+            if free_indices_coincide:
+                break
+        else:
+            return False            
 
         own_fermions = [
             tensor for tensor in self.tensors
