@@ -162,6 +162,6 @@ class Match(object):  # TODO make sure things that don't match don't match
             if indices_mapping is None:
                 continue
 
-            return Match(tensor_mapping, indices_mapping)
+            yield Match(tensor_mapping, indices_mapping)
 
         return None
