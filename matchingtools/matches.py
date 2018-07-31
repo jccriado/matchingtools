@@ -145,12 +145,7 @@ class Match(object):  # TODO make sure things that don't match don't match
         return indices_mapping
 
     @staticmethod
-    def match_operators(pattern, target):
-        tensors_mappings = Match._map_tensors(pattern, target)
-
-        if tensors_mappings is None:
-            return None
-
+    def _match_operators_iterable(tensors_mappings):
         for tensor_mapping in tensors_mappings:
             """
             Testing if a certain possible tensor mapping leads to a viable
@@ -163,3 +158,20 @@ class Match(object):  # TODO make sure things that don't match don't match
                 continue
 
             yield Match(tensor_mapping, indices_mapping)
+        
+    
+    @staticmethod
+    def match_operators(pattern, target):
+        tensors_mappings = list(Match._map_tensors(pattern, target))
+
+        if tensors_mappings is None:
+            return None
+
+        try:
+            next(Match._match_operators_iterable(tensors_mappings))
+            return Match._match_operators_iterable(tensors_mappings)
+        except StopIteration:
+            return None
+
+
+        
