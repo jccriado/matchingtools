@@ -165,23 +165,3 @@ class Match(object):  # TODO make sure things that don't match don't match
             yield Match(tensor_mapping, indices_mapping)
 
         return None
-
-    @staticmethod
-    def all_matches(pattern, target):
-        tensors_mappings = Match._map_tensors(pattern, target)
-        matches = []
-
-        for tensor_mapping in tensors_mappings:
-            """
-            Testing if a certain possible tensor mapping leads to a viable
-            indices mapping. If there is any inconsistency in the indices
-            mapping we can discard it right away.
-            """
-            indices_mapping = Match._map_operator_indices(tensor_mapping)
-
-            if indices_mapping is None:
-                continue
-
-            matches.append(Match(tensor_mapping, indices_mapping))
-
-        return matches
