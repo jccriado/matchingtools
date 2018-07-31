@@ -39,7 +39,6 @@ class Differentiable(object, metaclass=ABCMeta):
 
     def nth_derivative(self, indices):
         differentiated = self
-        # TODO: decide whether to use indices of reversed(indices)
         for index in indices:
             differentiated = differentiated.differentiate(index)
 
@@ -343,9 +342,7 @@ class Operator(Conjugable, Convertible, Differentiable):
         rest = []
 
         for tensor in self.tensors:
-            # TODO: understand this, sometimes:
-            # type(tensor) == Kdelta AND isinstance(tensor, Kdelta) == False
-            if tensor.name == "Kdelta":
+            if isinstance(tensor, Kdelta):
                 kdeltas.append(tensor)
             else:
                 rest.append(tensor.clone())
@@ -427,12 +424,8 @@ class Operator(Conjugable, Convertible, Differentiable):
         be equal. Reorderings allowed.
         """
 
-        # TODO: understand this, sometimes:
-        # type(other) == Operator AND isinstance(other, Convertible) == False
-        # ---
-        # When this is solved, uncomment the following two lines:
-        #   if not isinstance(other, Convertible):
-        #     return False
+        if not isinstance(other, Convertible):
+            return False
 
         try:
             other = other._to_operator()
@@ -498,9 +491,7 @@ class OperatorSum(Conjugable, Convertible, Differentiable):
     def __init__(self, operators=None):
         if operators is None:
             operators = []
-        # TODO: understand why this has to be done in order not to have
-        # elements of self.operators that are OperatorSum. This seems like
-        # a there's a bug somewhere else.
+
         self.operators = [operator._to_operator() for operator in operators]
 
         self._simplify()
@@ -551,7 +542,7 @@ class OperatorSum(Conjugable, Convertible, Differentiable):
     __rmul__ = __mul__
 
     def __neg__(self):
-        return OperatorSum([-op for op in self.operators])
+        return sum(-op for op in self.operators)
 
     def __eq__(self, other):
         if len(self.operators) != len(other.operators):
@@ -600,15 +591,14 @@ class OperatorSum(Conjugable, Convertible, Differentiable):
         ]
 
     def conjugate(self):
-        return OperatorSum([
+        return sum(
             operator.conjugate() for operator in self.operators
-        ])
+        )
 
     def differentiate(self, index):
-        # TODO: missing concat?
-        return OperatorSum([
+        return sum(
             operator.differentiate(index) for operator in self.operators
-        ])
+        )
 
     def filter_by_max_dimension(self, max_dimension):
         return OperatorSum([
