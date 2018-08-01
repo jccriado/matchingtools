@@ -1,9 +1,16 @@
+from matchingtools.indices import Index
+from matchingtools.core import OperatorSum
 from matchingtools.rules import Rule
 
 class EOMSolution(object):
-    def __init__(self, field_name, replacement):
-        self.field_name = field_name
+    def __init__(self, field, replacement):
+        self.field = field
         self.replacement = replacement
+
+    def __str__(self):
+        return str("({} := {})".format(self.field, self.replacement))
+
+    __repr__ = __str__
 
     def _rule(self, tensor):
         """ 
@@ -11,9 +18,13 @@ class EOMSolution(object):
         replacement. The indices of these derivatives are given by the 
         indices of the derivatives of the tensor.
         """
+        derivatives_indices = [
+            Index(derivative_index.name)
+            for derivative_index in tensor.derivatives_indices
+        ]
         return Rule(
-            tensor,
-            self.replacement.nth_derivative(tensor.derivatives_indices)
+            self.field.nth_derivative(derivatives_indices),
+            self.replacement.nth_derivative(derivatives_indices)
         )
         
     def _substitute_in_operator(self, operator):
@@ -22,17 +33,20 @@ class EOMSolution(object):
         derivative of the replacement.
         """
         for tensor in operator.tensors:
-            if tensor.name == self.field_name:
+            if (tensor.name == self.field.name
+                and tensor.is_conjugated == self.field.is_conjugated):
                 return self._rule(tensor).apply(operator)
-            
         return operator._to_operator_sum()
         
     def substitute_once(self, target, max_dimension):
-        """ Substitute once in each of operator of target. """
+        """ Substitute once in each operator of target. """
         return sum(
-            self._substitute_in_operator(operator)
-            .filter_by_max_dimension(max_dimension)
-            for operator in target._to_operator_sum().operators
+            (
+                self._substitute_in_operator(operator)
+                .filter_by_max_dimension(max_dimension)
+                for operator in target._to_operator_sum().operators
+            ),
+            OperatorSum()
         )
 
     def is_in(self, target):
@@ -41,7 +55,7 @@ class EOMSolution(object):
         """
         for operator in target.operators:
             for tensor in operator.tensors:
-                if tensor.name == self.field_name:
+                if tensor.name == self.field.name:
                     return True
 
         return False
@@ -50,6 +64,11 @@ class EOMSolution(object):
 class EOMSolutionSystem(object):
     def __init__(self, solutions):
         self.solutions = solutions
+
+    def __str__(self):
+        return str(self.solutions)
+
+    __repr__ = __str__
         
     def substitute(self, target, max_dimension):
         """ 
@@ -72,7 +91,7 @@ class EOMSolutionSystem(object):
         """
         new_solution = EOMSolutionSystem([
             EOMSolution(
-                target_solution.field_name,
+                target_solution.field,
                 self.substitute(target_solution.replacement, max_dimension)
                 .filter_by_max_dimension(max_dimension)
             )

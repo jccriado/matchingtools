@@ -93,5 +93,9 @@ class Rule(object):
         target = target._to_operator_sum()
 
         return sum(
-            self._apply_to_operator(operator) for operator in target.operators
+            (
+                self._apply_to_operator(operator)
+                for operator in target.operators
+            ),
+            OperatorSum()
         )

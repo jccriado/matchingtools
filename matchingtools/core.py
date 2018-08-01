@@ -180,7 +180,7 @@ class Tensor(Conjugable, Convertible, Differentiable, Functional):
                  for i, j in zip(self.all_indices, tensor.all_indices)]
             )
         
-        return 0
+        return OperatorSum()
                 
 
     def _replace_indices(self, indices_mapping):
@@ -218,7 +218,7 @@ class Tensor(Conjugable, Convertible, Differentiable, Functional):
 class Constant(Tensor):
     # TODO: enforce derivatives_indices==[]?
     def differentiate(self, index):
-        return 0
+        return OperatorSum()
 
 
 class Field(Tensor):
@@ -360,8 +360,16 @@ class Operator(Conjugable, Convertible, Differentiable, Functional):
             if both_fermions:
                 sign = sign * (-1)
 
+        if acc * self.coefficient == 0:
+            return OperatorSum()
+                
         return acc * self.coefficient
 
+    def _replace_indices(self, indices_mapping):
+        return Operator([
+            tensor._replace_indices(indices_mapping)
+            for tensor in self.tensors
+        ])
 
     def _simplify(self):
         if self.coefficient == 0:
@@ -460,6 +468,9 @@ class Operator(Conjugable, Convertible, Differentiable, Functional):
 
             acc += left * diff * right
 
+        if acc * self.coefficient == 0:
+            return OperatorSum()
+        
         return acc * self.coefficient
 
     def __eq__(self, other):
@@ -587,10 +598,12 @@ class OperatorSum(Conjugable, Convertible, Differentiable, Functional):
     __rmul__ = __mul__
 
     def __neg__(self):
-        return sum(-op for op in self.operators)
+        return sum((-op for op in self.operators), OperatorSum())
 
     def __eq__(self, other):
         if not isinstance(other, Convertible):
+            if other == 0 and len(self.operators) == 0:
+                return True
             return False
         
         other = other._to_operator_sum()
@@ -624,9 +637,18 @@ class OperatorSum(Conjugable, Convertible, Differentiable, Functional):
 
     def functional_derivative(self, tensor):
         return sum(
-            operator.functional_derivative(tensor)
-            for operator in self.operators
+            (
+                operator.functional_derivative(tensor)
+                for operator in self.operators
+            ),
+            OperatorSum()
         )
+
+    def _replace_indices(self, indices_mapping):
+        return OperatorSum([
+            operator._replace_indices(indices_mapping)
+            for operator in self.operators
+        ])
 
     def variation(self, tensor):
         max_derivatives = max(
@@ -637,11 +659,14 @@ class OperatorSum(Conjugable, Convertible, Differentiable, Functional):
         indices_derivatives = [Index('mu') for n in range(max_derivatives)]
         
         return sum(
-            (-1) ** len(indices) * 
-            self.functional_derivative(
-                tensor.nth_derivative(reversed(indices))
-            ).nth_derivative(indices)
-            for indices in inits(indices_derivatives)
+            (
+                (-1) ** len(indices) *
+                self.functional_derivative(
+                    tensor.nth_derivative(reversed(indices))
+                ).nth_derivative(indices)
+                for indices in inits(indices_derivatives)
+            ),
+            OperatorSum()
         )
 
     def _simplify(self):
@@ -664,12 +689,14 @@ class OperatorSum(Conjugable, Convertible, Differentiable, Functional):
 
     def conjugate(self):
         return sum(
-            operator.conjugate() for operator in self.operators
+            (operator.conjugate() for operator in self.operators),
+            OperatorSum()
         )
 
     def differentiate(self, index):
         return sum(
-            operator.differentiate(index) for operator in self.operators
+            (operator.differentiate(index) for operator in self.operators),
+            OperatorSum()
         )
 
     def filter_by_max_dimension(self, max_dimension):
@@ -683,8 +710,6 @@ def D(index, convertible):
     """
     Interface for the creation of tensors with derivatives applied.
     """
-    if convertible is 0:
-        return 0
     return convertible.differentiate(index)
 
 

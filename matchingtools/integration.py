@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 
 from matchingtools.indices import Index
-from matchingtools.core import RealConstant, RealField, D, Statistics, Operator
+from matchingtools.core import RealConstant, RealField, D, Statistics, Operator, OperatorSum
 from matchingtools.eomsolutions import EOMSolution, EOMSolutionSystem
 from matchingtools.lsttools import concat, iterate
 
@@ -129,7 +129,8 @@ class Scalar(HeavyField):
                 minus_D2_over_M2,
                 -self.mass ** (-2) * target,
                 round(max_dimension / 2)
-            )
+            ),
+            OperatorSum()
         )
 
     def eom_solutions(self, interaction_lagrangian, max_dimension):
@@ -138,24 +139,103 @@ class Scalar(HeavyField):
             
             return [
                 EOMSolution(
-                    self.field.name,
+                    self.field,
                     -self.propagator(variation, max_dimension)
                 )
             ]
         
         else:
-            variation = interaction_lagrangian.variation(field)
+            variation = interaction_lagrangian.variation(self.field)
             conjugate_variation = interaction_lagrangian.variation(
                 self.field.conjugate()
             )
+
+            return [
+                EOMSolution(
+                    self.field,
+                    -self.propagator(conjugate_variation, max_dimension)
+                ),
+                EOMSolution(
+                    self.field.conjugate(),
+                    -self.propagator(variation, max_dimension)
+                )
+            ]
+
+        
+class Vector(HeavyField):
+    def __init__(self, field, vector_index, flavor_index=None):
+        self.field = field
+        self.vector_index = vector_index
+        self.mass = Mass(
+            field_name=field.name,
+            index=flavor_index,
+            exponent=1
+        )
+
+    def quadratic_terms(self):
+        factor = 1/2 if isinstance(self.field, RealField) else 1
+
+        mu = self.vector_index
+        nu = Index(self.vector_index.name)
+        
+        field_mu = self.field
+        field_nu = self.field._replace_indices({mu: nu})
+        
+        kinetic_terms = (
+            - D(mu, field_nu.conjugate()) * D(mu, field_nu)
+            + D(mu, field_nu.conjugate()) * D(nu, field_mu)
+        )
+        mass_term = self.mass**2 * field_mu.conjugate() * field_mu
+        
+        return factor * (kinetic_terms + mass_term)
+
+    def propagator(self, target, max_dimension):
+        nu = self.vector_index
+        
+        def diff_op(subtarget):
+            mu = Index(nu.name)
+            subtarget = subtarget.filter_by_max_dimension(max_dimension - 2)
+
+            return self.mass ** (-2) * (
+                D(mu, D(nu, subtarget._replace_indices({nu: mu})))
+                + D(mu, D(mu, subtarget))
+            )
+
+        return sum(
+            iterate(
+                diff_op,
+                self.mass ** (-2) * target,
+                round(max_dimension / 2)
+            ),
+            OperatorSum()
+        )
+
+    def eom_solutions(self, interaction_lagrangian, max_dimension):
+        if isinstance(self.field, RealField):
+            variation = interaction_lagrangian.variation(self.field)
             
             return [
                 EOMSolution(
-                    self.field.name,
-                    -self.propagator(conjugate_variation, max_dimension)),
+                    self.field,
+                    -self.propagator(variation, max_dimension)
+                )
+            ]
+        
+        else:
+            variation = interaction_lagrangian.variation(self.field)
+            conjugate_variation = interaction_lagrangian.variation(
+                self.field.conjugate()
+            )
+
+            return [
                 EOMSolution(
-                    self.field.conjugate().name,
-                    -self.propagator(variation, max_dimension))
+                    self.field,
+                    -self.propagator(conjugate_variation, max_dimension)
+                ),
+                EOMSolution(
+                    self.field.conjugate(),
+                    -self.propagator(variation, max_dimension)
+                )
             ]
 
 
@@ -168,8 +248,8 @@ def integrate_out(interaction_lagrangian, heavy_fields, max_dimension):
     ).solve(max_dimension - 1)
     
     quadratic_lagrangian = sum(
-        heavy_field.quadratic_terms()
-        for heavy_field in heavy_fields
+        (heavy_field.quadratic_terms() for heavy_field in heavy_fields),
+        OperatorSum()
     )
 
     full_lagrangian = quadratic_lagrangian + interaction_lagrangian
@@ -178,7 +258,9 @@ def integrate_out(interaction_lagrangian, heavy_fields, max_dimension):
         map(
             Mass._simplify_product,
             eom_solutions.substitute(full_lagrangian, max_dimension).operators
-        )
+        ),
+        OperatorSum()
     )
 
     
+eta = RealConstant.make('eta')
