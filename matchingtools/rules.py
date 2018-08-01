@@ -71,7 +71,7 @@ class Rule(object):
 
                     if not is_mapped and is_contracted and name_clashes:
                         # name could be repeated, but new_index is unique
-                        new_index = Index(index.name + "'")
+                        new_index = Index(index.name)
                         match.indices_mapping[index] = new_index
 
         adapted_replacement = OperatorSum([
