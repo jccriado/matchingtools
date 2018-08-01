@@ -590,6 +590,9 @@ class OperatorSum(Conjugable, Convertible, Differentiable, Functional):
         return sum(-op for op in self.operators)
 
     def __eq__(self, other):
+        if not isinstance(other, Convertible):
+            return False
+        
         other = other._to_operator_sum()
         
         if len(self.operators) != len(other.operators):
@@ -676,11 +679,13 @@ class OperatorSum(Conjugable, Convertible, Differentiable, Functional):
         ])
 
 
-def D(index, tensor):
+def D(index, convertible):
     """
     Interface for the creation of tensors with derivatives applied.
     """
-    return tensor.differentiate(index)
+    if convertible is 0:
+        return 0
+    return convertible.differentiate(index)
 
 
 class Builder(object):
