@@ -21,14 +21,25 @@ class Rule(object):
 
         match = next(matches)
 
-        matched = [
-            match.tensors_mapping[pattern_tensor]
-            for pattern_tensor in self.pattern.tensors
-        ]
-        rest = [
-            target_tensor for target_tensor in target.tensors
-            if target_tensor not in matched
-        ]
+        # TODO: It seems that there's a bug here: target_tensor not in matched
+        # causes the problem.
+        #
+        # matched = [
+        #     match.tensors_mapping[pattern_tensor]
+        #     for pattern_tensor in self.pattern.tensors
+        # ]
+        # rest = [
+        #     target_tensor for target_tensor in target.tensors
+        #     if target_tensor not in matched
+        # ]
+        #
+        # Using this code instead:
+        matched = []
+        rest = target.tensors.copy()
+        for pattern_tensor in self.pattern.tensors:
+            mapped = match.tensors_mapping[pattern_tensor]
+            matched.append(mapped)
+            rest.remove(mapped)
 
         # compute the new operator tensors list
         reordered_target = matched + rest
@@ -75,7 +86,7 @@ class Rule(object):
             )
             for operator in self.replacement.operators
         ])
-
+        
         return sign * adapted_replacement * Operator(rest)
 
     def apply(self, target):
