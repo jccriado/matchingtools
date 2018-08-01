@@ -16,9 +16,10 @@ from fractions import Fraction
 from itertools import permutations
 from operator import add, __eq__
 
-from matchingtools.lsttools import LookUpTable
+from matchingtools.lsttools import LookUpTable, inits
 from matchingtools.matches import Match
 from matchingtools.utils import Permutation
+from matchingtools.indices import Index
 
 
 class Statistics(Enum):
@@ -43,6 +44,12 @@ class Differentiable(object, metaclass=ABCMeta):
             differentiated = differentiated.differentiate(index)
 
         return differentiated
+
+
+class Functional(object, metaclass=ABCMeta):
+    @abstractmethod
+    def functional_derivative(self, tensor):
+        pass
 
 
 class Convertible(object, metaclass=ABCMeta):
@@ -70,7 +77,7 @@ class Convertible(object, metaclass=ABCMeta):
         pass
 
 
-class Tensor(Conjugable, Convertible, Differentiable):
+class Tensor(Conjugable, Convertible, Differentiable, Functional):
     """
     Basic building block for operators.
 
@@ -133,6 +140,9 @@ class Tensor(Conjugable, Convertible, Differentiable):
     def __neg__(self):
         return -self._to_operator()
 
+    def __sub__(self, other):
+        return self._to_operator_sum() - other
+
     def __mul__(self, other):
         return self._to_operator_sum() * other
 
@@ -140,27 +150,12 @@ class Tensor(Conjugable, Convertible, Differentiable):
 
     def __eq__(self, other):
         return (
-            self.does_match(other)
+            Match.tensors_do_match(self, other)
             and self.indices == other.indices
             and self.derivatives_indices == other.derivatives_indices
             and self._tensor_dimension == other._tensor_dimension
             and self.dimension == other.dimension
             and self.statistics == other.statistics
-        )
-
-    def does_match(self, other):
-        if not isinstance(other, Tensor):
-            return False
-
-        return (
-            self.name == other.name
-            and self.dimension == other.dimension
-            and self.statistics == other.statistics
-            and self.is_conjugated == other.is_conjugated
-            and len(self.indices) == len(other.indices)
-            and len(self.derivatives_indices) == len(other.derivatives_indices)
-            and isinstance(self, Constant) == isinstance(other, Constant)
-            and isinstance(self, RealMixin) == isinstance(other, RealMixin)
         )
 
     def __hash__(self):
@@ -177,6 +172,16 @@ class Tensor(Conjugable, Convertible, Differentiable):
 
     def _to_operator_sum(self):
         return self._to_operator()._to_operator_sum()
+
+    def functional_derivative(self, tensor):
+        if Match.tensors_do_match(self, tensor):
+            return Operator(
+                [Kdelta(i, j)
+                 for i, j in zip(self.all_indices, tensor.all_indices)]
+            )
+
+        return OperatorSum()
+
 
     def _replace_indices(self, indices_mapping):
         new_tensor = self.clone()
@@ -213,13 +218,13 @@ class Tensor(Conjugable, Convertible, Differentiable):
 class Constant(Tensor):
     # TODO: enforce derivatives_indices==[]?
     def differentiate(self, index):
-        return 0
+        return OperatorSum()
 
 
 class Field(Tensor):
     def differentiate(self, index):
         diff = self.clone()
-        diff.derivative_indices.append(index)
+        diff.derivatives_indices.append(index)
 
         return diff
 
@@ -276,7 +281,7 @@ class Kdelta(RealConstant):
         return Kdelta(*self.indices)
 
 
-class Operator(Conjugable, Convertible, Differentiable):
+class Operator(Conjugable, Convertible, Differentiable, Functional):
     """
     Container for a list of tensors with their indices contracted.
 
@@ -311,6 +316,9 @@ class Operator(Conjugable, Convertible, Differentiable):
 
     __radd__ = __add__
 
+    def __sub__(self, other):
+        return self._to_operator_sum() - other
+
     def __mul__(self, other):
         return self._to_operator_sum() * other
 
@@ -334,6 +342,35 @@ class Operator(Conjugable, Convertible, Differentiable):
     def _to_operator_sum(self):
         return OperatorSum([self])
 
+    def functional_derivative(self, tensor):
+        acc = 0
+        sign = 1
+
+        for pos, self_tensor in enumerate(self.tensors):
+            left = Operator(self.tensors[:pos])
+            diff = self_tensor.functional_derivative(tensor)
+            right = Operator(self.tensors[pos+1:])
+
+            acc += sign * left * diff * right
+
+            both_fermions = (
+                tensor.statistics is Statistics.FERMION
+                and self_tensor.statistics is Statistics.FERMION
+            )
+            if both_fermions:
+                sign = sign * (-1)
+
+        if acc * self.coefficient == 0:
+            return OperatorSum()
+
+        return acc * self.coefficient
+
+    def _replace_indices(self, indices_mapping):
+        return Operator([
+            tensor._replace_indices(indices_mapping)
+            for tensor in self.tensors
+        ])
+
     def _simplify(self):
         if self.coefficient == 0:
             self.tensors = []
@@ -352,6 +389,7 @@ class Operator(Conjugable, Convertible, Differentiable):
         for pos, kdelta in enumerate(kdeltas):
             found_index = False
             for tensor in kdeltas[pos+1:] + rest:
+                # Non-deritative indices
                 for pos, index in enumerate(tensor.indices):
                     i, j = kdelta.indices
                     if index == i:
@@ -364,6 +402,21 @@ class Operator(Conjugable, Convertible, Differentiable):
                         break
                 if found_index:
                     break
+
+                # Derivatives indices
+                for pos, index in enumerate(tensor.derivatives_indices):
+                    i, j = kdelta.indices
+                    if index == i:
+                        tensor.derivatives_indices[pos] = j
+                        found_index = True
+                        break
+                    elif index == j:
+                        tensor.derivatives_indices[pos] = i
+                        found_index = True
+                        break
+                if found_index:
+                    break
+
             if not found_index:
                 remaining_kdeltas.append(kdelta)
 
@@ -415,7 +468,10 @@ class Operator(Conjugable, Convertible, Differentiable):
 
             acc += left * diff * right
 
-        return acc
+        if acc * self.coefficient == 0:
+            return OperatorSum()
+
+        return acc * self.coefficient
 
     def __eq__(self, other):
         """
@@ -478,7 +534,7 @@ class Operator(Conjugable, Convertible, Differentiable):
         return new_operator
 
 
-class OperatorSum(Conjugable, Convertible, Differentiable):
+class OperatorSum(Conjugable, Convertible, Differentiable, Functional):
     """
     Container for lists of operators representing their sum.
 
@@ -542,9 +598,16 @@ class OperatorSum(Conjugable, Convertible, Differentiable):
     __rmul__ = __mul__
 
     def __neg__(self):
-        return sum(-op for op in self.operators)
+        return sum((-op for op in self.operators), OperatorSum())
 
     def __eq__(self, other):
+        if not isinstance(other, Convertible):
+            if other == 0 and len(self.operators) == 0:
+                return True
+            return False
+
+        other = other._to_operator_sum()
+
         if len(self.operators) != len(other.operators):
             return False
 
@@ -572,6 +635,40 @@ class OperatorSum(Conjugable, Convertible, Differentiable):
     def _to_operator_sum(self):
         return self
 
+    def functional_derivative(self, tensor):
+        return sum(
+            (
+                operator.functional_derivative(tensor)
+                for operator in self.operators
+            ),
+            OperatorSum()
+        )
+
+    def _replace_indices(self, indices_mapping):
+        return OperatorSum([
+            operator._replace_indices(indices_mapping)
+            for operator in self.operators
+        ])
+
+    def variation(self, tensor):
+        max_derivatives = max(
+            len(self_tensor.derivatives_indices)
+            for operator in self.operators
+            for self_tensor in operator.tensors
+        )
+        indices_derivatives = [Index('mu') for n in range(max_derivatives)]
+
+        return sum(
+            (
+                (-1) ** len(indices) *
+                self.functional_derivative(
+                    tensor.nth_derivative(reversed(indices))
+                ).nth_derivative(indices)
+                for indices in inits(indices_derivatives)
+            ),
+            OperatorSum()
+        )
+
     def _simplify(self):
         coefficients = LookUpTable()
 
@@ -592,12 +689,14 @@ class OperatorSum(Conjugable, Convertible, Differentiable):
 
     def conjugate(self):
         return sum(
-            operator.conjugate() for operator in self.operators
+            (operator.conjugate() for operator in self.operators),
+            OperatorSum()
         )
 
     def differentiate(self, index):
         return sum(
-            operator.differentiate(index) for operator in self.operators
+            (operator.differentiate(index) for operator in self.operators),
+            OperatorSum()
         )
 
     def filter_by_max_dimension(self, max_dimension):

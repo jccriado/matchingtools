@@ -48,11 +48,21 @@ class Match(object):  # TODO make sure things that don't match don't match
         base.update(addition)
 
     @staticmethod
+    def tensors_do_match(tensor, other):
+        return (
+            tensor.name == other.name
+            and tensor.dimension == other.dimension
+            and tensor.statistics == other.statistics
+            and tensor.is_conjugated == other.is_conjugated
+            and len(tensor.indices) == len(other.indices)
+            and len(tensor.derivatives_indices) == len(other.derivatives_indices)
+        )
+
+    @staticmethod
     def _map_tensors(pattern_operator, target_operator):
-        Tensor = type(pattern_operator.tensors[0])  # not true, but good enough
         pattern_eqclasses = groupby(
             pattern_operator.tensors,
-            Tensor.does_match
+            Match.tensors_do_match
         )
 
         associates = {
@@ -62,7 +72,10 @@ class Match(object):  # TODO make sure things that don't match don't match
 
         for target_tensor in target_operator.tensors:
             for pattern_representative in associates:
-                if pattern_representative.does_match(target_tensor):
+                if Match.tensors_do_match(
+                        pattern_representative,
+                        target_tensor
+                ):
                     associates[pattern_representative].append(target_tensor)
                     break
 
@@ -145,12 +158,7 @@ class Match(object):  # TODO make sure things that don't match don't match
         return indices_mapping
 
     @staticmethod
-    def match_operators(pattern, target):
-        tensors_mappings = Match._map_tensors(pattern, target)
-
-        if tensors_mappings is None:
-            return None
-
+    def _match_operators_iterable(tensors_mappings):
         for tensor_mapping in tensors_mappings:
             """
             Testing if a certain possible tensor mapping leads to a viable
@@ -163,3 +171,20 @@ class Match(object):  # TODO make sure things that don't match don't match
                 continue
 
             yield Match(tensor_mapping, indices_mapping)
+        
+    
+    @staticmethod
+    def match_operators(pattern, target):
+        tensors_mappings = list(Match._map_tensors(pattern, target))
+
+        if tensors_mappings is None:
+            return None
+
+        try:
+            next(Match._match_operators_iterable(tensors_mappings))
+            return Match._match_operators_iterable(tensors_mappings)
+        except StopIteration:
+            return None
+
+
+        

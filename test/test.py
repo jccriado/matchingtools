@@ -15,3 +15,6 @@ rule = Rule(
 print('{} /. {} -> {} = {}'.format(
     target, rule.pattern, rule.replacement, rule.apply(target)
 ))
+
+i1, = Index.make('i')
+print(kappa(i) * mu(i, i1) * sigma(i1))
