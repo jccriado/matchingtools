@@ -9,6 +9,10 @@ def enum_product(*iters):
     return itertools.product(*map(enumerate, iters))
 
 
+def inits(lst):
+    return [lst[:i] for i in range(len(lst) + 1)]
+
+
 def iterate(f, x, n):
     if n > 0:
         iterated_collection = iterate(f, x, n - 1)
@@ -17,6 +21,7 @@ def iterate(f, x, n):
     else:
         return [x]
 
+    
 class LookUpTable(object):
     def __init__(self, items=None):
         if items is None:
