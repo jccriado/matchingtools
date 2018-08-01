@@ -99,8 +99,36 @@ class HeavyField(object, metaclass=ABCMeta):
     def eom_solutions(self, interaction_lagrangian, inverse_mass_order):
         pass
 
+class BosonMixin(object):
+    def eom_solutions(self, interaction_lagrangian, max_dimension):
+        if isinstance(self.field, RealField):
+            variation = interaction_lagrangian.variation(self.field)
+            
+            return [
+                EOMSolution(
+                    self.field,
+                    -self.propagator(variation, max_dimension)
+                )
+            ]
+        
+        else:
+            variation = interaction_lagrangian.variation(self.field)
+            conjugate_variation = interaction_lagrangian.variation(
+                self.field.conjugate()
+            )
+
+            return [
+                EOMSolution(
+                    self.field,
+                    -self.propagator(conjugate_variation, max_dimension)
+                ),
+                EOMSolution(
+                    self.field.conjugate(),
+                    -self.propagator(variation, max_dimension)
+                )
+            ]
     
-class Scalar(HeavyField):
+class Scalar(BosonMixin, HeavyField):
     def __init__(self, field, flavor_index=None):
         self.field = field
         self.mass = Mass(
@@ -133,36 +161,8 @@ class Scalar(HeavyField):
             OperatorSum()
         )
 
-    def eom_solutions(self, interaction_lagrangian, max_dimension):
-        if isinstance(self.field, RealField):
-            variation = interaction_lagrangian.variation(self.field)
-            
-            return [
-                EOMSolution(
-                    self.field,
-                    -self.propagator(variation, max_dimension)
-                )
-            ]
         
-        else:
-            variation = interaction_lagrangian.variation(self.field)
-            conjugate_variation = interaction_lagrangian.variation(
-                self.field.conjugate()
-            )
-
-            return [
-                EOMSolution(
-                    self.field,
-                    -self.propagator(conjugate_variation, max_dimension)
-                ),
-                EOMSolution(
-                    self.field.conjugate(),
-                    -self.propagator(variation, max_dimension)
-                )
-            ]
-
-        
-class Vector(HeavyField):
+class Vector(BosonMixin, HeavyField):
     def __init__(self, field, vector_index, flavor_index=None):
         self.field = field
         self.vector_index = vector_index
@@ -209,34 +209,6 @@ class Vector(HeavyField):
             ),
             OperatorSum()
         )
-
-    def eom_solutions(self, interaction_lagrangian, max_dimension):
-        if isinstance(self.field, RealField):
-            variation = interaction_lagrangian.variation(self.field)
-            
-            return [
-                EOMSolution(
-                    self.field,
-                    -self.propagator(variation, max_dimension)
-                )
-            ]
-        
-        else:
-            variation = interaction_lagrangian.variation(self.field)
-            conjugate_variation = interaction_lagrangian.variation(
-                self.field.conjugate()
-            )
-
-            return [
-                EOMSolution(
-                    self.field,
-                    -self.propagator(conjugate_variation, max_dimension)
-                ),
-                EOMSolution(
-                    self.field.conjugate(),
-                    -self.propagator(variation, max_dimension)
-                )
-            ]
 
 
 def integrate_out(interaction_lagrangian, heavy_fields, max_dimension):
