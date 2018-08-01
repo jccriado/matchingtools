@@ -607,13 +607,6 @@ class OperatorSum(Conjugable, Convertible, Differentiable):
         ])
 
 
-def D(index, tensor):
-    """
-    Interface for the creation of tensors with derivatives applied.
-    """
-    return tensor.differentiate(index)
-
-
 class Builder(object):
     def __init__(self, name, cls, kwargs):
         self.name = name
