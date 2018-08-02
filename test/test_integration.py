@@ -2,22 +2,39 @@ import unittest
 
 from matchingtools.indices import Index
 from matchingtools.core import (
-    RealConstant, RealField, ComplexField, D, Statistics
+    RealConstant, RealField, ComplexField, D, Statistics, Kdelta,
+    epsilon_up, epsilon_down, sigma_vector
 )
-from matchingtools.integration import Scalar, Vector, integrate_out
+from matchingtools.integration import (
+    Scalar, Vector, DiracFermion, integrate_out
+)
 from matchingtools.eomsolutions import EOMSolutionSystem
+from matchingtools.rules import Rule
 
-mu, i, j, a = Index.make('mu', 'i', 'j', 'a')
-m, g, h = RealConstant.make('m', 'g', 'h')
+mu, i, j, k, a = Index.make('mu', 'i', 'j', 'k', 'a')
+alpha, alpha_dot, beta, beta_dot = Index.make(
+    'alpha', 'alpha_dot', 'beta', 'beta_dot'
+)
+m, g, h, y = RealConstant.make('m', 'g', 'h', 'y')
 phi, S = RealField.make('phi', 'S', statistics=Statistics.BOSON, dimension=1)
 phi1, S1, V = ComplexField.make(
     'phi1', 'S1', 'V',
     statistics=Statistics.BOSON, dimension=1
 )
-psi, = ComplexField.make('psi', statistics=Statistics.BOSON, dimension=1)
+psi, FL, FR = ComplexField.make(
+    'psi', 'FL', 'FR',
+    statistics=Statistics.FERMION, dimension=1.5
+)
+
 heavy_S = Scalar(S(i, j, a), flavor_index=a)
 heavy_S1 = Scalar(S1(i, j, a), flavor_index=a)
 heavy_V = Vector(V(mu), mu)
+heavy_F = DiracFermion(
+    'F',
+    FL(alpha, i), FR(beta_dot, i),
+    alpha, beta_dot,
+    flavor_index = i
+)
 
 class TestIntegration(unittest.TestCase):
     def test_integration_real_scalar(self):
@@ -45,14 +62,40 @@ class TestIntegration(unittest.TestCase):
         )
 
     def test_integration_complex_vector(self):
-        interaction = h() * V(mu) * psi.c(a) * D(mu, psi(a))
+        pass
+        # interaction = h() * V(mu) * phi(a) * D(mu, phi(a))
+        # lagrangian = interaction + interaction.conjugate()
+
+        # self.assertEqual(
+        #     integrate_out(lagrangian, [heavy_V], 6),
+        #     - heavy_V.mass**(-2) * h() * h()
+        #     * phi(a) * D(mu, phi(a)) * D(mu, phi(i)) * phi(i)
+        # )
+
+    def test_integration_Dirac_fermion(self):
+        interaction = (
+            y(i, j) * FL.c(alpha_dot, i)
+            * phi(a) * psi(alpha_dot, a, j)
+        )
         lagrangian = interaction + interaction.conjugate()
 
-        self.assertEqual(
-            integrate_out(lagrangian, [heavy_V], 6),
-            - heavy_V.mass**(-2) * h() * h()
-            * psi.c(a) * D(mu, psi(a)) * D(mu, psi.c(i)) * psi(i)
-        )
+        effective_lagrangian = integrate_out(lagrangian, [heavy_F], 6)
+        
+        epsilon_rules = [
+            Rule(epsilon_down(i, j), epsilon_up(j, i)),
+            Rule(epsilon_up(i, j) * epsilon_up(j, k), Kdelta(i, k)),
+            Rule(epsilon_up(i, j) * epsilon_up(k, j), -Kdelta(i, k)),
+            Rule(epsilon_up(j, i) * epsilon_up(j, k), -Kdelta(i, k)),
+            Rule(epsilon_up(j, i) * epsilon_up(k, j), Kdelta(i, k))
+        ]
+
+        for _ in range(3):
+            for rule in epsilon_rules:
+                effective_lagrangian = rule.apply(effective_lagrangian)
+
+        print(effective_lagrangian)
+
+        
 
 if __name__ == "__main__":
     unittest.main()
