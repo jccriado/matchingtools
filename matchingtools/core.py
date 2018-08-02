@@ -14,7 +14,7 @@ from collections import Counter
 from enum import Enum
 from fractions import Fraction
 from itertools import permutations
-from operator import add, __eq__
+from operator import add
 
 from matchingtools.lsttools import LookUpTable, inits
 from matchingtools.matches import Match
@@ -181,7 +181,6 @@ class Tensor(Conjugable, Convertible, Differentiable, Functional):
             )
 
         return OperatorSum()
-
 
     def _replace_indices(self, indices_mapping):
         new_tensor = self.clone()
@@ -615,17 +614,10 @@ class OperatorSum(Conjugable, Convertible, Differentiable, Functional):
         if len(self.operators) != len(other.operators):
             return False
 
-        # TODO: is there a more efficient version of this?
-        return any(
-            all(map(__eq__, self.operators, other_permutation))
-            for other_permutation in permutations(other.operators)
+        return all(
+            self_operator in other.operator
+            for self_operator in self.operators
         )
-        # Does the following work always?
-        #   return (
-        #       all(op in other.operators for op in self.operators)
-        #       and
-        #       all(op in self.operators for op in other.operators)
-        #   )
 
     def _to_tensor(self):
         return self._to_operator()._to_tensor()
@@ -758,4 +750,3 @@ sigma4 = TensorBuilder("sigma4")
 
 epsilon_up, epsilon_down = RealConstant.make('epsilon_up', 'epsilon_down')
 sigma_vector, = ComplexConstant.make('sigma_vector')
-
