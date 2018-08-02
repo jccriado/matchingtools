@@ -9,6 +9,14 @@ def enum_product(*iters):
     return itertools.product(*map(enumerate, iters))
 
 
+def fst(pair):
+    return pair[0]
+
+
+def snd(pair):
+    return pair[1]
+
+
 def inits(lst):
     return [lst[:i] for i in range(len(lst) + 1)]
 
@@ -65,3 +73,7 @@ class LookUpTable(object):
 
         else:
             self.items.append((key, value))
+
+
+def mask(values, mask):
+    return [value for value, bit in zip(values, mask) if bit]
