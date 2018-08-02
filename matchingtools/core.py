@@ -215,7 +215,11 @@ class Tensor(Conjugable, Convertible, Differentiable, Functional):
 
 
 class Constant(Tensor):
-    # TODO: enforce derivatives_indices==[]?
+    def __init__(self, *args, **kwargs):
+        super().__init__(self, *args, **kwargs)
+
+        assert not self.derivatives_indices
+
     def differentiate(self, index):
         return OperatorSum()
 
