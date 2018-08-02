@@ -22,19 +22,25 @@ class EOMSolution(object):
             Index(derivative_index.name)
             for derivative_index in tensor.derivatives_indices
         ]
-        return Rule(
-            self.field.nth_derivative(derivatives_indices),
-            self.replacement.nth_derivative(derivatives_indices)
-        )
-        
+
+        if tensor.is_conjugated == self.field.is_conjugated:
+            return Rule(
+                self.field.nth_derivative(derivatives_indices),
+                self.replacement.nth_derivative(derivatives_indices)
+            )
+        else:
+            return Rule(
+                self.field.nth_derivative(derivatives_indices).conjugate(),
+                self.replacement.nth_derivative(derivatives_indices).conjugate()
+            )
+
     def _substitute_in_operator(self, operator):
         """
         Replace the first tensor with name self.field_name by the nth
         derivative of the replacement.
         """
         for tensor in operator.tensors:
-            if (tensor.name == self.field.name
-                and tensor.is_conjugated == self.field.is_conjugated):
+            if tensor.name == self.field.name:
                 return self._rule(tensor).apply(operator)
         return operator._to_operator_sum()
         

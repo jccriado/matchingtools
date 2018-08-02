@@ -521,8 +521,12 @@ class Operator(Conjugable, Convertible, Differentiable, Functional):
             tensor for tensor in self.tensors
             if tensor.statistics == Statistics.FERMION
         ]
+        other_fermions = [
+            tensor for tensor in other.tensors
+            if tensor.statistics == Statistics.FERMION
+        ]
         sign = Permutation.compare(
-            own_fermions,
+            other_fermions,
             [match.tensors_mapping[tensor] for tensor in own_fermions]
         ).parity
 
@@ -751,3 +755,7 @@ epsDownDot = TensorBuilder("epsDownDot")
 sigma4bar = TensorBuilder("sigma4bar")
 sigma4 = TensorBuilder("sigma4")
 '''
+
+epsilon_up, epsilon_down = RealConstant.make('epsilon_up', 'epsilon_down')
+sigma_vector, = ComplexConstant.make('sigma_vector')
+

@@ -1,7 +1,10 @@
 from abc import ABCMeta, abstractmethod
 
 from matchingtools.indices import Index
-from matchingtools.core import RealConstant, RealField, D, Statistics, Operator, OperatorSum
+from matchingtools.core import (
+    RealConstant, RealField, D, Statistics, Operator, OperatorSum,
+    epsilon_up, epsilon_down, sigma_vector
+)
 from matchingtools.eomsolutions import EOMSolution, EOMSolutionSystem
 from matchingtools.lsttools import concat, iterate
 
@@ -11,7 +14,6 @@ class Mass(RealConstant):
     # power. Products of powers of masses may be simplified.
     
     def __init__(self, field_name, index=None, exponent=1):
-
         # Compute the empty or one-element list of indices
         indices = [] if index is None else [index]
         
@@ -101,32 +103,14 @@ class HeavyField(object, metaclass=ABCMeta):
 
 class BosonMixin(object):
     def eom_solutions(self, interaction_lagrangian, max_dimension):
-        if isinstance(self.field, RealField):
-            variation = interaction_lagrangian.variation(self.field)
+        variation = interaction_lagrangian.variation(self.field.conjugate())
             
-            return [
-                EOMSolution(
-                    self.field,
-                    -self.propagator(variation, max_dimension)
-                )
-            ]
-        
-        else:
-            variation = interaction_lagrangian.variation(self.field)
-            conjugate_variation = interaction_lagrangian.variation(
-                self.field.conjugate()
+        return [
+            EOMSolution(
+                self.field,
+                -self.propagator(variation, max_dimension)
             )
-
-            return [
-                EOMSolution(
-                    self.field,
-                    -self.propagator(conjugate_variation, max_dimension)
-                ),
-                EOMSolution(
-                    self.field.conjugate(),
-                    -self.propagator(variation, max_dimension)
-                )
-            ]
+        ]
     
 class Scalar(BosonMixin, HeavyField):
     def __init__(self, field, flavor_index=None):
@@ -210,6 +194,81 @@ class Vector(BosonMixin, HeavyField):
             OperatorSum()
         )
 
+class DiracFermion(HeavyField):
+    def __init__(
+            self, name,
+            left_field, right_field,
+            left_spinor_index, right_spinor_index,
+            flavor_index=None):
+        self.left_field = left_field
+        self.right_field = right_field
+        self.left_spinor_index = left_spinor_index
+        self.right_spinor_index = right_spinor_index
+        self.mass = Mass(
+            field_name=name,
+            index=flavor_index,
+            exponent=1
+        )
+
+    def quadratic_terms(self):
+        alpha     = self.left_spinor_index
+        alpha_dot = Index(alpha.name)
+        beta_dot = self.right_spinor_index
+        beta     = Index(beta_dot.name)
+        mu = Index('mu')
+
+        fL  = self.left_field
+        fLc = self.left_field.conjugate()._replace_indices({alpha: alpha_dot})
+        fR  = self.right_field
+        fRc = self.right_field.conjugate()._replace_indices({beta_dot: beta})
+
+        kinetic_terms = (
+            1j * fLc * sigma_vector(mu, alpha_dot, alpha) * D(mu, fL)
+            + 1j * fRc * sigma_vector.c(mu, beta, beta_dot) * D(mu, fR)
+        )
+
+        mass_terms = - self.mass * (
+            fLc * epsilon_down(alpha_dot, beta_dot) * fR
+            + fRc * epsilon_up(beta, alpha) * fL
+        )
+
+        return kinetic_terms + mass_terms
+
+    def eom_solutions(self, interaction_lagrangian, max_dimension):
+        alpha     = Index(self.left_spinor_index.name)
+        alpha_dot = Index(alpha.name)
+        beta_dot = Index(self.right_spinor_index.name)
+        beta     = Index(beta_dot.name)
+        mu = Index('mu')
+
+        fL = self.left_field._replace_indices(
+            {self.left_spinor_index: alpha}
+        )
+        fR = self.right_field._replace_indices(
+            {self.right_spinor_index: beta_dot}
+        )
+        fLc = fL.conjugate()._replace_indices({alpha: alpha_dot})
+        fRc = fR.conjugate()._replace_indices({beta_dot: beta})
+        
+        variation_left = interaction_lagrangian.variation(fL)
+        variation_right = interaction_lagrangian.variation(fR)
+
+        replacement_left = self.mass**(-1) * epsilon_down(alpha, beta) * (
+            -1j * sigma_vector.c(mu, beta, self.right_spinor_index)
+            * D(mu, self.right_field)
+            + variation_right
+        )
+        replacement_right = self.mass**(-1) * epsilon_up(beta_dot, alpha_dot) * (
+            -1j * sigma_vector.c(mu, alpha_dot, self.left_spinor_index)
+            * D(mu, self.left_field)
+            + variation_left
+        )
+        
+        return [
+            EOMSolution(fL, replacement_left),
+            EOMSolution(fR, replacement_right)
+        ]
+
 
 def integrate_out(interaction_lagrangian, heavy_fields, max_dimension):
     eom_solutions = EOMSolutionSystem(
@@ -218,7 +277,7 @@ def integrate_out(interaction_lagrangian, heavy_fields, max_dimension):
             for heavy_field in heavy_fields
         )
     ).solve(max_dimension - 1)
-    
+
     quadratic_lagrangian = sum(
         (heavy_field.quadratic_terms() for heavy_field in heavy_fields),
         OperatorSum()
@@ -233,6 +292,3 @@ def integrate_out(interaction_lagrangian, heavy_fields, max_dimension):
         ),
         OperatorSum()
     )
-
-    
-eta = RealConstant.make('eta')
