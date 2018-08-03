@@ -1,10 +1,12 @@
 from abc import ABCMeta, abstractmethod
+from itertools import combinations
 
 from matchingtools.indices import Index
 from matchingtools.core import (
-    RealConstant, RealField, D, Statistics, Operator, OperatorSum,
+    RealConstant, RealField, Statistics, Operator, OperatorSum,
     epsilon_up, epsilon_down, sigma_vector
 )
+from matchingtools.shortcuts import D
 from matchingtools.eomsolutions import EOMSolution, EOMSolutionSystem
 from matchingtools.lsttools import concat, iterate
 
@@ -13,22 +15,19 @@ class Mass(RealConstant):
     # zero or one indices, and they can be exponentiated to some integer
     # power. Products of powers of masses may be simplified.
     
-    def __init__(self, field_name, index=None, exponent=1):
+    def __init__(self, field_name, indices=None, exponent=1):
         # Compute the empty or one-element list of indices
-        indices = [] if index is None else [index]
-        
-        super().__init__(
-            name="M_"+field_name,
-            indices=indices,
-            derivatives_indices=[],
-            dimension=0,
-            statistics=Statistics.BOSON
-        )
-
+        if indices is None:
+            indices = []
+            
         # Extra attributes that do not appear in Tensor
+        self.name = "M_" + field_name
+        self.indices = indices
+        self.derivatives_indices = []
+        self.statistics = Statistics.BOSON
+        self._tensor_dimension = 0
         self.field_name = field_name
         self.exponent = exponent
-        self.index = index
 
     def __str__(self):
         exponent_str = '' if self.exponent == 1 else '^' + str(self.exponent)
@@ -43,7 +42,7 @@ class Mass(RealConstant):
     def __eq__(self, other):
         return (
             isinstance(other, Mass)
-            and self.index == other.index
+            and self.indices == other.indices
             and self.exponent == other.exponent
         )
 
@@ -53,7 +52,7 @@ class Mass(RealConstant):
     def clone(self):
         return Mass(
             field_name=self.field_name,
-            index=self.index,
+            indices=self.indices,
             exponent=self.exponent
         )
         
@@ -69,27 +68,54 @@ class Mass(RealConstant):
             for operator in convertible._to_operator_sum().operators
         ]
 
+    def shares_index(self, other):
+        return (
+            len(self.indices) == 0 and len(other.indices) == 0
+            or any(own_index in other.indices for own_index in self.indices)
+        )
+
+    def free_index_pair(self, other):
+        if len(self.indices) == 0:
+            return []
+        
+        for index in self.indices:
+            if index not in other.indices:
+                first = index
+                break
+        for index in other.indices:
+            if index not in self.indices:
+                second = index
+                break
+        return [first, second]
+    
     @staticmethod
     def _simplify_product(operator):
-        masses = {}
-        rest = []
-        
-        for tensor in operator.tensors:
-            if isinstance(tensor, Mass):
-                masses.setdefault((tensor.field_name, tensor.index), 0)
-                masses[(tensor.field_name, tensor.index)] += tensor.exponent
-            else:
-                rest.append(tensor)
+        masses = [
+            tensor for tensor in operator.tensors
+            if tensor.name[0] == 'M'
+            #if isinstance(tensor, Mass)
+        ]
+        rest = [
+            tensor for tensor in operator.tensors
+            if tensor.name[0] != 'M'
+            #if not isinstance(tensor, Mass)
+        ]
 
-        mass_product = Operator(
-            [
-                Mass(field_name, index, exponent)
-                for (field_name, index), exponent in masses.items()
-            ],
-            1
-        )
+        new_masses = []
+        while masses:
+            for mass_1, mass_2 in combinations(masses, 2):
+                if (mass_1.field_name == mass_2.field_name
+                    and mass_1.shares_index(mass_2)):
+                    new_masses.append(
+                        Mass(mass_1.field_name, mass_1.free_index_pair(mass_2))
+                    )
+                    masses.remove(mass_1)
+                    masses.remove(mass_2)
+            else:
+                new_masses += masses
+                break
         
-        return mass_product * Operator(rest, operator.coefficient)
+        return Operator(new_masses + rest, operator.coefficient)
 
     
 class HeavyField(object, metaclass=ABCMeta):
