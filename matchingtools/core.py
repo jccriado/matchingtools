@@ -215,10 +215,10 @@ class Tensor(Conjugable, Convertible, Differentiable, Functional):
 
 
 class Constant(Tensor):
-    def __init__(self, *args, **kwargs):
-        super().__init__(self, *args, **kwargs)
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(self, *args, **kwargs)
 
-        assert not self.derivatives_indices
+    #     assert not self.derivatives_indices
 
     def differentiate(self, index):
         return OperatorSum()
@@ -237,7 +237,7 @@ class RealMixin(object):
         return self
 
 
-class ComplexMixin(object):  # TODO: inherit from Tensor?
+class ComplexMixin(object):
     def conjugate(self):
         conjugated = self.clone()
         conjugated.is_conjugated = not self.is_conjugated
@@ -619,7 +619,7 @@ class OperatorSum(Conjugable, Convertible, Differentiable, Functional):
             return False
 
         return all(
-            self_operator in other.operator
+            self_operator in other.operators
             for self_operator in self.operators
         )
 
