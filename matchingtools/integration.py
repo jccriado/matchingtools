@@ -92,27 +92,6 @@ class Mass(RealConstant):
 
     @staticmethod
     def _simplify_product(operator):
-<<<<<<< HEAD
-        masses = {}
-        rest = []
-
-        for tensor in operator.tensors:
-            if isinstance(tensor, Mass):
-                masses.setdefault((tensor.field_name, tensor.index), 0)
-                masses[(tensor.field_name, tensor.index)] += tensor.exponent
-            else:
-                rest.append(tensor)
-
-        mass_product = Operator(
-            [
-                Mass(field_name, index, exponent)
-                for (field_name, index), exponent in masses.items()
-            ],
-            1
-        )
-
-        return mass_product * Operator(rest, operator.coefficient)
-=======
         masses = [
             tensor for tensor in operator.tensors
             if tensor.name[0] == 'M'
@@ -139,7 +118,7 @@ class Mass(RealConstant):
                 break
 
         return Operator(new_masses + rest, operator.coefficient)
->>>>>>> fa51d064523126c89aa18810aef4ff330b38d70a
+
 
 
 class HeavyField(object, metaclass=ABCMeta):
