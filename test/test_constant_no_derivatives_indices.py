@@ -10,10 +10,10 @@ class TestConstantNoDerivativesIndices(unittest.TestCase):
 
     def test_exception_raised(self):
         with self.assertRaises(AssertionError):
-            RealConstant('x', derivatives_indices=[self.i])
+            RealConstant('x', indices=[], derivatives_indices=[self.i])
 
         with self.assertRaises(AssertionError):
-            ComplexConstant('y', derivatives_indices=[self.i])
+            ComplexConstant('y', indices=[], derivatives_indices=[self.i])
 
 
 if __name__ == "__main__":
