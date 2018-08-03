@@ -1,5 +1,5 @@
 language: python
 python:
-	- "3.6"
+ - "3.6"
 script:
-	- python -m unittest test/test_fierz_type_rule.py
+ - python -m unittest test/test_fierz_type_rule.py
