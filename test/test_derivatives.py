@@ -2,8 +2,9 @@ import unittest
 
 from matchingtools.indices import Index
 from matchingtools.core import (
-    RealConstant, RealField, ComplexField, D, Statistics
+    RealConstant, RealField, ComplexField, Statistics
 )
+from matchingtools.shortcuts import D
 from matchingtools.rules import Rule
 from matchingtools.matches import Match
 

@@ -1,7 +1,8 @@
 import unittest
 
 from matchingtools.indices import Index
-from matchingtools.core import RealConstant, RealField, D, Statistics
+from matchingtools.core import RealConstant, RealField, Statistics
+from matchingtools.shortcuts import D
 
 mu, i, j, a = Index.make('mu', 'i', 'j', 'a')
 m, g = RealConstant.make('m', 'g')

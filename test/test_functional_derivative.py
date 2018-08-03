@@ -2,8 +2,9 @@ import unittest
 
 from matchingtools.indices import Index
 from matchingtools.core import (
-    RealField, ComplexField, Statistics, D, Operator, Kdelta
+    RealField, ComplexField, Statistics, Operator, Kdelta
 )
+from matchingtools.shortcuts import D
 
 i, j, a, b, mu, nu = Index.make('i', 'j', 'a', 'b', 'mu', 'nu')
 x, y, z = RealField.make(

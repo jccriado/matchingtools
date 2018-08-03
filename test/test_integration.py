@@ -2,9 +2,10 @@ import unittest
 
 from matchingtools.indices import Index
 from matchingtools.core import (
-    RealConstant, RealField, ComplexField, D, Statistics, Kdelta,
+    RealConstant, RealField, ComplexField, Statistics, Kdelta,
     epsilon_up, epsilon_down, sigma_vector
 )
+from matchingtools.shortcuts import D
 from matchingtools.integration import (
     Scalar, Vector, DiracFermion, integrate_out
 )
