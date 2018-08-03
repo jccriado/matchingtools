@@ -13,7 +13,6 @@ from abc import ABCMeta, abstractmethod
 from collections import Counter
 from enum import Enum
 from fractions import Fraction
-from itertools import permutations
 from operator import add
 
 from matchingtools.lsttools import LookUpTable, inits
@@ -216,7 +215,7 @@ class Tensor(Conjugable, Convertible, Differentiable, Functional):
 
 class Constant(Tensor):
     def __init__(self, *args, **kwargs):
-        super().__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         assert not self.derivatives_indices
 
@@ -619,7 +618,7 @@ class OperatorSum(Conjugable, Convertible, Differentiable, Functional):
             return False
 
         return all(
-            self_operator in other.operator
+            self_operator in other.operators
             for self_operator in self.operators
         )
 
