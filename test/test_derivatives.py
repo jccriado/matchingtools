@@ -2,10 +2,12 @@ import unittest
 
 from matchingtools.indices import Index
 from matchingtools.core import (
-    RealConstant, RealField, ComplexField, D, Statistics
+    RealConstant, RealField, ComplexField, Statistics
 )
-from matchingtools.rules import Rule
 from matchingtools.matches import Match
+from matchingtools.rules import Rule
+from matchingtools.shortcuts import D
+
 
 mu, nu, rho, i, j = Index.make('mu', 'nu', 'rho', 'i', 'j')
 y, = RealConstant.make('y')
@@ -72,14 +74,14 @@ class TestDerivativesProperties(unittest.TestCase):
         self.assertNotEqual(D(mu, D(mu, S(i))), D(mu, D(nu, S(i))))
         self.assertNotEqual(D(nu, D(mu, V(mu))), D(mu, D(nu, V(mu))))
 
-        
+
 class TestDerivativesRules(unittest.TestCase):
     def setUp(self):
         self.eom_rule = Rule(
             D(mu, D(mu, S(i))),
             2 * S(i) + 3 * S(i) * S(j) * S(j)
         )
-    
+
     def test_eom_simple(self):
         self.assertEqual(
             self.eom_rule.apply(2 * D(mu, D(mu, S(i)))),
@@ -105,14 +107,14 @@ class TestDerivativesRules(unittest.TestCase):
                 S(i)._to_operator()
             )
         )
-        
+
         self.assertIsNone(
             Match.match_operators(
                 self.eom_rule.pattern._to_operator(),
                 D(mu, S(mu))._to_operator()
             )
         )
-                
+
         self.assertIsNone(
             Match.match_operators(
                 self.eom_rule.pattern,
@@ -128,12 +130,12 @@ class TestDerivativesRules(unittest.TestCase):
                 D(mu, D(mu, V(rho)))._to_operator()
             )
         )
-        
-        
+
+
 class TestReplaceByDerivative(unittest.TestCase):
     def setUp(self):
         self.rule = Rule(V(mu), psi.c(i, j) * D(mu, psi(i, j)))
-         
+
     def test_with_vector_inside(self):
         self.assertEqual(
             self.rule.apply(y(i) * S(i) * D(mu, V(mu))),
@@ -146,7 +148,7 @@ class TestReplaceByDerivative(unittest.TestCase):
             y(i) * D(mu, S(i)) * psi.c(i, j) * D(mu, psi(i, j))
         )
 
-        
+
 
 
 if __name__ == "__main__":

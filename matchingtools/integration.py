@@ -1,22 +1,24 @@
 from abc import ABCMeta, abstractmethod
 
-from matchingtools.indices import Index
 from matchingtools.core import (
-    RealConstant, RealField, D, Statistics, Operator, OperatorSum,
+    RealConstant, RealField, Statistics, Operator, OperatorSum,
     epsilon_up, epsilon_down, sigma_vector
 )
 from matchingtools.eomsolutions import EOMSolution, EOMSolutionSystem
+from matchingtools.indices import Index
 from matchingtools.lsttools import concat, iterate
+from matchingtools.shortcuts import D
+
 
 class Mass(RealConstant):
     # Masses are tensors that are associated with some field. They can have
     # zero or one indices, and they can be exponentiated to some integer
     # power. Products of powers of masses may be simplified.
-    
+
     def __init__(self, field_name, index=None, exponent=1):
         # Compute the empty or one-element list of indices
         indices = [] if index is None else [index]
-        
+
         super().__init__(
             name="M_"+field_name,
             indices=indices,
@@ -49,14 +51,14 @@ class Mass(RealConstant):
 
     def __hash__(self):
         return hash(self.name)
-    
+
     def clone(self):
         return Mass(
             field_name=self.field_name,
             index=self.index,
             exponent=self.exponent
         )
-        
+
     def __pow__(self, number):
         new_mass = self.clone()
         new_mass.exponent *= number
@@ -73,7 +75,7 @@ class Mass(RealConstant):
     def _simplify_product(operator):
         masses = {}
         rest = []
-        
+
         for tensor in operator.tensors:
             if isinstance(tensor, Mass):
                 masses.setdefault((tensor.field_name, tensor.index), 0)
@@ -88,10 +90,10 @@ class Mass(RealConstant):
             ],
             1
         )
-        
+
         return mass_product * Operator(rest, operator.coefficient)
 
-    
+
 class HeavyField(object, metaclass=ABCMeta):
     @abstractmethod
     def quadratic_terms(self):
@@ -104,14 +106,14 @@ class HeavyField(object, metaclass=ABCMeta):
 class BosonMixin(object):
     def eom_solutions(self, interaction_lagrangian, max_dimension):
         variation = interaction_lagrangian.variation(self.field.conjugate())
-            
+
         return [
             EOMSolution(
                 self.field,
                 -self.propagator(variation, max_dimension)
             )
         ]
-    
+
 class Scalar(BosonMixin, HeavyField):
     def __init__(self, field, flavor_index=None):
         self.field = field
@@ -124,10 +126,10 @@ class Scalar(BosonMixin, HeavyField):
     def quadratic_terms(self):
         mu = Index('mu')
         factor = 1/2 if isinstance(self.field, RealField) else 1
-        
+
         kinetic_term = D(mu, self.field.conjugate()) * D(mu, self.field)
         mass_term = -self.mass**2 * self.field.conjugate() * self.field
-        
+
         return factor * (kinetic_term + mass_term)
 
     def propagator(self, target, max_dimension):
@@ -135,7 +137,7 @@ class Scalar(BosonMixin, HeavyField):
             subtarget = subtarget.filter_by_max_dimension(max_dimension - 2)
             mu = Index('mu')
             return -self.mass ** (-2) * D(mu, D(mu, subtarget))
-        
+
         return sum(
             iterate(
                 minus_D2_over_M2,
@@ -145,7 +147,7 @@ class Scalar(BosonMixin, HeavyField):
             OperatorSum()
         )
 
-        
+
 class Vector(BosonMixin, HeavyField):
     def __init__(self, field, vector_index, flavor_index=None):
         self.field = field
@@ -161,21 +163,21 @@ class Vector(BosonMixin, HeavyField):
 
         mu = self.vector_index
         nu = Index(self.vector_index.name)
-        
+
         field_mu = self.field
         field_nu = self.field._replace_indices({mu: nu})
-        
+
         kinetic_terms = (
             - D(mu, field_nu.conjugate()) * D(mu, field_nu)
             + D(mu, field_nu.conjugate()) * D(nu, field_mu)
         )
         mass_term = self.mass**2 * field_mu.conjugate() * field_mu
-        
+
         return factor * (kinetic_terms + mass_term)
 
     def propagator(self, target, max_dimension):
         nu = self.vector_index
-        
+
         def diff_op(subtarget):
             mu = Index(nu.name)
             subtarget = subtarget.filter_by_max_dimension(max_dimension - 2)
@@ -249,7 +251,7 @@ class DiracFermion(HeavyField):
         )
         fLc = fL.conjugate()._replace_indices({alpha: alpha_dot})
         fRc = fR.conjugate()._replace_indices({beta_dot: beta})
-        
+
         variation_left = interaction_lagrangian.variation(fL)
         variation_right = interaction_lagrangian.variation(fR)
 
@@ -263,7 +265,7 @@ class DiracFermion(HeavyField):
             * D(mu, self.left_field)
             + variation_left
         )
-        
+
         return [
             EOMSolution(fL, replacement_left),
             EOMSolution(fR, replacement_right)

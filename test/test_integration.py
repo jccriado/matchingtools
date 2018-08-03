@@ -1,15 +1,15 @@
 import unittest
 
-from matchingtools.indices import Index
 from matchingtools.core import (
-    RealConstant, RealField, ComplexField, D, Statistics, Kdelta,
-    epsilon_up, epsilon_down, sigma_vector
+    RealConstant, RealField, ComplexField, Statistics, Kdelta,
+    epsilon_up, epsilon_down
 )
+from matchingtools.indices import Index
 from matchingtools.integration import (
     Scalar, Vector, DiracFermion, integrate_out
 )
-from matchingtools.eomsolutions import EOMSolutionSystem
 from matchingtools.rules import Rule
+
 
 mu, i, j, k, a = Index.make('mu', 'i', 'j', 'k', 'a')
 alpha, alpha_dot, beta, beta_dot = Index.make(
@@ -33,7 +33,7 @@ heavy_F = DiracFermion(
     'F',
     FL(alpha, i), FR(beta_dot, i),
     alpha, beta_dot,
-    flavor_index = i
+    flavor_index=i
 )
 
 class TestIntegration(unittest.TestCase):
@@ -80,7 +80,7 @@ class TestIntegration(unittest.TestCase):
         lagrangian = interaction + interaction.conjugate()
 
         effective_lagrangian = integrate_out(lagrangian, [heavy_F], 6)
-        
+
         epsilon_rules = [
             Rule(epsilon_down(i, j), epsilon_up(j, i)),
             Rule(epsilon_up(i, j) * epsilon_up(j, k), Kdelta(i, k)),
@@ -95,7 +95,7 @@ class TestIntegration(unittest.TestCase):
 
         print(effective_lagrangian)
 
-        
+
 
 if __name__ == "__main__":
     unittest.main()
