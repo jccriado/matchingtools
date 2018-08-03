@@ -55,7 +55,11 @@ class Match(object):  # TODO make sure things that don't match don't match
             and tensor.statistics == other.statistics
             and tensor.is_conjugated == other.is_conjugated
             and len(tensor.indices) == len(other.indices)
-            and len(tensor.derivatives_indices) == len(other.derivatives_indices)
+            and (
+                len(tensor.derivatives_indices)
+                ==
+                len(other.derivatives_indices)
+            )
         )
 
     @staticmethod
@@ -171,8 +175,7 @@ class Match(object):  # TODO make sure things that don't match don't match
                 continue
 
             yield Match(tensor_mapping, indices_mapping)
-        
-    
+
     @staticmethod
     def match_operators(pattern, target):
         tensors_mappings = list(Match._map_tensors(pattern, target))
@@ -185,6 +188,3 @@ class Match(object):  # TODO make sure things that don't match don't match
             return Match._match_operators_iterable(tensors_mappings)
         except StopIteration:
             return None
-
-
-        

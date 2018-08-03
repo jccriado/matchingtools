@@ -5,7 +5,6 @@ from matchingtools.core import (
     RealConstant, RealField, Statistics, Operator, OperatorSum,
     epsilon_up, epsilon_down, sigma_vector
 )
-from matchingtools.shortcuts import D
 from matchingtools.eomsolutions import EOMSolution, EOMSolutionSystem
 from matchingtools.indices import Index
 from matchingtools.lsttools import concat, iterate
@@ -95,19 +94,20 @@ class Mass(RealConstant):
         masses = [
             tensor for tensor in operator.tensors
             if tensor.name[0] == 'M'
-            #if isinstance(tensor, Mass)
+            # if isinstance(tensor, Mass)
         ]
         rest = [
             tensor for tensor in operator.tensors
             if tensor.name[0] != 'M'
-            #if not isinstance(tensor, Mass)
+            # if not isinstance(tensor, Mass)
         ]
 
         new_masses = []
         while masses:
             for mass_1, mass_2 in combinations(masses, 2):
-                if (mass_1.field_name == mass_2.field_name
-                    and mass_1.shares_index(mass_2)):
+                names_match = mass_1.field_name == mass_2.field_name
+                index_shared = mass_1.shares_index(mass_2)
+                if (names_match and index_shared):
                     new_masses.append(
                         Mass(mass_1.field_name, mass_1.free_index_pair(mass_2))
                     )
@@ -120,7 +120,6 @@ class Mass(RealConstant):
         return Operator(new_masses + rest, operator.coefficient)
 
 
-
 class HeavyField(object, metaclass=ABCMeta):
     @abstractmethod
     def quadratic_terms(self):
@@ -129,6 +128,7 @@ class HeavyField(object, metaclass=ABCMeta):
     @abstractmethod
     def eom_solutions(self, interaction_lagrangian, inverse_mass_order):
         pass
+
 
 class BosonMixin(object):
     def eom_solutions(self, interaction_lagrangian, max_dimension):
@@ -140,6 +140,7 @@ class BosonMixin(object):
                 -self.propagator(variation, max_dimension)
             )
         ]
+
 
 class Scalar(BosonMixin, HeavyField):
     def __init__(self, field, flavor_index=None):
@@ -223,6 +224,7 @@ class Vector(BosonMixin, HeavyField):
             OperatorSum()
         )
 
+
 class DiracFermion(HeavyField):
     def __init__(
             self, name,
@@ -240,15 +242,15 @@ class DiracFermion(HeavyField):
         )
 
     def quadratic_terms(self):
-        alpha     = self.left_spinor_index
+        alpha = self.left_spinor_index
         alpha_dot = Index(alpha.name)
         beta_dot = self.right_spinor_index
-        beta     = Index(beta_dot.name)
+        beta = Index(beta_dot.name)
         mu = Index('mu')
 
-        fL  = self.left_field
+        fL = self.left_field
+        fR = self.right_field
         fLc = self.left_field.conjugate()._replace_indices({alpha: alpha_dot})
-        fR  = self.right_field
         fRc = self.right_field.conjugate()._replace_indices({beta_dot: beta})
 
         kinetic_terms = (
@@ -264,10 +266,10 @@ class DiracFermion(HeavyField):
         return kinetic_terms + mass_terms
 
     def eom_solutions(self, interaction_lagrangian, max_dimension):
-        alpha     = Index(self.left_spinor_index.name)
+        alpha = Index(self.left_spinor_index.name)
         alpha_dot = Index(alpha.name)
         beta_dot = Index(self.right_spinor_index.name)
-        beta     = Index(beta_dot.name)
+        beta = Index(beta_dot.name)
         mu = Index('mu')
 
         fL = self.left_field._replace_indices(
@@ -276,18 +278,18 @@ class DiracFermion(HeavyField):
         fR = self.right_field._replace_indices(
             {self.right_spinor_index: beta_dot}
         )
-        fLc = fL.conjugate()._replace_indices({alpha: alpha_dot})
-        fRc = fR.conjugate()._replace_indices({beta_dot: beta})
 
         variation_left = interaction_lagrangian.variation(fL)
         variation_right = interaction_lagrangian.variation(fR)
 
-        replacement_left = self.mass**(-1) * epsilon_down(alpha, beta) * (
+        replacement_left = self.mass ** (-1) * epsilon_down(alpha, beta) * (
             -1j * sigma_vector.c(mu, beta, self.right_spinor_index)
             * D(mu, self.right_field)
             + variation_right
         )
-        replacement_right = self.mass**(-1) * epsilon_up(beta_dot, alpha_dot) * (
+        replacement_right = self.mass ** (-1) * epsilon_up(
+            beta_dot, alpha_dot
+        ) * (
             -1j * sigma_vector.c(mu, alpha_dot, self.left_spinor_index)
             * D(mu, self.left_field)
             + variation_left

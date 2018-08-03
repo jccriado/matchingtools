@@ -21,6 +21,7 @@ four_fermion_operator, = RealField.make(
     statistics=Statistics.BOSON
 )
 
+
 class TestTwoFermionReorder(unittest.TestCase):
     def setUp(self):
         self.rule = Rule(psi.c(alpha) * psi(beta), chi.c(alpha) * chi(beta))
@@ -39,9 +40,12 @@ class TestTwoFermionReorder(unittest.TestCase):
 
     def test_reorder_with_boson(self):
         self.assertEqual(
-            self.rule.apply(phi(gamma) * psi(gamma) * phi(delta) * psi.c(delta)),
+            self.rule.apply(
+                phi(gamma) * psi(gamma) * phi(delta) * psi.c(delta)
+            ),
             -phi(gamma) * chi.c(delta) * chi(gamma) * phi(delta)
         )
+
 
 class TestFourFermionReorder(unittest.TestCase):
     def setUp(self):
@@ -89,6 +93,7 @@ class TestFourFermionReorder(unittest.TestCase):
             ),
             -four_fermion_operator()._to_operator_sum()
         )
+
 
 if __name__ == "__main__":
     unittest.main()

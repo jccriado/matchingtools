@@ -33,5 +33,3 @@ class Index(object):
             for name, corresponding_indices in groups.items()
             for pos, index in enumerate(corresponding_indices)
         }
-            
-            
