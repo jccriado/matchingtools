@@ -1,12 +1,14 @@
 import unittest
 
-from matchingtools.indices import Index
 from matchingtools.core import RealConstant, RealField, Statistics
+from matchingtools.indices import Index
 from matchingtools.shortcuts import D
+
 
 mu, i, j, a = Index.make('mu', 'i', 'j', 'a')
 m, g = RealConstant.make('m', 'g')
 phi, = RealField.make('phi', statistics=Statistics.BOSON, dimension=1)
+
 
 class TestVariation(unittest.TestCase):
     def test_variation(self):
