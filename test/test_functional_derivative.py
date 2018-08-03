@@ -13,6 +13,7 @@ x, y, z = RealField.make(
 )
 psi, = ComplexField.make('psi', statistics=Statistics.FERMION, dimension=1.5)
 
+
 class TestFunctionalDerivative(unittest.TestCase):
     def test_linear_boson(self):
         self.assertEqual(

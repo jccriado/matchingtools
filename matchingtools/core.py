@@ -236,7 +236,7 @@ class RealMixin(object):
         return self
 
 
-class ComplexMixin(object):  # TODO: inherit from Tensor?
+class ComplexMixin(object):
     def conjugate(self):
         conjugated = self.clone()
         conjugated.is_conjugated = not self.is_conjugated
