@@ -9,6 +9,7 @@ from matchingtools.eomsolutions import EOMSolution, EOMSolutionSystem
 from matchingtools.indices import Index
 from matchingtools.lsttools import concat, iterate
 from matchingtools.shortcuts import D
+from matchingtools.utils import merge_dicts
 
 
 class Mass(RealConstant):
@@ -61,6 +62,12 @@ class Mass(RealConstant):
         new_mass = self.clone()
         new_mass.exponent *= number
         return new_mass
+
+    def _match_attributes(self):
+        return merge_dicts(super()._match_attributes(), {
+            'exponent': self.exponent,
+            'field_name': self.field_name
+        })
 
     @staticmethod
     def _simplify(convertible):

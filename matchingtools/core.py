@@ -46,12 +46,6 @@ class Differentiable(object, metaclass=ABCMeta):
         return differentiated
 
 
-class Functional(object, metaclass=ABCMeta):
-    @abstractmethod
-    def functional_derivative(self, tensor):
-        pass
-
-
 class Convertible(object, metaclass=ABCMeta):
     class DemoteError(Exception):
         def __init__(self, what, src, dest):
@@ -77,7 +71,19 @@ class Convertible(object, metaclass=ABCMeta):
         pass
 
 
-class Tensor(Conjugable, Convertible, Differentiable, Functional):
+class Functional(object, metaclass=ABCMeta):
+    @abstractmethod
+    def functional_derivative(self, tensor):
+        pass
+
+
+class Matchable(object, metaclass=ABCMeta):
+    @abstractmethod
+    def _match_attributes(self):
+        pass
+
+
+class Tensor(Conjugable, Convertible, Differentiable, Functional, Matchable):
     """
     Basic building block for operators.
 
@@ -181,6 +187,16 @@ class Tensor(Conjugable, Convertible, Differentiable, Functional):
             )
 
         return OperatorSum()
+
+    def _match_attributes(self):
+        return {
+            'name': self.name,
+            'dimension': self.dimension,
+            'statistics': self.statistics,
+            'is_conjugated': self.is_conjugated,
+            'indices_count': len(self.indices),
+            'd_indices_count': len(self.derivatives_indices),
+        }
 
     def _replace_indices(self, indices_mapping):
         new_tensor = self.clone()

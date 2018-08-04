@@ -118,3 +118,10 @@ def groupby(iterable, on):
             groups.append([item])
 
     return groups
+
+
+def merge_dicts(x, y):
+    z = x.copy()
+    z.update(y)
+
+    return z
