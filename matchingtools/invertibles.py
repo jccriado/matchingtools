@@ -1,14 +1,19 @@
+from abc import ABCMeta, abstractmethod
+
 from matchingtools.core import RealConstant
+
 
 class InvertibleMatrix(object, metaclass=ABCMeta):
     @abstractmethod
     def inverse_matrix(self, first_index, second_index):
         pass
 
+
 class InvertibleScalar(object, metaclass=ABCMeta):
     @abstractmethod
     def inverse_scalar(self):
         pass
+
 
 class MassMatrix(RealConstant, InvertibleMatrix):
     def __init__(self, field_name, first_index, second_index, exponent=1):
@@ -29,10 +34,11 @@ class MassMatrix(RealConstant, InvertibleMatrix):
 
     def inverse_matrix(self, first_index, second_index):
         return MassMatrix(
-            field_name=self.field_name
+            field_name=self.field_name,
             indices=[first_index, second_index],
             exponent=-self.exponent
         )
+
 
 class MassScalar(RealConstant, InvertibleScalar):
     def __init__(self, field_name, exponent=1):
@@ -52,7 +58,7 @@ class MassScalar(RealConstant, InvertibleScalar):
 
     def inverse_scalar(self, first_index, second_index):
         return MassScalar(
-            field_name=self.field_name
+            field_name=self.field_name,
             indices=[first_index, second_index],
             exponent=-self.exponent
         )
@@ -71,7 +77,7 @@ class EpsilonUp(RealConstant, InvertibleMatrix):
     def inverse_matrix(self, first_index, second_index):
         return EpsilonDown(first_index, second_index)
 
-    
+
 class EpsilonDown(RealConstant, InvertibleMatrix):
     def __init__(self, first_index, second_index):
         super().__init__(

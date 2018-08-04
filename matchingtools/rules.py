@@ -86,7 +86,7 @@ class Rule(object):
             )
             for operator in self.replacement.operators
         ])
-        
+
         return sign * adapted_replacement * Operator(rest)
 
     def apply(self, target):

@@ -19,7 +19,7 @@ psi, chi = ComplexField.make(
 class TestConjugates(unittest.TestCase):
     def test_conjugate_real(self):
         self.assertEqual(x(i), (x(i)).conjugate())
-    
+
     def test_conjugate_real_product(self):
         self.assertEqual(x(i) * y(i), (x(i) * y(i)).conjugate())
 
@@ -28,7 +28,7 @@ class TestConjugates(unittest.TestCase):
 
     def test_conjugate_complex_product(self):
         self.assertNotEqual(psi(i) * chi(i), (psi(i) * chi(i)).conjugate())
-    
+
     def test_double_conjugate_complex(self):
         self.assertEqual(psi(i), (psi(i)).conjugate().conjugate())
 
@@ -43,6 +43,6 @@ class TestConjugates(unittest.TestCase):
         self.assertNotEqual(operators, operators.conjugate())
         self.assertEqual(hermitian, hermitian.conjugate())
 
-        
+
 if __name__ == "__main__":
     unittest.main()

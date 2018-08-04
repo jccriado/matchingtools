@@ -18,6 +18,7 @@ psi, = ComplexField.make('psi', statistics=Statistics.BOSON, dimension=1.5)
 operator_1 = V(mu) * psi.c(i, j) * D(mu, psi(i, j))
 operator_2 = y(i) * S(j) * psi(i, j)
 
+
 class TestDerivativesProperties(unittest.TestCase):
     def test_constant(self):
         self.assertEqual(D(mu, y(i, j)), 0)
@@ -41,7 +42,10 @@ class TestDerivativesProperties(unittest.TestCase):
         self.assertEqual(D(mu, D(mu, psi(i, j))).dimension, 3.5)
 
     def test_complex_fields(self):
-        self.assertEqual(D(nu, D(mu, V.c(mu))), D(nu, D(mu, V(mu))).conjugate())
+        self.assertEqual(
+            D(nu, D(mu, V.c(mu))),
+            D(nu, D(mu, V(mu))).conjugate()
+        )
         self.assertEqual(D(mu, psi.c(i, j)), D(mu, psi(i, j)).conjugate())
 
     def test_fields_statistics(self):
@@ -122,7 +126,6 @@ class TestDerivativesRules(unittest.TestCase):
             )
         )
 
-
     def test_not_eom_field(self):
         self.assertIsNone(
             Match.match_operators(
@@ -147,8 +150,6 @@ class TestReplaceByDerivative(unittest.TestCase):
             self.rule.apply(y(i) * D(mu, S(i)) * V(mu)),
             y(i) * D(mu, S(i)) * psi.c(i, j) * D(mu, psi(i, j))
         )
-
-
 
 
 if __name__ == "__main__":
