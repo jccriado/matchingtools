@@ -13,9 +13,10 @@ from abc import ABCMeta, abstractmethod
 from collections import Counter
 from enum import Enum
 from fractions import Fraction
+from functools import reduce
 from operator import add
 
-from matchingtools.lsttools import LookUpTable, inits
+from matchingtools.lsttools import fst, snd, inits, LookUpTable, mask
 from matchingtools.matches import Match
 from matchingtools.utils import Permutation
 from matchingtools.indices import Index
@@ -282,6 +283,59 @@ class Kdelta(RealConstant):
     def clone(self):
         return Kdelta(*self.indices)
 
+    def apply(self, tensor):
+        tensor = tensor.clone()
+        i, j = self.indices
+        did_apply = False
+
+        # Non-deritative indices
+        for pos, index in enumerate(tensor.indices):
+            if index == i:
+                tensor.indices[pos] = j
+                did_apply = True
+                break
+            elif index == j:
+                tensor.indices[pos] = i
+                did_apply = True
+                break
+
+        # Derivatives indices
+        for pos, index in enumerate(tensor.derivatives_indices):
+            if index == i:
+                tensor.derivatives_indices[pos] = j
+                did_apply = True
+                break
+            elif index == j:
+                tensor.derivatives_indices[pos] = i
+                did_apply = True
+                break
+
+        return (did_apply, tensor)
+
+    @staticmethod
+    def _simplify(kdeltas):
+        def mix_pairs(p1, p2):
+            first = fst(p1) if snd(p1) in p2 else snd(p1)
+            second = fst(p2) if snd(p2) in p1 else snd(p2)
+
+            return (first, second)
+
+        def reducer(pairs, k):
+            new_pairs = []
+
+            for pair in pairs:
+                if fst(k) in pair or snd(k) in pair:
+                    k = mix_pairs(pair, k)
+                else:
+                    new_pairs.append(pair)
+
+            return new_pairs + [k]
+
+        pairs = [kdelta.indices for kdelta in kdeltas]
+        simplified_pairs = reduce(reducer, pairs, [])
+
+        return [Kdelta(*pair) for pair in simplified_pairs]
+
 
 class Operator(Conjugable, Convertible, Differentiable, Functional):
     """
@@ -378,51 +432,31 @@ class Operator(Conjugable, Convertible, Differentiable, Functional):
             self.tensors = []
 
         kdeltas = []
-        rest = []
+        regular_tensors = []
 
         for tensor in self.tensors:
             if isinstance(tensor, Kdelta):
                 kdeltas.append(tensor)
             else:
-                rest.append(tensor.clone())
+                regular_tensors.append(tensor)
 
-        # TODO: Refactor this?
-        remaining_kdeltas = []
-        for pos, kdelta in enumerate(kdeltas):
-            found_index = False
-            for tensor in kdeltas[pos+1:] + rest:
-                # Non-deritative indices
-                for pos, index in enumerate(tensor.indices):
-                    i, j = kdelta.indices
-                    if index == i:
-                        tensor.indices[pos] = j
-                        found_index = True
-                        break
-                    elif index == j:
-                        tensor.indices[pos] = i
-                        found_index = True
-                        break
-                if found_index:
+        kdeltas = Kdelta._simplify(kdeltas)
+
+        simplified_tensors = []
+        kdeltas_unused = [True] * len(kdeltas)
+
+        for tensor in regular_tensors:
+            for pos, kdelta in mask(enumerate(kdeltas), kdeltas_unused):
+                did_apply, new_tensor = kdelta.apply(tensor)
+
+                if did_apply:
+                    kdeltas_unused[pos] = False
+                    simplified_tensors.append(new_tensor)
                     break
+            else:
+                simplified_tensors.append(tensor)
 
-                # Derivatives indices
-                for pos, index in enumerate(tensor.derivatives_indices):
-                    i, j = kdelta.indices
-                    if index == i:
-                        tensor.derivatives_indices[pos] = j
-                        found_index = True
-                        break
-                    elif index == j:
-                        tensor.derivatives_indices[pos] = i
-                        found_index = True
-                        break
-                if found_index:
-                    break
-
-            if not found_index:
-                remaining_kdeltas.append(kdelta)
-
-        self.tensors = rest + remaining_kdeltas
+        self.tensors = simplified_tensors + mask(kdeltas, kdeltas_unused)
 
     @property
     def dimension(self):
