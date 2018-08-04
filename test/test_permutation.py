@@ -32,7 +32,5 @@ class TestPermutation(unittest.TestCase):
         self.assertEqual(Permutation([1, 2, 0]).parity, 1)
 
 
-
-
 if __name__ == "__main__":
     unittest.main()

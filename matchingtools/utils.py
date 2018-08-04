@@ -25,7 +25,7 @@ class Permutation(object):
                     break
             else:
                 raise ValueError(
-                    "Unable to build permutation: elements do not match"   
+                    "Unable to build permutation: elements do not match"
                 )
             new_positions.append(found_position)
             remaining_positions.remove(found_position)

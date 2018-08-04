@@ -36,6 +36,7 @@ heavy_F = DiracFermion(
     flavor_index=i
 )
 
+
 class TestIntegration(unittest.TestCase):
     def test_integration_real_scalar(self):
         lagrangian = (
@@ -94,7 +95,6 @@ class TestIntegration(unittest.TestCase):
                 effective_lagrangian = rule.apply(effective_lagrangian)
 
         print(effective_lagrangian)
-
 
 
 if __name__ == "__main__":

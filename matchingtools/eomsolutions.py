@@ -2,6 +2,7 @@ from matchingtools.indices import Index
 from matchingtools.core import OperatorSum
 from matchingtools.rules import Rule
 
+
 class EOMSolution(object):
     def __init__(self, field, replacement):
         self.field = field
@@ -13,9 +14,9 @@ class EOMSolution(object):
     __repr__ = __str__
 
     def _rule(self, tensor):
-        """ 
+        """
         A rule for substituting any tensor by the nth derivative of the
-        replacement. The indices of these derivatives are given by the 
+        replacement. The indices of these derivatives are given by the
         indices of the derivatives of the tensor.
         """
         derivatives_indices = [
@@ -31,7 +32,9 @@ class EOMSolution(object):
         else:
             return Rule(
                 self.field.nth_derivative(derivatives_indices).conjugate(),
-                self.replacement.nth_derivative(derivatives_indices).conjugate()
+                self.replacement.nth_derivative(
+                    derivatives_indices
+                ).conjugate()
             )
 
     def _substitute_in_operator(self, operator):
@@ -43,7 +46,7 @@ class EOMSolution(object):
             if tensor.name == self.field.name:
                 return self._rule(tensor).apply(operator)
         return operator._to_operator_sum()
-        
+
     def substitute_once(self, target, max_dimension):
         """ Substitute once in each operator of target. """
         return sum(
@@ -56,7 +59,7 @@ class EOMSolution(object):
         )
 
     def is_in(self, target):
-        """ 
+        """
         Find whether there is a tensor in target with name self.field_name.
         """
         for operator in target.operators:
@@ -75,15 +78,15 @@ class EOMSolutionSystem(object):
         return str(self.solutions)
 
     __repr__ = __str__
-        
+
     def substitute(self, target, max_dimension):
-        """ 
+        """
         Substitute everywhere iteratively, until there are not any
         remaining substitutions to be made
         """
         for solution in self.solutions:
             target = solution.substitute_once(target, max_dimension)
-            
+
         if any(solution.is_in(target) for solution in self.solutions):
             return self.substitute(target, max_dimension)
 
@@ -92,7 +95,7 @@ class EOMSolutionSystem(object):
     def solve(self, max_dimension):
         """
         Converts a system of solutions and to a system in which they have
-        been used to remove any occurrence of their field names in their 
+        been used to remove any occurrence of their field names in their
         replacements.
         """
         new_solution = EOMSolutionSystem([
@@ -110,8 +113,7 @@ class EOMSolutionSystem(object):
             return new_solution.solve(max_dimension)
 
         return new_solution
-            
-    
+
     # @staticmethod
     # def substitute(solutions, target, max_dimension):
     #     for solution in solutions:
