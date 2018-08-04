@@ -49,18 +49,7 @@ class Match(object):  # TODO make sure things that don't match don't match
 
     @staticmethod
     def tensors_do_match(tensor, other):
-        return (
-            tensor.name == other.name
-            and tensor.dimension == other.dimension
-            and tensor.statistics == other.statistics
-            and tensor.is_conjugated == other.is_conjugated
-            and len(tensor.indices) == len(other.indices)
-            and (
-                len(tensor.derivatives_indices)
-                ==
-                len(other.derivatives_indices)
-            )
-        )
+        return tensor._match_attributes() == other._match_attributes()
 
     @staticmethod
     def _map_tensors(pattern_operator, target_operator):
