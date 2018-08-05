@@ -9,120 +9,271 @@ from matchingtools.rules import Rule
 from matchingtools.shortcuts import D
 
 
-mu, nu, rho, i, j = Index.make('mu', 'nu', 'rho', 'i', 'j')
-y, = RealConstant.make('y')
-S, = RealField.make('S', statistics=Statistics.BOSON, dimension=1)
-V, = ComplexField.make('V', statistics=Statistics.BOSON, dimension=1)
-psi, = ComplexField.make('psi', statistics=Statistics.BOSON, dimension=1.5)
-
-operator_1 = V(mu) * psi.c(i, j) * D(mu, psi(i, j))
-operator_2 = y(i) * S(j) * psi(i, j)
-
-
 class TestDerivativesProperties(unittest.TestCase):
+    def setUp(self):
+        self.mu, self.nu, self.rho = Index.make('mu', 'nu', 'rho')
+        self.i, self.j = Index.make('i', 'j')
+
+        self.y, = RealConstant.make('y')
+
+        self.S, = RealField.make(
+            'S',
+            statistics=Statistics.BOSON,
+            dimension=1
+        )
+
+        self.V, = ComplexField.make(
+            'V',
+            statistics=Statistics.BOSON,
+            dimension=1
+        )
+
+        self.psi, = ComplexField.make(
+            'psi',
+            statistics=Statistics.BOSON,
+            dimension=1.5
+        )
+
+        self.operator_1 = (
+            self.V(self.mu) * self.psi.c(self.i, self.j)
+            * D(self.mu, self.psi(self.i, self.j))
+        )
+
+        self.operator_2 = (
+            self.y(self.i) * self.S(self.j) * self.psi(self.i, self.j)
+        )
+
     def test_constant(self):
-        self.assertEqual(D(mu, y(i, j)), 0)
+        self.assertEqual(
+            D(self.mu, self.y(self.i, self.j)),
+            0
+        )
 
     def test_fields_change(self):
-        self.assertNotEqual(D(mu, S(i)), S(i))
-        self.assertNotEqual(D(mu, V(nu)), V(nu))
-        self.assertNotEqual(D(mu, V(mu)), V(mu))
-        self.assertNotEqual(D(mu, psi(i, j)), psi(i, j))
+        self.assertNotEqual(
+            D(self.mu, self.S(self.i)),
+            self.S(self.i)
+        )
+
+        self.assertNotEqual(
+            D(self.mu, self.V(self.nu)),
+            self.V(self.nu)
+        )
+
+        self.assertNotEqual(
+            D(self.mu, self.V(self.mu)),
+            self.V(self.mu)
+        )
+
+        self.assertNotEqual(
+            D(self.mu, self.psi(self.i, self.j)),
+            self.psi(self.i, self.j)
+        )
 
     def test_different_indices(self):
-        self.assertNotEqual(D(mu, S(i)), D(nu, S(i)))
-        self.assertNotEqual(D(mu, V(nu)), D(rho, V(nu)))
-        self.assertNotEqual(D(mu, V(mu)), D(rho, V(mu)))
-        self.assertNotEqual(D(mu, psi(i, j)), psi(i, j))
+        self.assertNotEqual(
+            D(self.mu, self.S(self.i)),
+            D(self.nu, self.S(self.i))
+        )
+
+        self.assertNotEqual(
+            D(self.mu, self.V(self.nu)),
+            D(self.rho, self.V(self.nu))
+        )
+
+        self.assertNotEqual(
+            D(self.mu, self.V(self.mu)),
+            D(self.rho, self.V(self.mu))
+        )
+
+        self.assertNotEqual(
+            D(self.mu, self.psi(self.i, self.j)),
+            self.psi(self.i, self.j)
+        )
 
     def test_fields_dimensions(self):
-        self.assertEqual(D(mu, S(i)).dimension, 2)
-        self.assertEqual(D(mu, D(nu, V(nu))).dimension, 3)
-        self.assertEqual(D(mu, D(mu, V(nu))).dimension, 3)
-        self.assertEqual(D(mu, D(mu, psi(i, j))).dimension, 3.5)
+        self.assertEqual(
+            D(self.mu, self.S(self.i)).dimension,
+            2
+        )
+
+        self.assertEqual(
+            D(self.mu, D(self.nu, self.V(self.nu))).dimension,
+            3
+        )
+
+        self.assertEqual(
+            D(self.mu, D(self.mu, self.V(self.nu))).dimension,
+            3
+        )
+
+        self.assertEqual(
+            D(self.mu, D(self.mu, self.psi(self.i, self.j))).dimension,
+            3.5
+        )
 
     def test_complex_fields(self):
         self.assertEqual(
-            D(nu, D(mu, V.c(mu))),
-            D(nu, D(mu, V(mu))).conjugate()
+            D(self.nu, D(self.mu, self.V.c(self.mu))),
+            D(self.nu, D(self.mu, self.V(self.mu))).conjugate()
         )
-        self.assertEqual(D(mu, psi.c(i, j)), D(mu, psi(i, j)).conjugate())
+
+        self.assertEqual(
+            D(self.mu, self.psi.c(self.i, self.j)),
+            D(self.mu, self.psi(self.i, self.j)).conjugate()
+        )
 
     def test_fields_statistics(self):
-        self.assertEqual(D(mu, S(i)).statistics, S(i).statistics)
-        self.assertEqual(D(mu, V(nu)).statistics, V(nu).statistics)
-        self.assertEqual(D(mu, V(mu)).statistics, V(mu).statistics)
-        self.assertEqual(D(mu, psi(i, j)).statistics, psi(i, j).statistics)
+        self.assertEqual(
+            D(self.mu, self.S(self.i)).statistics,
+            self.S(self.i).statistics
+        )
+
+        self.assertEqual(
+            D(self.mu, self.V(self.nu)).statistics,
+            self.V(self.nu).statistics
+        )
+
+        self.assertEqual(
+            D(self.mu, self.V(self.mu)).statistics,
+            self.V(self.mu).statistics
+        )
+
+        self.assertEqual(
+            D(self.mu, self.psi(self.i, self.j)).statistics,
+            self.psi(self.i, self.j).statistics
+        )
 
     def test_linearity(self):
         self.assertEqual(
-            D(mu, operator_1 + operator_2),
-            D(mu, operator_1) + D(mu, operator_2)
+            D(self.mu, self.operator_1 + self.operator_2),
+            D(self.mu, self.operator_1) + D(self.mu, self.operator_2)
         )
 
     def test_leibniz(self):
         self.assertEqual(
-            D(nu, operator_1),
-            D(nu, V(mu)) * psi.c(i, j) * D(mu, psi(i, j))
-            + V(mu) * D(nu, psi.c(i, j)) * D(mu, psi(i, j))
-            + V(mu) * psi.c(i, j) * D(nu, D(mu, psi(i, j))),
+            D(self.nu, self.operator_1),
+
+            D(self.nu, self.V(self.mu))
+            * self.psi.c(self.i, self.j)
+            * D(self.mu, self.psi(self.i, self.j))
+
+            + self.V(self.mu)
+            * D(self.nu, self.psi.c(self.i, self.j))
+            * D(self.mu, self.psi(self.i, self.j))
+
+            + self.V(self.mu)
+            * self.psi.c(self.i, self.j)
+            * D(self.nu, D(self.mu, self.psi(self.i, self.j))),
         )
 
         self.assertEqual(
-            D(mu, operator_2),
-            y(i) * D(mu, S(j)) * psi(i, j)
-            + y(i) * S(j) * D(mu, psi(i, j))
+            D(self.mu, self.operator_2),
+
+            self.y(self.i)
+            * D(self.mu, self.S(self.j))
+            * self.psi(self.i, self.j)
+
+            + self.y(self.i)
+            * self.S(self.j)
+            * D(self.mu, self.psi(self.i, self.j))
         )
 
     def test_double(self):
-        self.assertNotEqual(D(mu, D(mu, S(i))), D(mu, D(nu, S(i))))
-        self.assertNotEqual(D(nu, D(mu, V(mu))), D(mu, D(nu, V(mu))))
+        self.assertNotEqual(
+            D(self.mu, D(self.mu, self.S(self.i))),
+            D(self.mu, D(self.nu, self.S(self.i)))
+        )
+
+        self.assertNotEqual(
+            D(self.nu, D(self.mu, self.V(self.mu))),
+            D(self.mu, D(self.nu, self.V(self.mu)))
+        )
 
 
-class TestDerivativesRules(unittest.TestCase):
+class TestReplaceDerivatives(unittest.TestCase):
     def setUp(self):
+        self.mu, self.nu, self.rho = Index.make('mu', 'nu', 'rho')
+        self.i, self.j = Index.make('i', 'j')
+
+        self.S, = RealField.make(
+            'S',
+            statistics=Statistics.BOSON,
+            dimension=1
+        )
+
+        self.V, = ComplexField.make(
+            'V',
+            statistics=Statistics.BOSON,
+            dimension=1
+        )
+
+        self.psi, = ComplexField.make(
+            'psi',
+            statistics=Statistics.BOSON,
+            dimension=1.5
+        )
+
         self.eom_rule = Rule(
-            D(mu, D(mu, S(i))),
-            2 * S(i) + 3 * S(i) * S(j) * S(j)
+            D(self.mu, D(self.mu, self.S(self.i))),
+            2 * self.S(self.i)
+            + 3 * self.S(self.i) * self.S(self.j) * self.S(self.j)
         )
 
     def test_eom_simple(self):
         self.assertEqual(
-            self.eom_rule.apply(2 * D(mu, D(mu, S(i)))),
-            4 * S(i) + 6 * S(i) * S(j) * S(j)
+            self.eom_rule.apply(
+                2 * D(self.mu, D(self.mu, self.S(self.i)))
+            ),
+            4 * self.S(self.i)
+            + 6 * self.S(self.i) * self.S(self.j) * self.S(self.j)
         )
 
     def test_eom_times_other(self):
         self.assertEqual(
-            self.eom_rule.apply(psi.c(i, j) * psi(j, i) * D(nu, D(nu, S(i)))),
-            psi.c(i, j) * psi(j, i) * (2 * S(i) + 3 * S(i) * S(j) * S(j))
+            self.eom_rule.apply(
+                self.psi.c(self.i, self.j) * self.psi(self.j, self.i)
+                * D(self.nu, D(self.nu, self.S(self.i)))
+            ),
+            self.psi.c(self.i, self.j) * self.psi(self.j, self.i)
+            * (
+                2 * self.S(self.i)
+                + 3 * self.S(self.i) * self.S(self.j) * self.S(self.j)
+            )
         )
 
     def test_eom_square(self):
         self.assertEqual(
-            self.eom_rule.apply(D(mu, D(mu, S(i))) * D(nu, D(nu, S(i)))),
-            D(mu, D(mu, S(i))) * (2 * S(i) + 3 * S(i) * S(j) * S(j))
+            self.eom_rule.apply(
+                D(self.mu, D(self.mu, self.S(self.i)))
+                * D(self.nu, D(self.nu, self.S(self.i)))
+            ),
+            D(self.mu, D(self.mu, self.S(self.i)))
+            * (
+                2 * self.S(self.i)
+                + 3 * self.S(self.i) * self.S(self.j) * self.S(self.j)
+            )
         )
 
     def test_not_eom(self):
         self.assertIsNone(
             Match.match_operators(
                 self.eom_rule.pattern._to_operator(),
-                S(i)._to_operator()
+                self.S(self.i)._to_operator()
             )
         )
 
         self.assertIsNone(
             Match.match_operators(
                 self.eom_rule.pattern._to_operator(),
-                D(mu, S(mu))._to_operator()
+                D(self.mu, self.S(self.mu))._to_operator()
             )
         )
 
         self.assertIsNone(
             Match.match_operators(
                 self.eom_rule.pattern,
-                D(mu, D(nu, S(i)))._to_operator()
+                D(self.mu, D(self.nu, self.S(self.i)))._to_operator()
             )
         )
 
@@ -130,25 +281,63 @@ class TestDerivativesRules(unittest.TestCase):
         self.assertIsNone(
             Match.match_operators(
                 self.eom_rule.pattern._to_operator(),
-                D(mu, D(mu, V(rho)))._to_operator()
+                D(self.mu, D(self.mu, self.V(self.rho)))._to_operator()
             )
         )
 
 
 class TestReplaceByDerivative(unittest.TestCase):
     def setUp(self):
-        self.rule = Rule(V(mu), psi.c(i, j) * D(mu, psi(i, j)))
+        self.mu, self.i, self.j = Index.make('mu', 'i', 'j')
+
+        self.y, = RealConstant.make('y')
+
+        self.S, = RealField.make(
+            'S',
+            statistics=Statistics.BOSON,
+            dimension=1
+        )
+
+        self.V, = ComplexField.make(
+            'V',
+            statistics=Statistics.BOSON,
+            dimension=1
+        )
+
+        self.psi, = ComplexField.make(
+            'psi',
+            statistics=Statistics.BOSON,
+            dimension=1.5
+        )
+
+        self.rule = Rule(
+            self.V(self.mu),
+            self.psi.c(self.i, self.j) * D(self.mu, self.psi(self.i, self.j))
+        )
 
     def test_with_vector_inside(self):
         self.assertEqual(
-            self.rule.apply(y(i) * S(i) * D(mu, V(mu))),
-            y(i) * S(i) * D(mu, V(mu))
+            self.rule.apply(
+                self.y(self.i)
+                * self.S(self.i)
+                * D(self.mu, self.V(self.mu))
+            ),
+            self.y(self.i)
+            * self.S(self.i)
+            * D(self.mu, self.V(self.mu))
         )
 
     def test_with_vector_outside(self):
         self.assertEqual(
-            self.rule.apply(y(i) * D(mu, S(i)) * V(mu)),
-            y(i) * D(mu, S(i)) * psi.c(i, j) * D(mu, psi(i, j))
+            self.rule.apply(
+                self.y(self.i)
+                * D(self.mu, self.S(self.i))
+                * self.V(self.mu)
+            ),
+            self.y(self.i)
+            * D(self.mu, self.S(self.i))
+            * self.psi.c(self.i, self.j)
+            * D(self.mu, self.psi(self.i, self.j))
         )
 
 
