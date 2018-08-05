@@ -4,75 +4,128 @@ from matchingtools.core import RealConstant, RealField, Kdelta, Statistics
 from matchingtools.indices import Index
 from matchingtools.rules import Rule
 
-a, b, c, d = Index.make('a', 'b', 'c', 'd')
-i, j, k, l, I, J = Index.make('i', 'j', 'k', 'l', 'I', 'J')
-
-sigma, = RealConstant.make('sigma')
-
-x, y, z, w = RealField.make(
-    'x', 'y', 'z', 'w',
-    dimension=1,
-    statistics=Statistics.BOSON
-)
-
-fierz_rule = Rule(
-    sigma(I, a, b) * sigma(I, c, d),
-    2 * Kdelta(a, d) * Kdelta(c, b) - Kdelta(a, b) * Kdelta(c, d)
-)
-
 
 class TestFierz(unittest.TestCase):
     def setUp(self):
+        self.a, self.b, self.c, self.d = Index.make('a', 'b', 'c', 'd')
+        self.i, self.j, self.k, self.el = Index.make('i', 'j', 'k', 'l')
+        self.I, self.J = Index.make('I', 'J')
+
+        self.sigma, = RealConstant.make('sigma')
+
+        self.x, self.y, self.z, self.w = RealField.make(
+            'x', 'y', 'z', 'w',
+            dimension=1,
+            statistics=Statistics.BOSON
+        )
+
         self.rule = Rule(
-            sigma(I, a, b) * sigma(I, c, d),
-            2 * Kdelta(a, d) * Kdelta(c, b) - Kdelta(a, b) * Kdelta(c, d)
+            self.sigma(self.I, self.a, self.b)
+            * self.sigma(self.I, self.c, self.d),
+
+            2 * Kdelta(self.a, self.d) * Kdelta(self.c, self.b)
+            - Kdelta(self.a, self.b) * Kdelta(self.c, self.d)
         )
 
     def test_tensors_same_indices(self):
         self.assertEqual(
-            self.rule.apply(sigma(I, a, b) * sigma(I, c, d)),
-            2 * Kdelta(a, d) * Kdelta(c, b) - Kdelta(a, b) * Kdelta(c, d)
+            self.rule.apply(
+                self.sigma(self.I, self.a, self.b)
+                * self.sigma(self.I, self.c, self.d)
+            ),
+            2 * Kdelta(self.a, self.d) * Kdelta(self.c, self.b)
+            - Kdelta(self.a, self.b) * Kdelta(self.c, self.d)
         )
 
     def test_tensors_different_indices(self):
         self.assertEqual(
-            self.rule.apply(sigma(J, i, j) * sigma(J, k, l)),
-            2 * Kdelta(i, l) * Kdelta(k, j) - Kdelta(i, j) * Kdelta(k, l)
+            self.rule.apply(
+                self.sigma(self.J, self.i, self.j)
+                * self.sigma(self.J, self.k, self.el)
+            ),
+            2 * Kdelta(self.i, self.el) * Kdelta(self.k, self.j)
+            - Kdelta(self.i, self.j) * Kdelta(self.k, self.el)
         )
 
     def test_tensors_same_indices_reorder(self):
         self.assertEqual(
-            self.rule.apply(sigma(I, a, c) * sigma(I, d, b)),
-            2 * Kdelta(a, b) * Kdelta(d, c) - Kdelta(a, c) * Kdelta(d, b)
+            self.rule.apply(
+                self.sigma(self.I, self.a, self.c)
+                * self.sigma(self.I, self.d, self.b)
+            ),
+            2 * Kdelta(self.a, self.b) * Kdelta(self.d, self.c)
+            - Kdelta(self.a, self.c) * Kdelta(self.d, self.b)
         )
 
     def test_tensors_same_indices_reorder_sum(self):
         self.assertEqual(
-            self.rule.apply(sigma(I, a, c) * sigma(I, d, b)),
-            - Kdelta(a, c) * Kdelta(d, b) + 2 * Kdelta(a, b) * Kdelta(d, c)
+            self.rule.apply(
+                self.sigma(self.I, self.a, self.c)
+                * self.sigma(self.I, self.d, self.b)
+            ),
+            - Kdelta(self.a, self.c) * Kdelta(self.d, self.b)
+            + 2 * Kdelta(self.a, self.b) * Kdelta(self.d, self.c)
         )
 
     def test_fields(self):
-        target = x(i) * sigma(I, i, j) * y(j) * z(k) * sigma(I, k, l) * w(l)
-        result = 2 * x(a) * w(a) * z(b) * y(b) - x(a) * y(a) * z(b) * w(b)
+        target = (
+            self.x(self.i)
+            * self.sigma(self.I, self.i, self.j)
+            * self.y(self.j)
+            * self.z(self.k)
+            * self.sigma(self.I, self.k, self.el)
+            * self.w(self.el)
+        )
+
+        result = (
+            2
+            * self.x(self.a)
+            * self.w(self.a)
+            * self.z(self.b)
+            * self.y(self.b)
+
+            - self.x(self.a)
+            * self.y(self.a)
+            * self.z(self.b)
+            * self.w(self.b)
+        )
 
         self.assertEqual(self.rule.apply(target), result)
 
     def test_fields_same(self):
-        target = x(i) * sigma(I, i, j) * x(j) * x(k) * sigma(I, k, l) * x(l)
-        result = x(a) * x(a) * x(b) * x(b)
+        target = (
+            self.x(self.i)
+            * self.sigma(self.I, self.i, self.j)
+            * self.x(self.j)
+            * self.x(self.k)
+            * self.sigma(self.I, self.k, self.el)
+            * self.x(self.el)
+        )
+
+        result = (
+            self.x(self.a)
+            * self.x(self.a)
+            * self.x(self.b)
+            * self.x(self.b)
+        )
 
         self.assertEqual(self.rule.apply(target), result)
 
     def test_tensors_one_contracted_index(self):
-        target = sigma(a, i, j) * sigma(a, i, J)
-        result = 2 * Kdelta(J, j) - Kdelta(j, J)
+        target = (
+            self.sigma(self.a, self.i, self.j)
+            * self.sigma(self.a, self.i, self.J)
+        )
+        result = 2 * Kdelta(self.J, self.j) - Kdelta(self.j, self.J)
 
         self.assertEqual(self.rule.apply(target), result)
 
     def test_tensors_two_contracted_indices(self):
-        target = sigma(b, i, j) * sigma(b, i, j)
-        result = Kdelta(J, J)
+        target = (
+            self.sigma(self.b, self.i, self.j)
+            * self.sigma(self.b, self.i, self.j)
+        )
+        result = Kdelta(self.J, self.J)
 
         self.assertEqual(self.rule.apply(target), result._to_operator_sum())
 

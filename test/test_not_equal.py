@@ -4,31 +4,56 @@ from matchingtools.core import ComplexField, Statistics
 from matchingtools.indices import Index
 
 
-i, j = Index.make('i', 'j')
-x, y = ComplexField.make('x', 'y', statistics=Statistics.BOSON, dimension=1)
-
-
 class TestNotEqual(unittest.TestCase):
+    def setUp(self):
+        self.i, self.j = Index.make('i', 'j')
+        self.x, self.y = ComplexField.make(
+            'x', 'y',
+            statistics=Statistics.BOSON,
+            dimension=1
+        )
+
     def test_different_index(self):
-        self.assertNotEqual(x(i), x(j))
+        self.assertNotEqual(
+            self.x(self.i),
+            self.x(self.j)
+        )
 
     def test_different_name(self):
-        self.assertNotEqual(x(i), y(i))
+        self.assertNotEqual(
+            self.x(self.i),
+            self.y(self.i)
+        )
 
     def test_conjugate(self):
-        self.assertNotEqual(x(i), x.c(i))
+        self.assertNotEqual(
+            self.x(self.i),
+            self.x.c(self.i)
+        )
 
     def test_different_indices(self):
-        self.assertNotEqual(x(i) * y(j), x(j) * y(i))
+        self.assertNotEqual(
+            self.x(self.i) * self.y(self.j),
+            self.x(self.j) * self.y(self.i)
+        )
 
     def test_different_sign(self):
-        self.assertNotEqual(x(i) * y(i), -y(i) * x(j))
+        self.assertNotEqual(
+            self.x(self.i) * self.y(self.i),
+            -self.y(self.i) * self.x(self.j)
+        )
 
     def test_different_coefficient(self):
-        self.assertNotEqual(x(i) * y(i), 2 * x(i) * y(i))
+        self.assertNotEqual(
+            self.x(self.i) * self.y(self.i),
+            2 * self.x(self.i) * self.y(self.i)
+        )
 
     def test_different_terms(self):
-        self.assertNotEqual(x(i) + x(i) + y(i), x(i) + y(i) + y(i))
+        self.assertNotEqual(
+            self.x(self.i) + self.x(self.i) + self.y(self.i),
+            self.x(self.i) + self.y(self.i) + self.y(self.i)
+        )
 
 
 if __name__ == "__main__":
