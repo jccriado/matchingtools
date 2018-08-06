@@ -122,11 +122,16 @@ class Tensor(Conjugable, Convertible, Differentiable, Functional, Matchable):
         for a Tensor with indices i[0], i[1], ..., i[n-1] and
         derivatives_indices di[0], di[1], ..., di[m-1]
         """
+        unique_indices_str = Index.assign_unique_str(self.all_indices)
+
         derivatives_str = ''.join(
-            'D({})'.format(index)
+            'D({})'.format(unique_indices_str[index])
             for index in reversed(self.derivatives_indices)
         )
-        indices_str = ', '.join(map(str, self.indices))
+        indices_str = ', '.join(
+            unique_indices_str[index]
+            for index in self.indices
+        )
         conjugate_str = '.c' if self.is_conjugated else ''
 
         return '{derivatives}{name}{conjugate}({indices})'.format(
@@ -374,12 +379,34 @@ class Operator(Conjugable, Convertible, Differentiable, Functional):
         self._simplify()
 
     def __str__(self):
-        tensors = " ".join(map(str, self.tensors))
+        unique_indices_str = Index.assign_unique_str(self.all_indices)
+        unique_indices = {
+            old_index: Index(new_index_name)
+            for old_index, new_index_name in unique_indices_str.items()
+        }
+
+        tensors_str = map(str, self._replace_indices(unique_indices).tensors)
 
         if self.coefficient == 1:
-            return tensors
+            coefficient_str = ''
+        else:
+            try:
+                from sympy import nsimplify
+                coefficient_str = str(nsimplify(self.coefficient))
+            except ModuleNotFoundError:
+                coefficient_str = str(self.coefficient)
 
-        return "{} {}".format(self.coefficient, tensors)
+        final_str = coefficient_str
+        current_line = coefficient_str
+        for tensor_str in tensors_str:
+            if len(current_line + ' ' + tensor_str) <= 80:
+                final_str += ' ' + tensor_str
+                current_line += ' ' + tensor_str
+            else:
+                final_str += '\n' + ' '*4 + '* ' + tensor_str
+                current_line = ' '*4 + '* ' + tensor_str
+
+        return final_str
 
     __repr__ = __str__
 
@@ -401,6 +428,13 @@ class Operator(Conjugable, Convertible, Differentiable, Functional):
 
     def __hash__(self):
         return hash(tuple(self.tensors))
+
+    @property
+    def all_indices(self):
+        return [
+            index for tensor in self.tensors
+            for index in tensor.all_indices
+        ]
 
     def _to_tensor(self):
         if len(self.tensors) == 1:
@@ -609,7 +643,10 @@ class OperatorSum(Conjugable, Convertible, Differentiable, Functional):
         self._simplify()
 
     def __str__(self):
-        return " + ".join(map(str, self.operators))
+        one_line_str = ' + '.join(map(str, self.operators))
+        if len(one_line_str) <= 80:
+            return one_line_str
+        return '\n+ '.join(map(str, self.operators))
 
     __repr__ = __str__
 
