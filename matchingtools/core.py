@@ -393,7 +393,7 @@ class Operator(Conjugable, Convertible, Differentiable, Functional):
             try:
                 from sympy import nsimplify
                 coefficient_str = str(nsimplify(self.coefficient))
-            except ModuleNotFoundError:
+            except ImportError:
                 coefficient_str = str(self.coefficient)
 
         final_str = coefficient_str
