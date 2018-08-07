@@ -60,5 +60,6 @@ class TestIntegrationRealScalar(unittest.TestCase):
             * self.phi.c(self.k) * self.phi(self.el)
         )
 
+
 if __name__ == '__main__':
     unittest.main()
