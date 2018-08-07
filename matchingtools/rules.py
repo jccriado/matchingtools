@@ -1,11 +1,8 @@
 # coding: utf-8
 
-from matchingtools.core import (
-    Operator, OperatorSum, Statistics
-)
+from matchingtools.core import Operator, OperatorSum
 from matchingtools.indices import Index
 from matchingtools.matches import Match
-from matchingtools.utils import Permutation
 
 
 class Rule(object):

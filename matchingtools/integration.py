@@ -1,9 +1,4 @@
-from itertools import combinations
-
-from matchingtools.core import (
-    RealConstant, RealField, Statistics, Operator, OperatorSum,
-    epsilon_up, epsilon_down, sigma_vector
-)
+from matchingtools.core import RealField
 from matchingtools.solutions import System
 from matchingtools.indices import Index
 from matchingtools.shortcuts import D
