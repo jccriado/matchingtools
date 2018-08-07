@@ -2,7 +2,8 @@ import unittest
 
 from matchingtools.matches import Match
 from matchingtools.indices import Index
-from matchingtools.core import RealField, Statistics
+from matchingtools.core import RealField
+from matchingtools.statistics import Statistics
 
 
 class TestPermutationMatch(unittest.TestCase):

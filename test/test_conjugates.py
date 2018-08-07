@@ -1,7 +1,8 @@
 import unittest
 
 from matchingtools.indices import Index
-from matchingtools.core import RealField, ComplexField, Statistics
+from matchingtools.core import RealField, ComplexField
+from matchingtools.statistics import Statistics
 
 
 class TestConjugates(unittest.TestCase):

@@ -22,14 +22,16 @@ class Index(object):
         return [Index(name) for name in names]
 
     @staticmethod
-    def assign_unique_str(indices):
+    def make_unique_names(indices):
         groups = {}
         for index in indices:
             groups.setdefault(index.name, set())
             groups[index.name].add(index)
 
         return {
-            index: name + (str(pos) if len(corresponding_indices) != 1 else '')
+            index: Index(
+                name + (str(pos) if len(corresponding_indices) != 1 else '')
+            )
             for name, corresponding_indices in groups.items()
             for pos, index in enumerate(corresponding_indices)
         }

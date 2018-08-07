@@ -1,6 +1,7 @@
 import unittest
 
-from matchingtools.core import RealField, ComplexField, Statistics
+from matchingtools.core import RealField, ComplexField
+from matchingtools.statistics import Statistics
 from matchingtools.indices import Index
 from matchingtools.rules import Rule
 

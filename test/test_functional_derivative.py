@@ -1,8 +1,7 @@
 import unittest
 
-from matchingtools.core import (
-    RealField, ComplexField, Statistics, Operator, Kdelta
-)
+from matchingtools.core import RealField, ComplexField, Operator, Kdelta
+from matchingtools.statistics import Statistics
 from matchingtools.indices import Index
 from matchingtools.shortcuts import D
 

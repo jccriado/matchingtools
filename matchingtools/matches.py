@@ -1,8 +1,11 @@
 # coding: utf-8
 
 import itertools
+from functools import reduce
+from operator import mul
 
-from matchingtools.utils import groupby
+from matchingtools.utils import groupby, Permutation
+from matchingtools.statistics import Statistics
 
 
 class Match(object):  # TODO make sure things that don't match don't match
@@ -30,16 +33,17 @@ class Match(object):  # TODO make sure things that don't match don't match
                 error_msg.format(base, offendant)
             )
 
-    def __init__(self, tensors_mapping, indices_mapping):
+    def __init__(self, tensors_mapping, indices_mapping, sign, rest):
         self.tensors_mapping = tensors_mapping
         self.indices_mapping = indices_mapping
+        self.sign = sign
+        self.rest = rest
 
     @staticmethod
     def extend_dict(base, addition):
         for key, value in addition.items():
             incoherent = (
-                key in base
-                and base[key] != value
+                (key in base and base[key] != value)
             )
 
             if incoherent:
@@ -151,19 +155,110 @@ class Match(object):  # TODO make sure things that don't match don't match
         return indices_mapping
 
     @staticmethod
-    def _match_operators_iterable(tensors_mappings):
-        for tensor_mapping in tensors_mappings:
+    def _match_operators_iterable(tensors_mappings, pattern, target):
+        tensors_mappings_with_indices_permutations = [
+            (tensor_mapping, dict(permuted_mapping))
+            for tensor_mapping in tensors_mappings
+            for permuted_mapping in
+            itertools.product(
+                *[
+                    [
+                        (
+                            tensor,
+                            (
+                                associate._replace_indices(
+                                    dict(zip(
+                                        associate.indices,
+                                        permutation
+                                    ))
+                                ),
+                                sign
+                            )
+                        )
+                        for permutation, sign in
+                        associate.generate_indices_permutations()
+                    ]
+                    for tensor, associate in tensor_mapping.items()
+                ]
+            )
+        ]
+
+        for mapping in tensors_mappings_with_indices_permutations:
             """
             Testing if a certain possible tensor mapping leads to a viable
             indices mapping. If there is any inconsistency in the indices
             mapping we can discard it right away.
             """
+            original_tensor_mapping, tensor_mapping_with_sign = mapping
+            indices_sign = reduce(
+                mul,
+                (sign for _, sign in tensor_mapping_with_sign.values()),
+                1
+            )
+            tensor_mapping = {
+                tensor: associate
+                for tensor, (associate, _) in tensor_mapping_with_sign.items()
+            }
+
             indices_mapping = Match._map_operator_indices(tensor_mapping)
 
             if indices_mapping is None:
                 continue
 
-            yield Match(tensor_mapping, indices_mapping)
+            def non_injective_contracted(fst_index, snd_index):
+                return (
+                    indices_mapping[fst_index] == indices_mapping[snd_index]
+                    and not (
+                        pattern.is_free_index(fst_index)
+                        and pattern.is_free_index(snd_index)
+                    )
+                )
+
+            if any(
+                    non_injective_contracted(first_index, second_index)
+                    for first_index, second_index
+                    in itertools.combinations(indices_mapping.keys(), 2)
+            ):
+                continue
+
+            if not all(
+                    not target.is_free_index(target_index)
+                    or pattern.is_free_index(pattern_index)
+                    for pattern_index, target_index in indices_mapping.items()
+            ):
+                continue
+
+            matched = []
+            rest = target.tensors.copy()
+            for pattern_tensor in pattern.tensors:
+                mapped = original_tensor_mapping[pattern_tensor]
+                matched.append(mapped)
+                rest.remove(mapped)
+
+            # compute the new operator tensors list
+            reordered_target = matched + rest
+
+            # check if a sign change is needed because of the reordering
+            original_fermions = [
+                tensor for tensor in target.tensors
+                if tensor.statistics == Statistics.FERMION
+            ]
+            reordered_fermions = [
+                tensor for tensor in reordered_target
+                if tensor.statistics == Statistics.FERMION
+            ]
+
+            fermions_permutation = Permutation.compare(
+                original_fermions, reordered_fermions
+            )
+            fermion_sign = fermions_permutation.parity
+
+            yield Match(
+                tensor_mapping,
+                indices_mapping,
+                fermion_sign * indices_sign,
+                rest
+            )
 
     @staticmethod
     def match_operators(pattern, target):
@@ -173,7 +268,15 @@ class Match(object):  # TODO make sure things that don't match don't match
             return None
 
         try:
-            next(Match._match_operators_iterable(tensors_mappings))
-            return Match._match_operators_iterable(tensors_mappings)
+            next(Match._match_operators_iterable(
+                tensors_mappings,
+                pattern,
+                target
+            ))
+            return Match._match_operators_iterable(
+                tensors_mappings,
+                pattern,
+                target
+            )
         except StopIteration:
             return None

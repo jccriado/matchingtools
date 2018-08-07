@@ -11,20 +11,16 @@ Defines the Lorentz tensors :data:`epsUp`, :data:`epsUpDot`,
 
 from abc import ABCMeta, abstractmethod
 from collections import Counter
-from enum import Enum
 from fractions import Fraction
 from functools import reduce
 from operator import add
+from itertools import permutations
 
-from matchingtools.lsttools import fst, snd, inits, LookUpTable, mask
+from matchingtools.lsttools import fst, snd, inits, LookUpTable, mask, concat
 from matchingtools.matches import Match
-from matchingtools.utils import Permutation
 from matchingtools.indices import Index
-
-
-class Statistics(Enum):
-    BOSON = 1
-    FERMION = 2
+from matchingtools.statistics import Statistics
+from matchingtools.utils import Permutation
 
 
 class Conjugable(object, metaclass=ABCMeta):
@@ -122,11 +118,16 @@ class Tensor(Conjugable, Convertible, Differentiable, Functional, Matchable):
         for a Tensor with indices i[0], i[1], ..., i[n-1] and
         derivatives_indices di[0], di[1], ..., di[m-1]
         """
+        unique_indices = Index.make_unique_names(self.all_indices)
+
         derivatives_str = ''.join(
-            'D({})'.format(index)
+            'D({})'.format(str(unique_indices[index]))
             for index in reversed(self.derivatives_indices)
         )
-        indices_str = ', '.join(map(str, self.indices))
+        indices_str = ', '.join(
+            str(unique_indices[index])
+            for index in self.indices
+        )
         conjugate_str = '.c' if self.is_conjugated else ''
 
         return '{derivatives}{name}{conjugate}({indices})'.format(
@@ -225,6 +226,9 @@ class Tensor(Conjugable, Convertible, Differentiable, Functional, Matchable):
             is_conjugated=self.is_conjugated
         )
 
+    def generate_indices_permutations(self):
+        return [(self.indices, 1)]
+
     @classmethod
     def make(cls, *names, **kwargs):
         return [Builder(name, cls, kwargs) for name in names]
@@ -276,7 +280,24 @@ class ComplexField(ComplexMixin, Field):
     pass
 
 
-class Kdelta(RealConstant):
+class TotallySymmetricMixin(object):
+    def generate_indices_permutations(self):
+        return [
+            (permutation, 1)
+            for permutation in permutations(self.indices)
+        ]
+
+
+class TotallyAntiSymmetricMixin(object):
+    def generate_indices_permutations(self):
+        return [
+            (permutation,
+             Permutation.compare(self.indices, permutation).parity)
+            for permutation in permutations(self.indices)
+        ]
+
+
+class Kdelta(TotallySymmetricMixin, RealConstant):
     def __init__(self, *indices):
         indices_list = list(indices)
         indices_count = len(indices_list)
@@ -374,12 +395,19 @@ class Operator(Conjugable, Convertible, Differentiable, Functional):
         self._simplify()
 
     def __str__(self):
-        tensors = " ".join(map(str, self.tensors))
+        unique_indices = Index.make_unique_names(self.all_indices)
+        tensors_str = map(str, self._replace_indices(unique_indices).tensors)
 
         if self.coefficient == 1:
-            return tensors
+            coefficient_str = ''
+        else:
+            coefficient_str = str(self.coefficient)
 
-        return "{} {}".format(self.coefficient, tensors)
+        final_str = coefficient_str
+        for tensor_str in tensors_str:
+            final_str += ' ' + tensor_str
+
+        return final_str
 
     __repr__ = __str__
 
@@ -402,6 +430,13 @@ class Operator(Conjugable, Convertible, Differentiable, Functional):
     def __hash__(self):
         return hash(tuple(self.tensors))
 
+    @property
+    def all_indices(self):
+        return [
+            index for tensor in self.tensors
+            for index in tensor.all_indices
+        ]
+
     def _to_tensor(self):
         if len(self.tensors) == 1:
             return self.tensors[0]
@@ -417,11 +452,18 @@ class Operator(Conjugable, Convertible, Differentiable, Functional):
     def functional_derivative(self, tensor):
         acc = 0
         sign = 1
+        new_indices_mapping = {
+            index: Index(index.name)
+            for index in tensor.indices
+            if not self.is_free_index(index)
+        }
 
-        for pos, self_tensor in enumerate(self.tensors):
-            left = Operator(self.tensors[:pos])
+        safe_tensors = self._replace_indices(new_indices_mapping).tensors
+
+        for pos, self_tensor in enumerate(safe_tensors):
+            left = Operator(safe_tensors[:pos])
             diff = self_tensor.functional_derivative(tensor)
-            right = Operator(self.tensors[pos+1:])
+            right = Operator(safe_tensors[pos+1:])
 
             acc += sign * left * diff * right
 
@@ -438,10 +480,13 @@ class Operator(Conjugable, Convertible, Differentiable, Functional):
         return acc * self.coefficient
 
     def _replace_indices(self, indices_mapping):
-        return Operator([
-            tensor._replace_indices(indices_mapping)
-            for tensor in self.tensors
-        ])
+        return Operator(
+            [
+                tensor._replace_indices(indices_mapping)
+                for tensor in self.tensors
+            ],
+            self.coefficient
+        )
 
     def _simplify(self):
         if self.coefficient == 0:
@@ -569,20 +614,7 @@ class Operator(Conjugable, Convertible, Differentiable, Functional):
         else:
             return False  # no valid match found
 
-        own_fermions = [
-            tensor for tensor in self.tensors
-            if tensor.statistics == Statistics.FERMION
-        ]
-        other_fermions = [
-            tensor for tensor in other.tensors
-            if tensor.statistics == Statistics.FERMION
-        ]
-        sign = Permutation.compare(
-            other_fermions,
-            [match.tensors_mapping[tensor] for tensor in own_fermions]
-        ).parity
-
-        return self.coefficient * sign == other.coefficient
+        return self.coefficient * match.sign == other.coefficient
 
     def with_unit_coefficient(self):
         new_operator = self.clone()
@@ -609,7 +641,10 @@ class OperatorSum(Conjugable, Convertible, Differentiable, Functional):
         self._simplify()
 
     def __str__(self):
-        return " + ".join(map(str, self.operators))
+        unique_indices = Index.make_unique_names(self.all_indices)
+        self_renamed_indices = self._replace_indices(unique_indices)
+
+        return " + ".join(map(str, self_renamed_indices.operators))
 
     __repr__ = __str__
 
@@ -698,6 +733,10 @@ class OperatorSum(Conjugable, Convertible, Differentiable, Functional):
             operator._replace_indices(indices_mapping)
             for operator in self.operators
         ])
+
+    @property
+    def all_indices(self):
+        return concat(operator.all_indices for operator in self.operators)
 
     def variation(self, tensor):
         max_derivatives = max(

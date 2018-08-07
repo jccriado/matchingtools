@@ -1,9 +1,8 @@
 import unittest
 
 from matchingtools.indices import Index
-from matchingtools.core import (
-    RealConstant, RealField, ComplexField, Statistics
-)
+from matchingtools.core import RealConstant, RealField, ComplexField
+from matchingtools.statistics import Statistics
 from matchingtools.matches import Match
 from matchingtools.rules import Rule
 from matchingtools.shortcuts import D
@@ -194,7 +193,7 @@ class TestDerivativesProperties(unittest.TestCase):
 class TestReplaceDerivatives(unittest.TestCase):
     def setUp(self):
         self.mu, self.nu, self.rho = Index.make('mu', 'nu', 'rho')
-        self.i, self.j = Index.make('i', 'j')
+        self.i, self.j, self.k, self.el = Index.make('i', 'j', 'k', 'l')
 
         self.S, = RealField.make(
             'S',
@@ -232,13 +231,14 @@ class TestReplaceDerivatives(unittest.TestCase):
     def test_eom_times_other(self):
         self.assertEqual(
             self.eom_rule.apply(
-                self.psi.c(self.i, self.j) * self.psi(self.j, self.i)
-                * D(self.nu, D(self.nu, self.S(self.i)))
+                self.psi.c(self.i, self.j) * self.psi(self.j, self.i) *
+                self.S(self.k) * D(self.nu, D(self.nu, self.S(self.k)))
             ),
             self.psi.c(self.i, self.j) * self.psi(self.j, self.i)
+            * self.S(self.k)
             * (
-                2 * self.S(self.i)
-                + 3 * self.S(self.i) * self.S(self.j) * self.S(self.j)
+                2 * self.S(self.k)
+                + 3 * self.S(self.k) * self.S(self.el) * self.S(self.el)
             )
         )
 
@@ -288,7 +288,7 @@ class TestReplaceDerivatives(unittest.TestCase):
 
 class TestReplaceByDerivative(unittest.TestCase):
     def setUp(self):
-        self.mu, self.i, self.j = Index.make('mu', 'i', 'j')
+        self.mu, self.i, self.j, self.k = Index.make('mu', 'i', 'j', 'k')
 
         self.y, = RealConstant.make('y')
 
@@ -334,8 +334,8 @@ class TestReplaceByDerivative(unittest.TestCase):
                 * D(self.mu, self.S(self.i))
                 * self.V(self.mu)
             ),
-            self.y(self.i)
-            * D(self.mu, self.S(self.i))
+            self.y(self.k)
+            * D(self.mu, self.S(self.k))
             * self.psi.c(self.i, self.j)
             * D(self.mu, self.psi(self.i, self.j))
         )

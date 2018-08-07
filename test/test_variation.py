@@ -1,6 +1,7 @@
 import unittest
 
-from matchingtools.core import RealConstant, RealField, Statistics
+from matchingtools.core import RealConstant, RealField
+from matchingtools.statistics import Statistics
 from matchingtools.indices import Index
 from matchingtools.shortcuts import D
 
