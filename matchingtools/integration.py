@@ -1,10 +1,12 @@
 from abc import ABCMeta, abstractmethod
 
-from matchingtools.core import RealField
+from matchingtools.core import RealField, SigmaVector
 from matchingtools.solutions import System
 from matchingtools.indices import Index
 from matchingtools.shortcuts import D
-from matchingtools.invertibles import MassMatrix, MassScalar
+from matchingtools.invertibles import (
+    MassMatrix, MassScalar, EpsilonDown, EpsilonUp
+)
 
 
 class CanonicalField(object, metaclass=ABCMeta):
@@ -76,6 +78,46 @@ class Vector(BosonMixin, CanonicalField):
         return self.factor() * (kinetic_terms + self.boson_mass_term())
 
 
+class DiracFermion(CanonicalField):
+    def __init__(
+            self, left_field, right_field,
+            left_spinor_index, right_spinor_index,
+            flavor_index=None
+    ):
+        self.left_field = left_field
+        self.right_field = right_field
+        self.left_spinor_index = left_spinor_index
+        self.right_spinor_index = right_spinor_index
+        self.flavor_index = flavor_index
+
+        def quadratic_terms(self):
+            alpha = self.left_spinor_index
+            alpha_dot = Index(alpha.name)
+            beta_dot = self.right_spinor_index
+            beta = Index(beta_dot.name)
+            mu = Index('mu')
+
+            fL = self.left_field
+            fR = self.right_field
+            fLc = self.left_field.conjugate()._replace_indices(
+                {alpha: alpha_dot}
+            )
+            fRc = self.right_field.conjugate()._replace_indices(
+                {beta_dot: beta}
+            )
+
+            kinetic_terms = (
+                1j * fLc * SigmaVector(mu, alpha_dot, alpha) * D(mu, fL)
+                + 1j * fRc * SigmaVector.c(mu, beta, beta_dot) * D(mu, fR)
+            )
+            mass_terms = - self.mass * (
+                fLc * EpsilonDown(alpha_dot, beta_dot) * fR
+                + fRc * EpsilonUp(beta, alpha) * fL
+            )
+
+            return kinetic_terms + mass_terms
+
+
 class UVTheory(object):
     def __init__(self, interaction_lagrangian, heavy_fields):
         self.heavy_fields = heavy_fields
@@ -106,28 +148,3 @@ class UVTheory(object):
                 effective_lagrangian
             )
         )
-
-# def quadratic_terms(self):
-#     alpha = self.left_spinor_index
-#     alpha_dot = Index(alpha.name)
-#     beta_dot = self.right_spinor_index
-#     beta = Index(beta_dot.name)
-#     mu = Index('mu')
-
-#     fL = self.left_field
-#     fR = self.right_field
-#     fLc = self.left_field.conjugate()._replace_indices({alpha: alpha_dot})
-#     fRc = self.right_field.conjugate()._replace_indices({beta_dot: beta})
-
-#     kinetic_terms = (
-#         1j * fLc * sigma_vector(mu, alpha_dot, alpha) * D(mu, fL)
-#         + 1j * fRc * sigma_vector.c(mu, beta, beta_dot) * D(mu, fR)
-#     )
-
-#     mass_terms = - self.mass * (
-#         fLc * epsilon_down(alpha_dot, beta_dot) * fR
-#         + fRc * epsilon_up(beta, alpha) * fLp
-#     )
-
-
-#     return kinetic_terms + mass_terms
