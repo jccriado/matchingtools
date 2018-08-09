@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 
-from matchingtools.core import RealField, OperatorSum
+from matchingtools.core import RealField
 from matchingtools.solutions import System
 from matchingtools.indices import Index
 from matchingtools.shortcuts import D
