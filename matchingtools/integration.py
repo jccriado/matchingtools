@@ -90,32 +90,63 @@ class DiracFermion(CanonicalField):
         self.right_spinor_index = right_spinor_index
         self.flavor_index = flavor_index
 
-        def quadratic_terms(self):
-            alpha = self.left_spinor_index
-            alpha_dot = Index(alpha.name)
-            beta_dot = self.right_spinor_index
-            beta = Index(beta_dot.name)
-            mu = Index('mu')
+    def quadratic_terms(self):
+        alpha = self.left_spinor_index
+        alpha_dot = Index(alpha.name)
+        beta_dot = self.right_spinor_index
+        beta = Index(beta_dot.name)
+        mu = Index('mu')
 
-            fL = self.left_field
-            fR = self.right_field
-            fLc = self.left_field.conjugate()._replace_indices(
-                {alpha: alpha_dot}
-            )
-            fRc = self.right_field.conjugate()._replace_indices(
-                {beta_dot: beta}
-            )
+        fL = self.left_field
+        fR = self.right_field
+        fLc = self.left_field.conjugate()._replace_indices({alpha: alpha_dot})
+        fRc = self.right_field.conjugate()._replace_indices({beta_dot: beta})
 
-            kinetic_terms = (
-                1j * fLc * SigmaVector(mu, alpha_dot, alpha) * D(mu, fL)
-                + 1j * fRc * SigmaVector.c(mu, beta, beta_dot) * D(mu, fR)
-            )
-            mass_terms = - self.mass * (
-                fLc * EpsilonDown(alpha_dot, beta_dot) * fR
-                + fRc * EpsilonUp(beta, alpha) * fL
-            )
+        kinetic_terms = (
+            1j * fLc * SigmaVector(mu, alpha_dot, alpha) * D(mu, fL)
+            + 1j * fRc * SigmaVector.c(mu, beta, beta_dot) * D(mu, fR)
+        )
+        mass_terms = - self.mass * (
+            fLc * EpsilonDown(alpha_dot, beta_dot) * fR
+            + fRc * EpsilonUp(beta, alpha) * fL
+        )
 
-            return kinetic_terms + mass_terms
+        return kinetic_terms + mass_terms
+
+
+class MajoranaFermion(CanonicalField):
+    def __init__(self, left_field, left_spinor_index, flavor_index=None):
+        self.left_field = left_field
+        self.left_spinor_index = left_spinor_index
+        self.flavor_index = flavor_index
+
+    def quadratic_terms(self):
+        alpha = self.left_spinor_index
+        beta = Index(alpha.name)
+        alpha_dot = Index(alpha.name)
+        beta_dot = Index(alpha.name)
+        mu = Index('mu')
+
+        fL_alpha = self.left_field
+        fL_beta = self.left_field._replace_indices({alpha: beta})
+        fLc_alpha_dot = (
+            self.left_field.conjugate()._replace_indices({alpha: alpha_dot})
+        )
+        fLc_beta_dot = (
+            self.left_field.conjugate()._replace_indices({alpha: beta_dot})
+        )
+
+        kinetic_terms = 1j * (
+            fLc_alpha_dot
+            * SigmaVector(mu, alpha_dot, alpha)
+            * D(mu, fL_alpha)
+        )
+        mass_terms = - 1/2 * self.mass * (
+            fL_alpha * EpsilonDown(alpha, beta) * fL_beta
+            + fLc_alpha_dot * EpsilonDown(alpha_dot, beta_dot) * fLc_beta_dot
+        )
+
+        return kinetic_terms + mass_terms
 
 
 class UVTheory(object):
