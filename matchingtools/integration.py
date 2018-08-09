@@ -1,57 +1,111 @@
-from matchingtools.core import RealField
+from abc import ABCMeta, abstractmethod
+
+from matchingtools.core import RealField, OperatorSum
 from matchingtools.solutions import System
 from matchingtools.indices import Index
 from matchingtools.shortcuts import D
 from matchingtools.invertibles import MassMatrix, MassScalar
 
 
-def boson_mass_term(field, flavor_index):
-    if flavor_index is None:
-        mass = MassScalar(field.name)
-        return -mass**2 * field.conjugate() * field
+class CanonicalField(object, metaclass=ABCMeta):
+    @abstractmethod
+    def quadratic_terms(self):
+        pass
 
-    new_flavor_index = Index(flavor_index.name)
-    mass = MassMatrix(
-        field.name,
-        new_flavor_index,
-        flavor_index
-    )
 
-    return (
-        -mass**2
-        * field.conjugate()._replace_indices(
-            {flavor_index: new_flavor_index}
+class BosonMixin(object):
+    def boson_mass_term(self):
+        if self.flavor_index is None:
+            mass = MassScalar(self.field.name)
+            return -mass**2 * self.field.conjugate() * self.field
+
+        new_flavor_index = Index(self.flavor_index.name)
+        mass = MassMatrix(
+            self.field.name,
+            new_flavor_index,
+            self.flavor_index
         )
-        * field
-    )
 
-
-def scalar_quadratic_terms(field, flavor_index=None):
-    mu = Index('mu')
-    factor = 1/2 if isinstance(field, RealField) else 1
-
-    kinetic_term = D(mu, field.conjugate()) * D(mu, field)
-
-    return factor * (kinetic_term + boson_mass_term(field, flavor_index))
-
-
-def vector_quadratic_terms(field, vector_index, flavor_index=None):
-    factor = 1/2 if isinstance(field, RealField) else 1
-    new_vector_index = Index(vector_index.name)
-
-    kinetic_terms = (
-        - D(new_vector_index, field.conjugate())
-        * D(new_vector_index, field)
-
-        + D(new_vector_index, field.conjugate())
-        * D(
-            vector_index,
-            field.replace_indices({vector_index: new_vector_index})
+        return (
+            -mass**2
+            * self.field.conjugate()._replace_indices(
+                {self.flavor_index: new_flavor_index}
+            )
+            * self.field
         )
-    )
 
-    return factor * (kinetic_terms + boson_mass_term(field, flavor_index))
+    def factor(self):
+        return 1/2 if isinstance(self.field, RealField) else 1
 
+
+class Scalar(BosonMixin, CanonicalField):
+    def __init__(self, field, flavor_index=None):
+        self.field = field
+        self.flavor_index = flavor_index
+
+    def quadratic_terms(self):
+        mu = Index('mu')
+
+        kinetic_term = D(mu, self.field.conjugate()) * D(mu, self.field)
+
+        return self.factor() * (kinetic_term + self.boson_mass_term())
+
+
+class Vector(BosonMixin, CanonicalField):
+    def __init__(self, field, vector_index, flavor_index=None):
+        self.field = field
+        self.vector_index = vector_index
+        self.flavor_index = flavor_index
+
+    def quadratic_terms(self):
+        new_vector_index = Index(self.vector_index.name)
+
+        kinetic_terms = (
+            - D(new_vector_index, self.field.conjugate())
+            * D(new_vector_index, self.field)
+
+            + D(new_vector_index, self.field.conjugate())
+            * D(
+                self.vector_index,
+                self.field.replace_indices(
+                    {self.vector_index: new_vector_index}
+                )
+            )
+        )
+
+        return self.factor() * (kinetic_terms + self.boson_mass_term())
+
+
+class UVTheory(object):
+    def __init__(self, interaction_lagrangian, heavy_fields):
+        self.heavy_fields = heavy_fields
+        self.lagrangian = sum(
+            (
+                heavy_field.quadratic_terms()
+                for heavy_field in heavy_fields
+            ),
+            interaction_lagrangian
+        )
+
+    def equations_of_motion_solutions(self, max_dimension):
+        return System(
+            [
+                self.lagrangian.variation(heavy_field.field)
+                for heavy_field in self.heavy_fields
+            ],
+            [heavy_field.field for heavy_field in self.heavy_fields]
+        ).solve(max_dimension)
+
+    def integrate_out(self, max_dimension):
+        effective_lagrangian = (
+            self.equations_of_motion_solutions(max_dimension - 1)
+            .substitute(self.lagrangian, max_dimension)
+        )
+        return MassScalar._simplify(
+            MassMatrix._simplify(
+                effective_lagrangian
+            )
+        )
 
 # def quadratic_terms(self):
 #     alpha = self.left_spinor_index
@@ -72,24 +126,8 @@ def vector_quadratic_terms(field, vector_index, flavor_index=None):
 
 #     mass_terms = - self.mass * (
 #         fLc * epsilon_down(alpha_dot, beta_dot) * fR
-#         + fRc * epsilon_up(beta, alpha) * fL
+#         + fRc * epsilon_up(beta, alpha) * fLp
 #     )
 
 
 #     return kinetic_terms + mass_terms
-
-
-def integrate_out(lagrangian, heavy_fields, max_dimension):
-    eom_solutions = System(
-        [
-            lagrangian.variation(heavy_field)
-            for heavy_field in heavy_fields
-        ],
-        heavy_fields
-    ).solve(max_dimension - 1)
-
-    return MassScalar._simplify(
-        MassMatrix._simplify(
-            eom_solutions.substitute(lagrangian, max_dimension)
-        )
-    )

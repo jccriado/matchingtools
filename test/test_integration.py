@@ -4,7 +4,7 @@ from matchingtools.core import RealConstant, RealField, ComplexField
 from matchingtools.statistics import Statistics
 from matchingtools.indices import Index
 from matchingtools.invertibles import MassMatrix
-from matchingtools.integration import scalar_quadratic_terms, integrate_out
+from matchingtools.integration import Scalar, UVTheory
 
 
 class TestIntegrationRealScalar(unittest.TestCase):
@@ -35,20 +35,13 @@ class TestIntegrationRealScalar(unittest.TestCase):
             * self.Xi(self.a, self.k)
         )
 
-        self.lagrangian = (
-            interaction_lagrangian
-            + scalar_quadratic_terms(
-                self.Xi(self.b, self.el),
-                flavor_index=self.el
-            )
+        self.uv_theory = UVTheory(
+            interaction_lagrangian,
+            [Scalar(self.Xi(self.a, self.i), flavor_index=self.i)]
         )
 
     def test_integration(self):
-        effective_lagrangian = integrate_out(
-            self.lagrangian,
-            [self.Xi(self.a, self.i)],
-            4
-        )
+        effective_lagrangian = self.uv_theory.integrate_out(4)
 
         self.assertEqual(
             effective_lagrangian,
