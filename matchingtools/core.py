@@ -374,6 +374,17 @@ class Kdelta(TotallySymmetricMixin, RealConstant):
         return [Kdelta(*pair) for pair in simplified_pairs]
 
 
+class SigmaVector(ComplexConstant):
+    def __init__(self, lorentz_index, right_spinor_index, left_spinor_index):
+        super().__init__(
+            name="SigmaTensor",
+            indices=[lorentz_index, right_spinor_index, left_spinor_index],
+            derivatives_indices=[],
+            dimension=0,
+            statistics=Statistics.BOSON
+        )
+
+
 class Operator(Conjugable, Convertible, Differentiable, Functional):
     """
     Container for a list of tensors with their indices contracted.
@@ -810,35 +821,3 @@ class Builder(object):
 
     def c(self, *indices):
         return self(*indices).conjugate()
-
-
-# To be used to specify the statistics of fields
-
-# TODO: decide whether we want to keep these aliases or not
-
-boson = Statistics.BOSON
-fermion = Statistics.FERMION
-
-# Basic Lorentz group related tensors.
-#
-# * The eps- tensors represent the antisymmetric epsilon symbols with
-#   two-component spinor indices, with Up/Down denoting the position of
-#   the two indices and the sufix -Dot meaning that both indices are dotted.
-#
-# * The sigma- tensors represent sigma matrices, defined in the usual way
-#   using the three Pauli matrices and the 2x2 identity. The Lorentz vector
-#   index is the first, the two two-component spinor indices are the second
-#   and third.
-
-# TODO: Rewrite these
-'''
-epsUp = TensorBuilder("epsUp")
-epsUpDot = TensorBuilder("epsUpDot")
-epsDown = TensorBuilder("epsDown")
-epsDownDot = TensorBuilder("epsDownDot")
-sigma4bar = TensorBuilder("sigma4bar")
-sigma4 = TensorBuilder("sigma4")
-'''
-
-epsilon_up, epsilon_down = RealConstant.make('epsilon_up', 'epsilon_down')
-sigma_vector, = ComplexConstant.make('sigma_vector')
