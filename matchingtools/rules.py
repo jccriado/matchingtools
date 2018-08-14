@@ -18,6 +18,10 @@ class Rule(object):
 
         match = next(matches)
 
+        rest = target.tensors.copy()
+        for pattern_tensor in self.pattern.tensors:
+            rest.remove(match.tensors_mapping[pattern_tensor])
+
         # extend indices mapping
         for operator in self.replacement.operators:
             for tensor in operator.tensors:
@@ -26,7 +30,7 @@ class Rule(object):
                     is_contracted = not operator.is_free_index(index)
                     name_clashes = any(
                         index in original_tensor
-                        for original_tensor in match.rest
+                        for original_tensor in rest
                     )
 
                     if not is_mapped and is_contracted and name_clashes:
@@ -47,7 +51,7 @@ class Rule(object):
             for operator in self.replacement.operators
         ])
 
-        return match.sign * adapted_replacement * Operator(match.rest)
+        return match.sign * adapted_replacement * Operator(rest)
 
     def apply(self, target):
         target = target._to_operator_sum()
