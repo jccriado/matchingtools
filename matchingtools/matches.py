@@ -151,27 +151,40 @@ class Match(object):  # TODO make sure things that don't match don't match
 
         return indices_mapping
 
-    class _SignedMapping(object):
+    class _SignedTensorMapping(object):
         def __init__(self, mapping, sign):
+            """
+            A signed tensor mapping contains a tensor mapping and a sign.
+            """
+            # TODO: this is an ad-hoc solution for representing tensor
+            # mappings with the sign corresponding to the permutation of
+            # their indices under consideration. This might not be the best
+            # solution.
             self.mapping = mapping
             self.sign = sign
 
         @staticmethod
         def from_triplets(triplets):
+            """
+            From a list of triplets, construct a tensor mapping from the first
+            two elements of each triplet and compute the sign by multiplying
+            every third element.
+            """
             mapping = []
             sign = 1
             for first, second, third in triplets:
                 mapping.append((first, second))
                 sign *= third
-            return Match._SignedMapping(dict(mapping), sign)
+            return Match._SignedTensorMapping(dict(mapping), sign)
 
     @staticmethod
     def _is_injective(indices_mapping, pattern, target):
-        # ------------------------------------------------------------
+        """
+        Check that the indices_mapping satisfies some 'injectivity' conditions
+        """
 
-        # Identifying pairs of indices in the pattern that map to the
-        # same index in the target, where one of the indices in the
-        # pair are not free
+        # Identify pairs of indices in the pattern that map to the same index
+        # in the target, where one of the indices in the pair are not free
         def non_injective_pair(fst_index, snd_index):
             return (
                 indices_mapping[fst_index]
@@ -191,7 +204,7 @@ class Match(object):  # TODO make sure things that don't match don't match
         if non_injective:
             return False
 
-        # Check that pre-image of a free index should be free
+        # Check that pre-image of a free index is free
         free_preimage_is_free = all(
             not target.is_free_index(target_index)
             or pattern.is_free_index(pattern_index)
@@ -241,7 +254,7 @@ class Match(object):  # TODO make sure things that don't match don't match
             ])
 
             index_permuted_mappings = map(
-                Match._SignedMapping.from_triplets,
+                Match._SignedTensorMapping.from_triplets,
                 index_permuted_triplets
             )
 
