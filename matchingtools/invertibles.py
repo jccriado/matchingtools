@@ -183,11 +183,12 @@ class MassScalar(RealConstant, InvertibleScalar):
         return Operator(masses + rest, operator.coefficient)
 
 
-class EpsilonUp(TotallySymmetricMixin, RealConstant, InvertibleMatrix):
+class EpsilonUp(TotallyAntiSymmetricMixin, RealConstant, InvertibleMatrix):
     def __init__(self, first_index, second_index):
         super().__init__(
             name="EpsilonUp",
-            indices=[first_index, second_index]
+            indices=[first_index, second_index],
+            derivatives_indices=[]
         )
 
     def clone(self):
@@ -201,7 +202,8 @@ class EpsilonDown(TotallyAntiSymmetricMixin, RealConstant, InvertibleMatrix):
     def __init__(self, first_index, second_index):
         super().__init__(
             name="EpsilonDown",
-            indices=[first_index, second_index]
+            indices=[first_index, second_index],
+            derivatives_indices=[]
         )
 
     def clone(self):
