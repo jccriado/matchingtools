@@ -1,8 +1,6 @@
 # coding: utf-8
 
 import itertools
-from functools import reduce
-from operator import mul
 
 from matchingtools.utils import groupby, Permutation
 from matchingtools.statistics import Statistics
@@ -33,11 +31,10 @@ class Match(object):  # TODO make sure things that don't match don't match
                 error_msg.format(base, offendant)
             )
 
-    def __init__(self, tensors_mapping, indices_mapping, sign, rest):
+    def __init__(self, tensors_mapping, indices_mapping, sign):
         self.tensors_mapping = tensors_mapping
         self.indices_mapping = indices_mapping
         self.sign = sign
-        self.rest = rest
 
     @staticmethod
     def extend_dict(base, addition):
@@ -154,18 +151,99 @@ class Match(object):  # TODO make sure things that don't match don't match
 
         return indices_mapping
 
+    class _SignedMapping(object):
+        def __init__(self, mapping, sign):
+            self.mapping = mapping
+            self.sign = sign
+
+        @staticmethod
+        def from_triplets(triplets):
+            mapping = []
+            sign = 1
+            for first, second, third in triplets:
+                mapping.append((first, second))
+                sign *= third
+            return Match._SignedMapping(dict(mapping), sign)
+
+    @staticmethod
+    def _is_injective(indices_mapping, pattern, target):
+        # ------------------------------------------------------------
+
+        # Identifying pairs of indices in the pattern that map to the
+        # same index in the target, where one of the indices in the
+        # pair are not free
+        def non_injective_pair(fst_index, snd_index):
+            return (
+                indices_mapping[fst_index]
+                == indices_mapping[snd_index]
+                and not (
+                    pattern.is_free_index(fst_index)
+                    and pattern.is_free_index(snd_index)
+                )
+            )
+
+        non_injective = any(
+            non_injective_pair(first_index, second_index)
+            for first_index, second_index
+            in itertools.combinations(indices_mapping.keys(), 2)
+        )
+
+        if non_injective:
+            return False
+
+        # Check that pre-image of a free index should be free
+        free_preimage_is_free = all(
+            not target.is_free_index(target_index)
+            or pattern.is_free_index(pattern_index)
+            for pattern_index, target_index in indices_mapping.items()
+        )
+
+        return free_preimage_is_free
+
+    @staticmethod
+    def _fermions_sign(tensor_mapping, pattern, target):
+        """ Compute the sign due to the fermion permutation """
+        matched = []
+        rest = target.tensors.copy()
+        for pattern_tensor in pattern.tensors:
+            mapped = tensor_mapping[pattern_tensor]
+            matched.append(mapped)
+            rest.remove(mapped)
+
+        # Compute the new operator tensors list
+        reordered_target = matched + rest
+
+        original_fermions = [
+            tensor for tensor in target.tensors
+            if tensor.statistics == Statistics.FERMION
+        ]
+        reordered_fermions = [
+            tensor for tensor in reordered_target
+            if tensor.statistics == Statistics.FERMION
+        ]
+
+        fermions_permutation = Permutation.compare(
+            original_fermions, reordered_fermions
+        )
+        return fermions_permutation.parity
+
     @staticmethod
     def _match_operators_iterable(tensors_mappings, pattern, target):
         for tensor_mapping in tensors_mappings:
             # Compute all possible combinations of allowed permutations of the
             # indices of the target tensors in the candidate match
-            index_permuted_mappings = itertools.product(*[
+            index_permuted_triplets = itertools.product(*[
                 [
                     (tensor, permuted_assoc, sign)
                     for permuted_assoc, sign in associate.index_permutations()
                 ]
                 for tensor, associate in tensor_mapping.items()
             ])
+
+            index_permuted_mappings = map(
+                Match._SignedMapping.from_triplets,
+                index_permuted_triplets
+            )
 
             for index_permuted_mapping in index_permuted_mappings:
                 """
@@ -174,92 +252,23 @@ class Match(object):  # TODO make sure things that don't match don't match
                 mapping we can discard it right away.
                 """
                 # Compute the sign due to the permutation of the indices
-                indices_sign = reduce(
-                    mul,
-                    (sign for _, _, sign in index_permuted_mapping),
-                    1
-                )
-
-                # Compute the actual mapping of tensors, with each associate
-                # with its indices permuted
-                permuted_tensor_mapping = {
-                    tensor: associate
-                    for tensor, associate, _ in index_permuted_mapping
-                }
 
                 # Try to match the indices for this permutation
                 indices_mapping = Match._map_operator_indices(
-                    permuted_tensor_mapping
+                    index_permuted_mapping.mapping
                 )
 
                 if indices_mapping is None:
                     continue
 
-                # ------------------------------------------------------------
-
-                # Identifying pairs of indices in the pattern that map to the
-                # same index in the target, where one of the indices in the
-                # pair are not free
-                def non_injective_pair(fst_index, snd_index):
-                    return (
-                        indices_mapping[fst_index]
-                        == indices_mapping[snd_index]
-                        and not (
-                            pattern.is_free_index(fst_index)
-                            and pattern.is_free_index(snd_index)
-                        )
-                    )
-
-                non_injective = any(
-                    non_injective_pair(first_index, second_index)
-                    for first_index, second_index
-                    in itertools.combinations(indices_mapping.keys(), 2)
-                )
-
-                if non_injective:
+                if not Match._is_injective(indices_mapping, pattern, target):
                     continue
-
-                # Check that pre-image of a free index should be free
-                free_preimage_is_free = all(
-                    not target.is_free_index(target_index)
-                    or pattern.is_free_index(pattern_index)
-                    for pattern_index, target_index in indices_mapping.items()
-                )
-
-                if not free_preimage_is_free:
-                    continue
-
-                # ------------------------------------------------------------
-                # Compute the sign due to the fermion permutation
-                matched = []
-                rest = target.tensors.copy()
-                for pattern_tensor in pattern.tensors:
-                    mapped = tensor_mapping[pattern_tensor]
-                    matched.append(mapped)
-                    rest.remove(mapped)
-
-                # Compute the new operator tensors list
-                reordered_target = matched + rest
-
-                original_fermions = [
-                    tensor for tensor in target.tensors
-                    if tensor.statistics == Statistics.FERMION
-                ]
-                reordered_fermions = [
-                    tensor for tensor in reordered_target
-                    if tensor.statistics == Statistics.FERMION
-                ]
-
-                fermions_permutation = Permutation.compare(
-                    original_fermions, reordered_fermions
-                )
-                fermion_sign = fermions_permutation.parity
 
                 yield Match(
                     tensor_mapping,
                     indices_mapping,
-                    fermion_sign * indices_sign,
-                    rest
+                    Match._fermions_sign(tensor_mapping, pattern, target)
+                    * index_permuted_mapping.sign
                 )
 
     @staticmethod
