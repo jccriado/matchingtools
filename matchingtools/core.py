@@ -190,12 +190,13 @@ class Tensor(Conjugable, Convertible, Differentiable, Functional, Matchable):
         return OperatorSum()
 
     def _match_attributes(self):
+        # TODO: these lines are commented because it increases the performance
         return {
             'name': self.name,
-            'dimension': self.dimension,
-            'statistics': self.statistics,
+            # 'dimension': self.dimension,
+            # 'statistics': self.statistics,
             'is_conjugated': self.is_conjugated,
-            'indices_count': len(self.indices),
+            # 'indices_count': len(self.indices),
             'd_indices_count': len(self.derivatives_indices),
         }
 
@@ -226,8 +227,8 @@ class Tensor(Conjugable, Convertible, Differentiable, Functional, Matchable):
             is_conjugated=self.is_conjugated
         )
 
-    def generate_indices_permutations(self):
-        return [(self.indices, 1)]
+    def index_permutations(self):
+        return [(self, 1)]
 
     @classmethod
     def make(cls, *names, **kwargs):
@@ -281,18 +282,23 @@ class ComplexField(ComplexMixin, Field):
 
 
 class TotallySymmetricMixin(object):
-    def generate_indices_permutations(self):
+    def index_permutations(self):
         return [
-            (permutation, 1)
+            (
+                self._replace_indices(dict(zip(self.indices, permutation))),
+                1
+            )
             for permutation in permutations(self.indices)
         ]
 
 
 class TotallyAntiSymmetricMixin(object):
-    def generate_indices_permutations(self):
+    def index_permutations(self):
         return [
-            (permutation,
-             Permutation.compare(self.indices, permutation).parity)
+            (
+                self._replace_indices(dict(zip(self.indices, permutation))),
+                Permutation.compare(self.indices, permutation).parity
+            )
             for permutation in permutations(self.indices)
         ]
 
@@ -668,7 +674,19 @@ class OperatorSum(Conjugable, Convertible, Differentiable, Functional):
         if not isinstance(other, OperatorSum):
             return self + other._to_operator_sum()
 
-        return OperatorSum(self.operators + other.operators)
+        operators = []
+        other_operators = other.operators
+        for own_operator in self.operators:
+            for other_operator in other_operators:
+                simplified_op_sum = OperatorSum([own_operator, other_operator])
+                if len(simplified_op_sum.operators) == 1:
+                    operators.append(simplified_op_sum.operators[0])
+                    other_operators.remove(other_operator)
+                    break
+            else:
+                operators.append(own_operator)
+
+        return OperatorSum(operators + other_operators)
 
     __radd__ = __add__
 

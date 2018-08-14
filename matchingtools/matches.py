@@ -156,112 +156,125 @@ class Match(object):  # TODO make sure things that don't match don't match
 
     @staticmethod
     def _match_operators_iterable(tensors_mappings, pattern, target):
-        tensors_mappings_with_indices_permutations = [
-            (tensor_mapping, dict(permuted_mapping))
-            for tensor_mapping in tensors_mappings
-            for permuted_mapping in
-            itertools.product(
-                *[
-                    [
-                        (
-                            tensor,
-                            (
-                                associate._replace_indices(
-                                    dict(zip(
-                                        associate.indices,
-                                        permutation
-                                    ))
-                                ),
-                                sign
-                            )
-                        )
-                        for permutation, sign in
-                        associate.generate_indices_permutations()
-                    ]
-                    for tensor, associate in tensor_mapping.items()
+        for tensor_mapping in tensors_mappings:
+            # Compute all possible combinations of allowed permutations of the
+            # indices of the target tensors in the candidate match
+            index_permuted_mappings = itertools.product(*[
+                [
+                    (tensor, permuted_assoc, sign)
+                    for permuted_assoc, sign in associate.index_permutations()
                 ]
-            )
-        ]
+                for tensor, associate in tensor_mapping.items()
+            ])
 
-        for mapping in tensors_mappings_with_indices_permutations:
-            """
-            Testing if a certain possible tensor mapping leads to a viable
-            indices mapping. If there is any inconsistency in the indices
-            mapping we can discard it right away.
-            """
-            original_tensor_mapping, tensor_mapping_with_sign = mapping
-            indices_sign = reduce(
-                mul,
-                (sign for _, sign in tensor_mapping_with_sign.values()),
-                1
-            )
-            tensor_mapping = {
-                tensor: associate
-                for tensor, (associate, _) in tensor_mapping_with_sign.items()
-            }
-
-            indices_mapping = Match._map_operator_indices(tensor_mapping)
-
-            if indices_mapping is None:
-                continue
-
-            def non_injective_contracted(fst_index, snd_index):
-                return (
-                    indices_mapping[fst_index] == indices_mapping[snd_index]
-                    and not (
-                        pattern.is_free_index(fst_index)
-                        and pattern.is_free_index(snd_index)
-                    )
+            for index_permuted_mapping in index_permuted_mappings:
+                """
+                Testing if a certain possible tensor mapping leads to a viable
+                indices mapping. If there is any inconsistency in the indices
+                mapping we can discard it right away.
+                """
+                # Compute the sign due to the permutation of the indices
+                indices_sign = reduce(
+                    mul,
+                    (sign for _, _, sign in index_permuted_mapping),
+                    1
                 )
 
-            if any(
-                    non_injective_contracted(first_index, second_index)
+                # Compute the actual mapping of tensors, with each associate
+                # with its indices permuted
+                permuted_tensor_mapping = {
+                    tensor: associate
+                    for tensor, associate, _ in index_permuted_mapping
+                }
+
+                # Try to match the indices for this permutation
+                indices_mapping = Match._map_operator_indices(
+                    permuted_tensor_mapping
+                )
+
+                if indices_mapping is None:
+                    continue
+
+                # ------------------------------------------------------------
+
+                # Identifying pairs of indices in the pattern that map to the
+                # same index in the target, where one of the indices in the
+                # pair are not free
+                def non_injective_pair(fst_index, snd_index):
+                    return (
+                        indices_mapping[fst_index]
+                        == indices_mapping[snd_index]
+                        and not (
+                            pattern.is_free_index(fst_index)
+                            and pattern.is_free_index(snd_index)
+                        )
+                    )
+
+                non_injective = any(
+                    non_injective_pair(first_index, second_index)
                     for first_index, second_index
                     in itertools.combinations(indices_mapping.keys(), 2)
-            ):
-                continue
+                )
 
-            if not all(
+                if non_injective:
+                    continue
+
+                # Check that pre-image of a free index should be free
+                free_preimage_is_free = all(
                     not target.is_free_index(target_index)
                     or pattern.is_free_index(pattern_index)
                     for pattern_index, target_index in indices_mapping.items()
-            ):
-                continue
+                )
 
-            matched = []
-            rest = target.tensors.copy()
-            for pattern_tensor in pattern.tensors:
-                mapped = original_tensor_mapping[pattern_tensor]
-                matched.append(mapped)
-                rest.remove(mapped)
+                if not free_preimage_is_free:
+                    continue
 
-            # compute the new operator tensors list
-            reordered_target = matched + rest
+                # ------------------------------------------------------------
+                # Compute the sign due to the fermion permutation
+                matched = []
+                rest = target.tensors.copy()
+                for pattern_tensor in pattern.tensors:
+                    mapped = tensor_mapping[pattern_tensor]
+                    matched.append(mapped)
+                    rest.remove(mapped)
 
-            # check if a sign change is needed because of the reordering
-            original_fermions = [
-                tensor for tensor in target.tensors
-                if tensor.statistics == Statistics.FERMION
-            ]
-            reordered_fermions = [
-                tensor for tensor in reordered_target
-                if tensor.statistics == Statistics.FERMION
-            ]
+                # Compute the new operator tensors list
+                reordered_target = matched + rest
 
-            fermions_permutation = Permutation.compare(
-                original_fermions, reordered_fermions
-            )
-            fermion_sign = fermions_permutation.parity
+                original_fermions = [
+                    tensor for tensor in target.tensors
+                    if tensor.statistics == Statistics.FERMION
+                ]
+                reordered_fermions = [
+                    tensor for tensor in reordered_target
+                    if tensor.statistics == Statistics.FERMION
+                ]
 
-            yield Match(
-                tensor_mapping,
-                indices_mapping,
-                fermion_sign * indices_sign,
-                rest
-            )
+                fermions_permutation = Permutation.compare(
+                    original_fermions, reordered_fermions
+                )
+                fermion_sign = fermions_permutation.parity
+
+                yield Match(
+                    tensor_mapping,
+                    indices_mapping,
+                    fermion_sign * indices_sign,
+                    rest
+                )
 
     @staticmethod
     def match_operators(pattern, target):
+        tensors_can_match = all(
+            any(
+                Match.tensors_do_match(pattern_tensor, target_tensor)
+                for target_tensor in target.tensors
+            )
+            for pattern_tensor in pattern.tensors
+        )
+
+        if not tensors_can_match:
+            return None
+
         tensors_mappings = list(Match._map_tensors(pattern, target))
 
         if tensors_mappings is None:
