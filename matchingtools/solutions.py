@@ -24,6 +24,8 @@ class Equation(object):
                     error_msg.format(operator)
                 )
 
+        NonLinearInvertible = (NonLinear, NonInvertible)
+
         def __init__(
             self, field, invertible_matrices, invertible_scalars, coefficient
         ):
@@ -125,9 +127,7 @@ class Equation(object):
                     raise Equation.MultipleLinearTerms(self)
                 else:
                     found_linear_term = True
-            except Equation.LinearInvertibleTerm.NonInvertible:
-                rest += operator
-            except Equation.LinearInvertibleTerm.NonLinear:
+            except Equation.LinearInvertibleTerm.NonLinearInvertible:
                 rest += operator
 
         if not found_linear_term:
