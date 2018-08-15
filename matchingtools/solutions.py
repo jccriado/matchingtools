@@ -75,7 +75,7 @@ class Equation(object):
                     )
 
             if not found_field:
-                return Equation.LinearInvertibleTerm.NonLinear(operator)
+                raise Equation.LinearInvertibleTerm.NonLinear(operator)
 
             return Equation.LinearInvertibleTerm(
                 return_field,
