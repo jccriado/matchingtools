@@ -178,7 +178,7 @@ class Match(object):  # TODO make sure things that don't match don't match
             return Match._SignedTensorMapping(dict(mapping), sign)
 
     @staticmethod
-    def _is_injective(indices_mapping, pattern, target):
+    def _is_valid_index_mapping(indices_mapping, pattern, target):
         """
         Check that the indices_mapping satisfies some 'injectivity' conditions
         """
@@ -274,7 +274,9 @@ class Match(object):  # TODO make sure things that don't match don't match
                 if indices_mapping is None:
                     continue
 
-                if not Match._is_injective(indices_mapping, pattern, target):
+                if not Match._is_valid_index_mapping(
+                        indices_mapping, pattern, target
+                ):
                     continue
 
                 yield Match(
