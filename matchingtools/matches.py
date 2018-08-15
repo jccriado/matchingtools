@@ -180,11 +180,13 @@ class Match(object):  # TODO make sure things that don't match don't match
     @staticmethod
     def _is_valid_index_mapping(indices_mapping, pattern, target):
         """
-        Check that the indices_mapping satisfies some 'injectivity' conditions
+        Check that the indices_mapping satisfies some necessary conditions:
+        - For two different indices in the patter, if one is contracted, they
+          can't be mapped to the same index in the target.
+        - Any index that is mapped to a free index of the target should be a
+          free index of the pattern.
         """
 
-        # Identify pairs of indices in the pattern that map to the same index
-        # in the target, where one of the indices in the pair are not free
         def non_injective_pair(fst_index, snd_index):
             return (
                 indices_mapping[fst_index]
@@ -264,7 +266,6 @@ class Match(object):  # TODO make sure things that don't match don't match
                 indices mapping. If there is any inconsistency in the indices
                 mapping we can discard it right away.
                 """
-                # Compute the sign due to the permutation of the indices
 
                 # Try to match the indices for this permutation
                 indices_mapping = Match._map_operator_indices(
