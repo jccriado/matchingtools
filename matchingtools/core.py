@@ -540,19 +540,30 @@ class Operator(Conjugable, Convertible, Differentiable, Functional):
     def dimension(self):
         return sum([tensor.dimension for tensor in self.tensors])
 
+    @property
+    def statistics(self):
+        own_fermions = [
+            tensor for tensor in self.tensors
+            if tensor.statistics == Statistics.FERMION
+        ]
+        if len(own_fermions) % 2 == 0:
+            return Statistics.BOSON
+        else:
+            return Statistics.FERMION
+
     def __contains__(self, tensor):
         return tensor in self.tensors
 
     def is_free_index(self, index):
         return len([
-            1 for tensor in self.tensors for tensor_index in tensor.indices
+            1 for tensor in self.tensors for tensor_index in tensor.all_indices
             if tensor_index == index
         ]) == 1
 
     @property
     def free_indices(self):
         counter = Counter(
-            index for tensor in self.tensors for index in tensor.indices
+            index for tensor in self.tensors for index in tensor.all_indices
         )
 
         return [
