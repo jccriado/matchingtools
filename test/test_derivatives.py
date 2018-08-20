@@ -48,6 +48,15 @@ class TestDerivativesProperties(unittest.TestCase):
             0
         )
 
+    def test_match(self):
+        self.assertIsNotNone(
+            Match.match_operators(
+                D(self.mu, self.S(self.i))._to_operator(),
+                (self.S(self.i) * self.V(self.mu) * D(self.mu, self.S(self.i)))
+                ._to_operator()
+            )
+        )
+
     def test_fields_change(self):
         self.assertNotEqual(
             D(self.mu, self.S(self.i)),
