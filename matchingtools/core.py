@@ -606,6 +606,8 @@ class Operator(Conjugable, Convertible, Differentiable, Functional):
         """
 
         if not isinstance(other, Convertible):
+            if len(self.tensors) == 0 and other == self.coefficient:
+                return True
             return False
 
         try:
