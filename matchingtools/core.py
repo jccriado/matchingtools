@@ -184,7 +184,8 @@ class Tensor(Conjugable, Convertible, Differentiable, Functional, Matchable):
         if Match.tensors_do_match(self, tensor):
             return Operator(
                 [Kdelta(i, j)
-                 for i, j in zip(self.all_indices, tensor.all_indices)]
+                 for i, j in zip(self.all_indices, tensor.all_indices)
+                 if i != j]
             )
 
         return OperatorSum()

@@ -23,6 +23,19 @@ class TestFunctionalDerivative(unittest.TestCase):
             dimension=1.5
         )
 
+    def test_boson_free(self):
+        self.assertEqual(
+            (self.x(self.i, self.j))
+            .functional_derivative(self.x(self.i, self.j)),
+            1
+        )
+
+        self.assertEqual(
+            (self.x(self.i, self.j))
+            .functional_derivative(self.x(self.a, self.b)),
+            Kdelta(self.i, self.a) * Kdelta(self.j, self.b)
+        )
+
     def test_linear_boson(self):
         self.assertEqual(
             (
