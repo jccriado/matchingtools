@@ -53,6 +53,19 @@ class Match(object):  # TODO make sure things that don't match don't match
         return tensor._match_attributes() == other._match_attributes()
 
     @staticmethod
+    def group_by_tensor_match(tensors):
+        tensor_classes = []
+        for tensor in tensors:
+            for tensor_class in tensor_classes.copy():
+                if Match.tensors_do_match(tensor_class[0], tensor):
+                    tensor_class.append(tensor)
+                    break
+            else:
+                tensor_classes.append([tensor])
+
+        return tensor_classes
+
+    @staticmethod
     def _map_tensors(pattern_operator, target_operator):
         pattern_eqclasses = groupby(
             pattern_operator.tensors,
@@ -80,10 +93,12 @@ class Match(object):  # TODO make sure things that don't match don't match
                         pattern_eqclass,
                         image
                     )
-                ) for base_image in itertools.combinations(
+                )
+                for base_image in itertools.combinations(
                     associates[pattern_eqclass[0]],
                     len(pattern_eqclass)
-                ) for image in itertools.permutations(base_image)
+                )
+                for image in itertools.permutations(base_image)
             ] for pattern_eqclass in pattern_eqclasses
         ]
 
@@ -216,10 +231,18 @@ class Match(object):  # TODO make sure things that don't match don't match
         return free_preimage_is_free
 
     @staticmethod
+    def _is_valid_tensor_mapping(tensor_mapping, pattern, target):
+        for tensor, associate in tensor_mapping.items():
+            if pattern.tensors.count(tensor) > target.tensors.count(associate):
+                return False
+        return True
+
+    @staticmethod
     def _fermions_sign(tensor_mapping, pattern, target):
         """ Compute the sign due to the fermion permutation """
         matched = []
         rest = target.tensors.copy()
+
         for pattern_tensor in pattern.tensors:
             mapped = tensor_mapping[pattern_tensor]
             matched.append(mapped)
@@ -245,6 +268,11 @@ class Match(object):  # TODO make sure things that don't match don't match
     @staticmethod
     def _match_operators_iterable(tensors_mappings, pattern, target):
         for tensor_mapping in tensors_mappings:
+            if not Match._is_valid_tensor_mapping(
+                    tensor_mapping, pattern, target
+            ):
+                continue
+
             # Compute all possible combinations of allowed permutations of the
             # indices of the target tensors in the candidate match
             index_permuted_triplets = itertools.product(*[

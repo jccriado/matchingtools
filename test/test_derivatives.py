@@ -48,12 +48,34 @@ class TestDerivativesProperties(unittest.TestCase):
             0
         )
 
-    def test_match(self):
+    def test_match_single(self):
         self.assertIsNotNone(
             Match.match_operators(
                 D(self.mu, self.S(self.i))._to_operator(),
                 (self.S(self.i) * self.V(self.mu) * D(self.mu, self.S(self.i)))
                 ._to_operator()
+            )
+        )
+
+    def test_match_double(self):
+        operator = (
+            D(self.mu, self.S(self.i))
+            * D(self.mu, self.S(self.i))
+            * self.S(self.j)
+            * self.S(self.j)
+        )._to_operator()
+
+        operator_crossed = (
+            D(self.mu, self.S(self.i))
+            * D(self.mu, self.S(self.j))
+            * self.S(self.i)
+            * self.S(self.j)
+        )._to_operator()
+
+        self.assertIsNone(
+            Match.match_operators(
+                operator,
+                operator_crossed
             )
         )
 
