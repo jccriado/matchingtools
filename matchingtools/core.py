@@ -384,7 +384,7 @@ class Kdelta(TotallySymmetricMixin, RealConstant):
 class SigmaVector(ComplexConstant):
     def __init__(self, lorentz_index, right_spinor_index, left_spinor_index):
         super().__init__(
-            name="SigmaTensor",
+            name="SigmaVector",
             indices=[lorentz_index, right_spinor_index, left_spinor_index],
             derivatives_indices=[],
             dimension=0,
