@@ -4,27 +4,30 @@ from functools import reduce
 from matchingtools.indices import Index
 from matchingtools.matches import Match
 from matchingtools.core import Field, OperatorSum
-from matchingtools.fieldrules import FieldRule
+from matchingtools.replacements import Replacement
 from matchingtools.invertibles import InvertibleMatrix, InvertibleScalar
 
 
 class Equation(object):
     class LinearInvertibleTerm(object):
-        class NonInvertible(Exception):
+        class NonInvertibleError(Exception):
             def __init__(self, operator, non_invertible_factor):
-                error_msg = "Non-invertible factor {} in operator {}"
+                error_msg = (
+                    "Unable to indentify invertible term: "
+                    + "non-invertible factor {} in operator {}"
+                )
                 super().__init__(
                     error_msg.format(non_invertible_factor, operator)
                 )
 
-        class NonLinear(Exception):
+        class NonLinearError(Exception):
             def __init__(self, operator):
-                error_msg = "Non-linear operator {}"
+                error_msg = "Unable to identify linear term: {}"
                 super().__init__(
                     error_msg.format(operator)
                 )
 
-        NonLinearInvertible = (NonLinear, NonInvertible)
+        NonLinearInvertibleError = (NonLinearError, NonInvertibleError)
 
         def __init__(
             self, field, invertible_matrices, invertible_scalars, coefficient
@@ -61,7 +64,10 @@ class Equation(object):
 
                 if is_valid:
                     if found_field:
-                        raise Equation.LinearInvertibleTerm.NonLinear(operator)
+                        raise (
+                            Equation.LinearInvertibleTerm
+                            .NonLinearError(operator)
+                        )
                     else:
                         found_field = True
                         return_field = tensor
@@ -70,14 +76,18 @@ class Equation(object):
                 elif isinstance(tensor, InvertibleScalar):
                     invertible_scalars.append(tensor)
                 elif isinstance(tensor, Field):
-                    raise Equation.LinearInvertibleTerm.NonLinear(operator)
+                    raise (
+                        Equation.LinearInvertibleTerm
+                        .NonLinearError(operator)
+                    )
                 else:
-                    raise Equation.LinearInvertibleTerm.NonInvertible(
-                        operator, tensor
+                    raise (
+                        Equation.LinearInvertibleTerm
+                        .NonInvertibleError(operator, tensor)
                     )
 
             if not found_field:
-                raise Equation.LinearInvertibleTerm.NonLinear(operator)
+                raise Equation.LinearInvertibleTerm.NonLinearError(operator)
 
             return Equation.LinearInvertibleTerm(
                 return_field,
@@ -86,7 +96,7 @@ class Equation(object):
                 operator.coefficient
             )
 
-    class NoLinearTerms(Exception):
+    class NoLinearTermsError(Exception):
         def __init__(self, equation):
             error_msg = (
                 "Unable find a 'linear invertible term' in equation {}\n" +
@@ -96,7 +106,7 @@ class Equation(object):
                 error_msg.format(equation.equation, equation.unknowns)
             )
 
-    class MultipleLinearTerms(Exception):
+    class MultipleLinearTermsError(Exception):
         def __init__(self, equation):
             error_msg = (
                 "Found several 'linear invertible terms' in equation {}\n" +
@@ -124,14 +134,14 @@ class Equation(object):
                 )
 
                 if found_linear_term:
-                    raise Equation.MultipleLinearTerms(self)
+                    raise Equation.MultipleLinearTermsError(self)
                 else:
                     found_linear_term = True
-            except Equation.LinearInvertibleTerm.NonLinearInvertible:
+            except Equation.LinearInvertibleTerm.NonLinearInvertibleError:
                 rest += operator
 
         if not found_linear_term:
-            raise Equation.NoLinearTerms(self)
+            raise Equation.NoLinearTermsError(self)
 
         return linear_term, rest
 
@@ -159,7 +169,7 @@ class Equation(object):
             1
         )
 
-        return FieldRule(
+        return Replacement(
             linear_term.field._replace_indices(new_indices_mapping),
             -(
                 1/linear_term.coefficient
@@ -184,24 +194,24 @@ class System(object):
 
 
 class SystemSolution(object):
-    def __init__(self, field_rules):
-        self.field_rules = field_rules
+    def __init__(self, replacements):
+        self.replacements = replacements
 
     def __str__(self):
-        return str(self.field_rules)
+        return str(self.replacements)
 
     __repr__ = __str__
 
-    def substitute(self, target, max_dimension):
+    def replace(self, target, max_dimension):
         """
         Substitute everywhere iteratively, until there are not any
         remaining substitutions to be made
         """
-        for field_rule in self.field_rules:
-            target = field_rule.substitute_once(target, max_dimension)
+        for replacement in self.replacements:
+            target = replacement.replace_all_occurrences(target, max_dimension)
 
-        if any(field_rule.is_in(target) for field_rule in self.field_rules):
-            return self.substitute(target, max_dimension)
+        if any(replacement.is_in(target) for replacement in self.replacements):
+            return self.replace(target, max_dimension)
 
         return target
 
@@ -211,18 +221,18 @@ class SystemSolution(object):
         been used to remove any occurrence of their field names in their
         replacements.
         """
-        new_rules = SystemSolution([
-            FieldRule(
-                target_rule.field,
-                self.substitute(target_rule.replacement, max_dimension)
+        new_replacements = SystemSolution([
+            Replacement(
+                target_replacement.tensor,
+                self.replace(target_replacement.replacement, max_dimension)
                 .filter_by_max_dimension(max_dimension)
             )
-            for target_rule in self.field_rules
+            for target_replacement in self.replacements
         ])
 
-        if any(field_rule.is_in(target_rule.replacement)
-               for field_rule in self.field_rules
-               for target_rule in self.field_rules):
-            return new_rules.solve(max_dimension)
+        if any(replacement.is_in(target_replacement.replacement)
+               for replacement in self.replacements
+               for target_replacement in self.replacements):
+            return new_replacements.solve(max_dimension)
 
-        return new_rules
+        return new_replacements

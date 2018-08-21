@@ -172,7 +172,7 @@ class UVTheory(object):
     def integrate_out(self, max_dimension):
         effective_lagrangian = (
             self.equations_of_motion_solutions(max_dimension - 1)
-            .substitute(self.lagrangian, max_dimension)
+            .replace(self.lagrangian, max_dimension)
         )
         return MassScalar._simplify(
             MassMatrix._simplify(
