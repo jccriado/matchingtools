@@ -1,8 +1,7 @@
-import uuid
-
 from matchingtools.indices import Index
 from matchingtools.core import Operator, OperatorSum
 from matchingtools.rules import Rule
+from matchingtools.uniquefields import _UniqueField
 
 
 class Replacement(object):
@@ -17,14 +16,8 @@ class Replacement(object):
         if len(tensor.derivatives_indices) > 0:
             raise Replacement.DifferentiatedTensorError(tensor)
 
-        self._id = uuid.uuid4()
-        self.tensor = tensor
+        self.tensor = _UniqueField.from_tensor(tensor)
         self.replacement = replacement
-
-    def mark(self, tensor):
-        new_tensor = tensor.clone()
-        new_tensor.name = self._id
-        return new_tensor
 
     def __str__(self):
         return "{} -> {}".format(self.tensor, self.replacement)
@@ -43,7 +36,7 @@ class Replacement(object):
             for old_index in tensor.derivatives_indices
         }
         tensor = (
-            self.mark(self.tensor)._replace_indices(new_indices_mapping)
+            self.tensor._replace_indices(new_indices_mapping)
             .nth_derivative(tensor.derivatives_indices)
         )
         replacement = (
@@ -62,7 +55,7 @@ class Replacement(object):
         derivative of the replacement.
         """
         for tensor in operator.tensors:
-            if tensor.name == self._id:
+            if self.id_match(tensor):
                 return self._generate_rule(tensor).apply(operator)
         return operator._to_operator_sum()
 
@@ -77,13 +70,20 @@ class Replacement(object):
             OperatorSum()
         )
 
+    def id_match(self, tensor):
+        return (
+            tensor.name == self.tensor.name
+            and isinstance(tensor, _UniqueField)
+            and tensor._id == self.tensor._id
+        )
+
     def is_in(self, target):
         """
         Find whether there is a tensor in target with name self.tensor.name.
         """
         for operator in target.operators:
             for tensor in operator.tensors:
-                if tensor.name == self._id:
+                if self.id_match(tensor):
                     return True
         return False
 
@@ -95,7 +95,7 @@ class Replacement(object):
         target = OperatorSum([
             Operator(
                 [
-                    self.mark(tensor)
+                    _UniqueField.from_tensor(tensor, self.tensor._id)
                     if tensor.name == self.tensor.name
                     else tensor
                     for tensor in operator.tensors
