@@ -35,7 +35,7 @@ class Replacement(object):
             old_index: Index(old_index.name)
             for old_index in tensor.derivatives_indices
         }
-        tensor = (
+        pattern = (
             self.tensor._replace_indices(new_indices_mapping)
             .nth_derivative(tensor.derivatives_indices)
         )
@@ -45,16 +45,16 @@ class Replacement(object):
         )
 
         if tensor.is_conjugated == self.tensor.is_conjugated:
-            return Rule(tensor, replacement)
+            return Rule(pattern, replacement)
         else:
-            return Rule(tensor.conjugate(), replacement.conjugate())
+            return Rule(pattern.conjugate(), replacement.conjugate())
 
     def _replace_in_operator(self, operator):
         """
         Replace the first tensor with name self.tensor.name by the nth
         derivative of the replacement.
         """
-        for tensor in operator.tensors:
+        for pos, tensor in enumerate(operator.tensors):
             if self.id_match(tensor):
                 return self._generate_rule(tensor).apply(operator)
         return operator._to_operator_sum()

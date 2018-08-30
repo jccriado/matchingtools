@@ -33,7 +33,7 @@ class _UniqueField(ComplexField):
             indices=tensor.indices,
             derivatives_indices=tensor.derivatives_indices,
             statistics=tensor.statistics,
-            dimension=tensor.dimension,
+            dimension=tensor._tensor_dimension,
             is_conjugated=tensor.is_conjugated
         )
 
@@ -44,7 +44,7 @@ class _UniqueField(ComplexField):
             indices=self.indices,
             derivatives_indices=self.derivatives_indices,
             statistics=self.statistics,
-            dimension=self.dimension,
+            dimension=self._tensor_dimension,
             is_conjugated=self.is_conjugated
         )
 
