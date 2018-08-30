@@ -416,7 +416,7 @@ class Operator(Conjugable, Convertible, Differentiable, Functional):
         unique_indices = Index.make_unique_names(self.all_indices)
         tensors_str = map(str, self._replace_indices(unique_indices).tensors)
 
-        if self.coefficient == 1:
+        if self.coefficient == 1 and len(self.tensors) > 0:
             coefficient_str = ''
         else:
             coefficient_str = str(self.coefficient)
@@ -672,6 +672,9 @@ class OperatorSum(Conjugable, Convertible, Differentiable, Functional):
         self._simplify()
 
     def __str__(self):
+        if len(self.operators) == 0:
+            return "0"
+
         unique_indices = Index.make_unique_names(self.all_indices)
         self_renamed_indices = self._replace_indices(unique_indices)
 
@@ -816,6 +819,7 @@ class OperatorSum(Conjugable, Convertible, Differentiable, Functional):
                 coefficient
             )
             for operator, coefficient in coefficients.items
+            if coefficient != 0
         ]
 
     def conjugate(self):
