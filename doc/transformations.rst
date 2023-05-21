@@ -8,7 +8,7 @@ Transformations of the effective Lagrangian
    :mod:`matchingtools.transformations` that it uses are in the namespace.
    To import all the functions that appear here do::
 
-     from matchingtools.operators import tensor_op, flavor_tensor_op
+     from matchingtools.core import tensor_op, flavor_tensor_op
      
      from matchingtools.transformations import (
          simplify, apply_rules)
@@ -51,8 +51,8 @@ write the rule::
 
 The operators of the basis should be represented by tensor with a name
 identifing the operator. They can be defined using
-:func:`matchingtools.operators.tensor_op` when they don't have
-free indices and :func:`matchingtools.operators.flavor_tensor_op`
+:func:`matchingtools.core.tensor_op` when they don't have
+free indices and :func:`matchingtools.core.flavor_tensor_op`
 when they do. So we usually define::
 
   Op1 = tensor_op("Op1")

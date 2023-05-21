@@ -141,7 +141,7 @@ def apply_rules(op_sum, rules, max_iterations, verbose=True):
     Args:
         op_sum (:class:`matchingtools.operator.OperatorSum`): to which the rules
             should be applied.
-        rules (list of pairs (:class:`matchingtools.operators.Operator`,  :class:`matchingtools.operators.OperatorSum`)): The first element
+        rules (list of pairs (:class:`matchingtools.core.Operator`,  :class:`matchingtools.core.OperatorSum`)): The first element
             of each pair represents a pattern to be subtituted in each
             operator by the second element using :func:`apply_rule`.
         max_iterations (int): maximum number of application of rules to

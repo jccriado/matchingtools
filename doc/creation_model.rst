@@ -1,13 +1,13 @@
 Creation of models
 ==================
 
-.. currentmodule:: matchingtools.operators
+.. currentmodule:: matchingtools.core
 
 .. note:: This section assumes that the classes and functions
-   from :mod:`matchingtools.operators` that it uses are in the namespace.
+   from :mod:`matchingtools.core` that it uses are in the namespace.
    To import all the classes and functions that appear here do::
 
-      from matchingtools.operators import (
+      from matchingtools.core import (
 	  Tensor, Operator, OperatorSum
           TensorBuilder, FieldBuilder, D, Op, OpSum,
 	  number_op, power_op)
@@ -97,12 +97,12 @@ Define the interaction Lagrangian as an operator sum::
 
   int_lag = OpSum(op1, op2, ...)
 
-Each argument to the function :func:`matchingtools.operators.OpSum` should
+Each argument to the function :func:`matchingtools.core.OpSum` should
 be an operator defined as::
 
   op1 = Op(tens1(ind1, ind2, ...), field1(ind3, ind4, ...), ...)
 
-The arguments of the function :func:`matchingtools.operators.Op` are
+The arguments of the function :func:`matchingtools.core.Op` are
 tensors (and fields). Their indices are integer numbers. Negative
 integers are reserved for free indices. Free indices are not meant
 to be used in the operators appearing in the Lagrangian, but later
@@ -113,7 +113,7 @@ is expressed by repetition of indices.
 
 To introduce the covariant derivative with index ``ind`` of a tensor
 ``tens`` inside an operator, use the function
-:func:`matchingtools.operators.D` in the following way::
+:func:`matchingtools.core.D` in the following way::
 
   D(ind, tens(ind1, ind2, ...))
 
