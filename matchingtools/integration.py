@@ -491,7 +491,7 @@ def integrate(heavy_fields, interaction_lagrangian, max_dim=6, verbose=True):
 
     Args:
         heavy_fields (list of heavy fields): to be integrated out
-        interaction_lagrangian (``matchingtools.operators.OperatorSum``):
+        interaction_lagrangian (``matchingtools.core.OperatorSum``):
             from which to integrate out the heavy fields
         max_dim (int): maximum dimension of the operators in the effective
             lagrangian

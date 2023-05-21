@@ -12,8 +12,8 @@ Output of the results
 It's usually convenient to organize the final results by presenting
 the coefficient to each operator of the effective Lagrangian.
 When a set of rules has been applied to the effective Lagrangian so
-that it is written as an :class:`matchingtools.operators.OperatorSum` whose
-elements are :class:`matchingtools.operators.Operator` objects each of which
+that it is written as an :class:`matchingtools.core.OperatorSum` whose
+elements are :class:`matchingtools.core.Operator` objects each of which
 contains one tensor representing the actual operator in the basis and
 other tensors representing the coefficient the operator has.
 
