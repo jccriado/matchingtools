@@ -57,8 +57,8 @@ Creation of the model
 
 The imports that we will need are::
 
-  from matchingtools.operators import (
-      TensorBuilder, FieldBuilder, Op, OpSum,
+  from matchingtools.core import (
+      TensorBuilder, FieldBuilder, D, Op, OpSum,
       number_op, tensor_op, boson, fermion, kdelta)
 
   from matchingtools.integration import RealScalar, integrate
@@ -84,7 +84,7 @@ new scalar::
 
 The second argument of ``FieldBuilder`` represent the energy dimensions
 of the field, and the third corresponds its the statistics and can either
-be ``boson`` or ```fermion``.
+be ``boson`` or ``fermion``.
 
 Now we are ready to write the interaction Lagrangian::
   
@@ -175,7 +175,7 @@ of the operators of a Lagrangian as plain text and write it to a file::
 
   final_coef_names = [
     "Ophi6", "Ophi4", "O1phi", "O3phi", "ODphi", "ODphic"]
-  eff_lag_writer = Writer(trasnf_eff_lag, final_coef_names)
+  eff_lag_writer = Writer(transf_eff_lag, final_coef_names)
   eff_lag_writer.write_text_file("simple_example")
 
 It can also to write a LaTeX file with the representation of these
